@@ -18,6 +18,7 @@ This pack defines the project before implementation. It creates no application c
 | [08 — DevOps plan](08-devops-plan.md) | Environments, delivery pipeline, operational tasks, and runbooks |
 | [09 — Project structure](09-project-structure.md) | Proposed Node.js/Fastify + React foundation |
 | [10 — Agentic coding structure](10-agentic-coding-structure.md) | Proposed coding-agent roles, task contracts, and review workflow |
+| [11 — Sprint 1 development plan](11-sprint-1-development-plan.md) | Hands-on sequence for developing and checking the Sprint 1 experiments |
 
 ## Assumptions
 
