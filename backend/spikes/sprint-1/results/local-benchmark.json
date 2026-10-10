@@ -1,0 +1,44 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "timestamp": "2026-10-10T08:06:24.030Z",
+  "avgLatencyMs": 14089,
+  "accuracyPercent": 100,
+  "results": [
+    {
+      "id": "DEV-01",
+      "question": "What is the total revenue from completed and shipped orders?",
+      "generatedSql": "SELECT SUM(order_items.quantity * order_items.unit_price) AS total_revenue\nFROM order_items\nJOIN orders ON order_items.order_id = orders.id\nWHERE orders.status IN ('completed', 'shipped');",
+      "latencyMs": 54455,
+      "status": "SUCCESS",
+      "errorMessage": null,
+      "rowsReturned": 1
+    },
+    {
+      "id": "DEV-02",
+      "question": "List all customers in the EMEA region.",
+      "generatedSql": "SELECT id, name FROM customers WHERE region = 'EMEA';",
+      "latencyMs": 352,
+      "status": "SUCCESS",
+      "errorMessage": null,
+      "rowsReturned": 2
+    },
+    {
+      "id": "DEV-03",
+      "question": "Which product is the most expensive by unit price?",
+      "generatedSql": "SELECT name FROM products ORDER BY unit_price DESC LIMIT 1",
+      "latencyMs": 323,
+      "status": "SUCCESS",
+      "errorMessage": null,
+      "rowsReturned": 1
+    },
+    {
+      "id": "DEV-04",
+      "question": "How many orders were placed by each customer?",
+      "generatedSql": "SELECT c.id, c.name, COUNT(o.id) AS order_count FROM customers c JOIN orders o ON c.id = o.customer_id WHERE o.status IN ('completed', 'shipped') GROUP BY c.id, c.name ORDER BY order_count DESC LIMIT 50;",
+      "latencyMs": 1224,
+      "status": "SUCCESS",
+      "errorMessage": null,
+      "rowsReturned": 2
+    }
+  ]
+}

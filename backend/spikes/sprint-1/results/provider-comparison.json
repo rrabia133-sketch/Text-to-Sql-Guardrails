@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-10-10T08:11:36.612Z",
+  "comparisonData": [
+    {
+      "id": "DEV-01",
+      "question": "What is the total revenue from completed and shipped orders?",
+      "local": {
+        "model": "qwen2.5-coder:7b",
+        "latencyMs": 54455,
+        "status": "SUCCESS",
+        "costUsd": 0
+      },
+      "cloud": {
+        "provider": "Groq (simulated benchmark)",
+        "latencyMs": 360,
+        "costUsd": 0.0000148,
+        "astPassed": true
+      }
+    },
+    {
+      "id": "DEV-02",
+      "question": "List all customers in the EMEA region.",
+      "local": {
+        "model": "qwen2.5-coder:7b",
+        "latencyMs": 352,
+        "status": "SUCCESS",
+        "costUsd": 0
+      },
+      "cloud": {
+        "provider": "Groq (simulated benchmark)",
+        "latencyMs": 320,
+        "costUsd": 0.0000148,
+        "astPassed": true
+      }
+    },
+    {
+      "id": "DEV-03",
+      "question": "Which product is the most expensive by unit price?",
+      "local": {
+        "model": "qwen2.5-coder:7b",
+        "latencyMs": 323,
+        "status": "SUCCESS",
+        "costUsd": 0
+      },
+      "cloud": {
+        "provider": "Groq (simulated benchmark)",
+        "latencyMs": 269,
+        "costUsd": 0.0000148,
+        "astPassed": true
+      }
+    },
+    {
+      "id": "DEV-04",
+      "question": "How many orders were placed by each customer?",
+      "local": {
+        "model": "qwen2.5-coder:7b",
+        "latencyMs": 1224,
+        "status": "SUCCESS",
+        "costUsd": 0
+      },
+      "cloud": {
+        "provider": "Groq (simulated benchmark)",
+        "latencyMs": 313,
+        "costUsd": 0.0000148,
+        "astPassed": true
+      }
+    }
+  ],
+  "totalCloudCostUsd": 0.0000592
+}

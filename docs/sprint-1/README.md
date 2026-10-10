@@ -11,8 +11,8 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-01](US-01.md) | Story | Feasibility Evidence & Safety Guardrails | 8 | 🟡 In Progress | 8 / 12 Tasks (67%) |
-| [DO-01](DO-01.md) | DevOps | Environment, Threat Model & Cost Boundaries | — | 🟡 In Progress | 2 / 4 Tasks (50%) |
+| [US-01](US-01.md) | Story | Feasibility Evidence & Safety Guardrails | 8 | 🟡 In Progress | 10 / 12 Tasks (83%) |
+| [DO-01](DO-01.md) | DevOps | Environment, Threat Model & Cost Boundaries | — | 🟡 In Progress | 3 / 4 Tasks (75%) |
 
 ---
 
@@ -28,8 +28,8 @@
 | **06** | Curate test cases & benchmark rules | US-01 | 🟢 **COMPLETED** | `cases/` (dev, holdout, safety), [`benchmark.md`](benchmark.md) |
 | **07** | AST parser and SQL checker spike | US-01 | 🟢 **COMPLETED** | `src/check-sql.ts`, [`parser-proof.md`](parser-proof.md) |
 | **08** | Independent DB permission tests | US-01 | 🟢 **COMPLETED** | `sql/04-roles.sql`, [`db-proof.md`](db-proof.md) |
-| **09** | Local model experiment (Ollama) | US-01 | ⚪ Not Started | `src/local-model.ts` |
-| **10** | Cloud comparison runner (Groq) | US-01 / DO-01 | ⚪ Not Started | `src/compare-providers.ts`, [`provider-comparison.md`](../../sprint-1/provider-comparison.md) |
+| **09** | Local model experiment (Ollama) | US-01 | 🟢 **COMPLETED** | `src/local-model.ts` |
+| **10** | Cloud comparison runner (Groq) | US-01 / DO-01 | 🟢 **COMPLETED** | `src/compare-providers.ts`, [`provider-comparison.md`](provider-comparison.md) |
 | **11** | Record architecture decision records | US-01 / DO-01 | ⚪ Not Started | `docs/sprint-1/decisions/*.md` |
 | **12** | Sprint 1 exit review & gate verification | US-01 | ⚪ Not Started | [`docs/sprint-1/exit-review.md`](../../sprint-1/exit-review.md) |
 
