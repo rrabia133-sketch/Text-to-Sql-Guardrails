@@ -11,7 +11,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-01](US-01.md) | Story | Feasibility Evidence & Safety Guardrails | 8 | 🟡 In Progress | 6 / 12 Tasks (50%) |
+| [US-01](US-01.md) | Story | Feasibility Evidence & Safety Guardrails | 8 | 🟡 In Progress | 7 / 12 Tasks (58%) |
 | [DO-01](DO-01.md) | DevOps | Environment, Threat Model & Cost Boundaries | — | 🟡 In Progress | 2 / 4 Tasks (50%) |
 
 ---
@@ -26,7 +26,7 @@
 | **04** | Build disposable PostgreSQL fixture | US-01 | 🟢 **COMPLETED** | `compose.yaml` (port 5434), `sql/*.sql` |
 | **05** | Define query rules, threats & risks | US-01 / DO-01 | 🟢 **COMPLETED** | [`query-rules.md`](query-rules.md), [`threat-model.md`](threat-model.md) |
 | **06** | Curate test cases & benchmark rules | US-01 | 🟢 **COMPLETED** | `cases/` (dev, holdout, safety), [`benchmark.md`](benchmark.md) |
-| **07** | AST parser and SQL checker spike | US-01 | ⚪ Not Started | `src/check-sql.ts`, [`parser-proof.md`](../../sprint-1/parser-proof.md) |
+| **07** | AST parser and SQL checker spike | US-01 | 🟢 **COMPLETED** | `src/check-sql.ts`, [`parser-proof.md`](parser-proof.md) |
 | **08** | Independent DB permission tests | US-01 | ⚪ Not Started | `sql/04-roles.sql`, [`db-proof.md`](../../sprint-1/db-proof.md) |
 | **09** | Local model experiment (Ollama) | US-01 | ⚪ Not Started | `src/local-model.ts` |
 | **10** | Cloud comparison runner (Groq) | US-01 / DO-01 | ⚪ Not Started | `src/compare-providers.ts`, [`provider-comparison.md`](../../sprint-1/provider-comparison.md) |
