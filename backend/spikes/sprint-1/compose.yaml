@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: text2sql_spike_postgres
+    environment:
+      POSTGRES_DB: analytics_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_spike_password_2026
+    ports:
+      # Pinned to loopback 127.0.0.1 on port 5434 to eliminate collision
+      - "127.0.0.1:5434:5432"
+    volumes:
+      # Automatically initializes schema and small seed on first run
+      - ./sql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./sql/02-seed-small.sql:/docker-entrypoint-initdb.d/02-seed-small.sql:ro
+      - postgres_spike_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d analytics_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_spike_data:

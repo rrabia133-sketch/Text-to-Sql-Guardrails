@@ -1,15 +1,3 @@
-
----
-
-### Part 2: Create `docs/sprint-1/glossary.md`
-
-Create the file [docs/sprint-1/glossary.md](file:///d:/React-project/Text-to-SQL%20Interface/docs/sprint-1/glossary.md) with the content below.
-
-#### Why this matters:
-* LLMs frequently calculate revenue incorrectly if you don't define whether *cancelled* or *pending* orders are included.
-* Date calculations like `"in the last 30 days"` produce flaky, non-reproducible test results unless anchored to a **deterministic reference test date** (`2026-10-01 00:00:00 UTC`).
-
-```markdown
 # Business Glossary & Metric Definitions
 
 - **Scope:** Synthetic E-commerce Analytics Spike
