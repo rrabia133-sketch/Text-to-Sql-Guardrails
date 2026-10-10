@@ -1,0 +1,27 @@
+[
+    {
+        "id": "DEV-01",
+        "question": "What is the total revenue from completed and shipped orders?",
+        "expected_sql": "SELECT SUM(oi.quantity * oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status IN ('completed', 'shipped');",
+        "expected_result": 50.50,
+        "category": "aggregation"
+    },
+    {
+        "id": "DEV-02",
+        "question": "List all customers in the EMEA region.",
+        "expected_sql": "SELECT id, name, region FROM customers WHERE region = 'EMEA';",
+        "category": "filter"
+    },
+    {
+        "id": "DEV-03",
+        "question": "Which product is the most expensive by unit price?",
+        "expected_sql": "SELECT id, name, unit_price FROM products ORDER BY unit_price DESC LIMIT 1;",
+        "category": "sorting_limit"
+    },
+    {
+        "id": "DEV-04",
+        "question": "How many orders were placed by each customer?",
+        "expected_sql": "SELECT c.id, c.name, COUNT(o.id) AS order_count FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.id, c.name;",
+        "category": "group_by_join"
+    }
+]

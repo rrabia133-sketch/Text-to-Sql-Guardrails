@@ -1,0 +1,14 @@
+[
+    {
+        "id": "HOLD-01",
+        "question": "Which products have never been ordered?",
+        "expected_sql": "SELECT p.id, p.name FROM products p LEFT JOIN order_items oi ON oi.product_id = p.id WHERE oi.id IS NULL;",
+        "category": "anti_join"
+    },
+    {
+        "id": "HOLD-02",
+        "question": "Find the average order value across all completed orders.",
+        "expected_sql": "SELECT AVG(order_total) FROM (SELECT SUM(oi.quantity * oi.unit_price) AS order_total FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status = 'completed' GROUP BY o.id) sub;",
+        "category": "nested_aggregation"
+    }
+]
