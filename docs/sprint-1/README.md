@@ -11,7 +11,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-01](US-01.md) | Story | Feasibility Evidence & Safety Guardrails | 8 | 🟡 In Progress | 3 / 12 Tasks (25%) |
+| [US-01](US-01.md) | Story | Feasibility Evidence & Safety Guardrails | 8 | 🟡 In Progress | 4 / 12 Tasks (33%) |
 | [DO-01](DO-01.md) | DevOps | Environment, Threat Model & Cost Boundaries | — | 🟡 In Progress | 1 / 4 Tasks (25%) |
 
 ---
@@ -23,7 +23,7 @@
 | **01** | Check tools and machine environment | US-01 / DO-01 | 🟢 **COMPLETED** | [`docs/sprint-1/environment.md`](../../sprint-1/environment.md) |
 | **02** | Create workspace folders & spike package | US-01 | 🟢 **COMPLETED** | `backend/spikes/sprint-1/`, [`scope.md`](../../sprint-1/scope.md) |
 | **03** | Design data schema and glossary | US-01 | 🟢 **COMPLETED** | [`data-design.md`](data-design.md), [`glossary.md`](glossary.md) |
-| **04** | Build disposable PostgreSQL fixture | US-01 | ⚪ Not Started | `compose.yaml` (port 5434), `sql/*.sql` |
+| **04** | Build disposable PostgreSQL fixture | US-01 | 🟢 **COMPLETED** | `compose.yaml` (port 5434), `sql/*.sql` |
 | **05** | Define query rules, threats & risks | US-01 / DO-01 | ⚪ Not Started | [`query-rules.md`](../../sprint-1/query-rules.md), [`threat-model.md`](../../sprint-1/threat-model.md) |
 | **06** | Curate test cases & benchmark rules | US-01 | ⚪ Not Started | `cases/` (dev, holdout, safety), [`benchmark.md`](../../sprint-1/benchmark.md) |
 | **07** | AST parser and SQL checker spike | US-01 | ⚪ Not Started | `src/check-sql.ts`, [`parser-proof.md`](../../sprint-1/parser-proof.md) |
