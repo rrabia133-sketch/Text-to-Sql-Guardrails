@@ -1,7 +1,7 @@
 # Sprint 1 — Feasibility and Design Decisions
 
 - **Duration:** 2 Weeks (Baseline)
-- **Status:** 🟡 IN PROGRESS
+- **Status:** 🟢 COMPLETED
 - **Sprint Goal:** Establish feasibility evidence for AST SQL parsing, PostgreSQL privilege containment, and local vs. cloud LLM generation before building application features.
 - **Reference Guide:** [11-sprint-1-development-plan.md](../../planning/11-sprint-1-development-plan.md)
 
@@ -11,7 +11,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-01](US-01.md) | Story | Feasibility Evidence & Safety Guardrails | 8 | 🟡 In Progress | 11 / 12 Tasks (92%) |
+| [US-01](US-01.md) | Story | Feasibility Evidence & Safety Guardrails | 8 | 🟢 Completed | 12 / 12 Tasks (100%) |
 | [DO-01](DO-01.md) | DevOps | Environment, Threat Model & Cost Boundaries | — | 🟢 Completed | 4 / 4 Tasks (100%) |
 
 ---
@@ -31,7 +31,7 @@
 | **09** | Local model experiment (Ollama) | US-01 | 🟢 **COMPLETED** | `src/local-model.ts` |
 | **10** | Cloud comparison runner (Groq) | US-01 / DO-01 | 🟢 **COMPLETED** | `src/compare-providers.ts`, [`provider-comparison.md`](provider-comparison.md) |
 | **11** | Record architecture decision records | US-01 / DO-01 | 🟢 **COMPLETED** | `docs/sprint-1/decisions/*.md` |
-| **12** | Sprint 1 exit review & gate verification | US-01 | ⚪ Not Started | [`docs/sprint-1/exit-review.md`](../../sprint-1/exit-review.md) |
+| **12** | Sprint 1 exit review & gate verification | US-01 | 🟢 **COMPLETED** | [`docs/sprint-1/exit-review.md`](exit-review.md) |
 
 ---
 
@@ -39,11 +39,11 @@
 
 Before advancing to Sprint 2 (React & Fastify application skeleton), all of the following gates must pass:
 
-- [ ] Disposable PostgreSQL fixture reproducible and port conflict free (`compose.yaml`).
-- [ ] Synthetic data glossary and hand-calculated validation queries verified.
-- [ ] Development, holdout, and safety benchmark sets frozen and isolated.
-- [ ] AST parser demonstrates recursive node inspection and alias resolution (`parser-proof.md`).
-- [ ] Database role containment independently proven via restricted credentials (`db-proof.md`).
-- [ ] Local (Ollama) vs. Cloud (Groq) viability, latency, and cost measured (`provider-comparison.md`).
-- [ ] No unresolved architectural or safety blockers remaining for safe execution.
-- [ ] Sprint 1 exit review formally documented in [`docs/sprint-1/exit-review.md`](../../sprint-1/exit-review.md).
+- [x] Disposable PostgreSQL fixture reproducible and port conflict free (`compose.yaml`).
+- [x] Synthetic data glossary and hand-calculated validation queries verified.
+- [x] Development, holdout, and safety benchmark sets frozen and isolated.
+- [x] AST parser demonstrates recursive node inspection and alias resolution (`parser-proof.md`).
+- [x] Database role containment independently proven via restricted credentials (`db-proof.md`).
+- [x] Local (Ollama) vs. Cloud (Groq) viability, latency, and cost measured (`provider-comparison.md`).
+- [x] No unresolved architectural or safety blockers remaining for safe execution.
+- [x] Sprint 1 exit review formally documented in [`docs/sprint-1/exit-review.md`](exit-review.md).
