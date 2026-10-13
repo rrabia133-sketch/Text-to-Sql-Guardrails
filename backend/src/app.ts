@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import sensible from "@fastify/sensible";
 import { config, type AppConfig } from "./config/env.js";
+import type { HealthResponse } from "@text2sql/contracts";
 
 export interface BuildAppOptions extends FastifyServerOptions {
     appConfig?: AppConfig;
@@ -32,6 +33,18 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         secret: currentConfig.SESSION_SECRET,
         hook: "onRequest",
     });
+
+
+
+    app.get("/health", async (): Promise<HealthResponse> => {
+        return {
+            status: "healthy",
+            version: "0.1.0",
+            uptimeSeconds: Math.floor(process.uptime()),
+            timestamp: new Date().toISOString(),
+        };
+    });
+
 
     // Initial root probe
     app.get("/", async () => {

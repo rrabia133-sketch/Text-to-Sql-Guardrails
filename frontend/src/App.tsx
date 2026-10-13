@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import type { HealthResponse } from "@text2sql/contracts";
 interface ApiHealthResponse {
     name: string;
     status: string;

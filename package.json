@@ -4,9 +4,9 @@
     "private": true,
     "description": "Text-to-SQL Interface with rigorous AST guardrails and privilege containment",
     "workspaces": [
+        "packages/*",
         "backend",
-        "frontend",
-        "packages/*"
+        "frontend"
     ],
     "scripts": {
         "dev": "npm run dev --workspaces --if-present",
