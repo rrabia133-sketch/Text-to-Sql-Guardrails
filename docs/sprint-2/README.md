@@ -16,7 +16,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-02–04](US-02-04.md) | Story | Application Foundation (US-02, US-03, US-04) | 15 | 🟡 In Progress | 0 / 16 Tasks (0%) |
+| [US-02–04](US-02-04.md) | Story | Application Foundation (US-02, US-03, US-04) | 15 | 🟡 In Progress | 2 / 16 Tasks (12.5%) |
 | [DO-02–04](DO-02-04.md) | DevOps | Workspace, DB Roles & CI Pipeline (DO-02–04) | — | 🟡 In Progress | 0 / 9 Tasks (0%) |
 
 ---
@@ -24,9 +24,9 @@
 ## Sprint 2 Task Board
 
 | Task # | Name | Assigned To | Status | Output Artifact |
-| :---: | :--- | :--- | :---: | :--- |
-| **01** | Scaffold monorepo workspace & package configuration | [US-02–04](US-02-04.md#task-1-monorepo-workspace-configuration--package-layout) | 🟡 **IN PROGRESS** | `package.json`, `packages/`, `apps/` |
-| **02** | Configure Fastify backend skeleton & lifecycle | [US-02–04](US-02-04.md#task-2-scaffold-fastify-backend-application-skeleton) | ⚪ **PENDING** | `apps/api/src/app.ts`, `apps/api/src/server.ts` |
+| :---: | :--- | :--- | :--- | :--- |
+| **01** | Scaffold monorepo workspace & package configuration | [US-02–04](US-02-04.md#task-1-monorepo-workspace-configuration--package-layout) | 🟢 **COMPLETED** | `package.json`, `packages/`, `backend/`, `frontend/` |
+| **02** | Configure Fastify backend skeleton & lifecycle | [US-02–04](US-02-04.md#task-2-scaffold-fastify-backend-application-skeleton) | 🟢 **COMPLETED** | `backend/src/app.ts`, `backend/src/server.ts`, `backend/src/config/env.ts` |
 | **03** | Configure React + Vite frontend skeleton | [US-02–04](US-02-04.md#task-3-scaffold-react--vite-frontend-application-skeleton) | ⚪ **PENDING** | `apps/web/src/App.tsx`, `apps/web/vite.config.ts` |
 | **04** | Define shared TypeScript contracts package | [US-02–04](US-02-04.md#task-4-define-shared-typescript-contracts-package) | ⚪ **PENDING** | `packages/contracts/src/index.ts` |
 | **05** | Implement service health & readiness endpoints | [US-02–04](US-02-04.md#task-5-implement-service-health--readiness-endpoints) | ⚪ **PENDING** | `apps/api/src/modules/health/` (`/health`, `/ready`) |
