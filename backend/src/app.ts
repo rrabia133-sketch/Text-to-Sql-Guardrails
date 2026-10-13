@@ -3,14 +3,25 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import sensible from "@fastify/sensible";
 import { config, type AppConfig } from "./config/env.js";
-import type { HealthResponse } from "@text2sql/contracts";
+import {
+    PostgresDatabaseChecker,
+    type IDatabaseChecker,
+} from "./modules/health/health.service.js";
+import { healthRoutes } from "./modules/health/health.routes.js";
 
 export interface BuildAppOptions extends FastifyServerOptions {
     appConfig?: AppConfig;
+    dbChecker?: IDatabaseChecker;
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
     const currentConfig = opts.appConfig || config;
+    const dbChecker =
+        opts.dbChecker ||
+        new PostgresDatabaseChecker(
+            currentConfig.ANALYTICS_DB_URL,
+            currentConfig.APP_DB_URL
+        );
 
     const app = Fastify({
         logger: {
@@ -18,6 +29,13 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
             redact: ["req.headers.authorization", "req.headers.cookie"],
         },
         ...opts,
+    });
+
+    // Cleanup resources on app shutdown
+    app.addHook("onClose", async () => {
+        if (dbChecker.close) {
+            await dbChecker.close();
+        }
     });
 
     // Core security & utility plugins
@@ -34,17 +52,8 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         hook: "onRequest",
     });
 
-
-
-    app.get("/health", async (): Promise<HealthResponse> => {
-        return {
-            status: "healthy",
-            version: "0.1.0",
-            uptimeSeconds: Math.floor(process.uptime()),
-            timestamp: new Date().toISOString(),
-        };
-    });
-
+    // Health and readiness routes
+    await app.register(healthRoutes, { dbChecker });
 
     // Initial root probe
     app.get("/", async () => {

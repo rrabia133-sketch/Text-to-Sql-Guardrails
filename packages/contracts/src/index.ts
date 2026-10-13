@@ -4,12 +4,13 @@ export const CONTRACTS_VERSION = "0.1.0";
 // 1. Service Health & Readiness Contracts
 // ==========================================
 
-export type HealthStatus = "healthy" | "degraded" | "unhealthy";
+export type HealthStatus = "healthy" | "degraded" | "unhealthy" | "ok";
 
 export interface HealthResponse {
     status: HealthStatus;
-    version: string;
-    uptimeSeconds: number;
+    version?: string;
+    uptimeSeconds?: number;
+    uptime?: number;
     timestamp: string;
 }
 

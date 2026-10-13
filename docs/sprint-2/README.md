@@ -16,7 +16,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-02–04](US-02-04.md) | Story | Application Foundation (US-02, US-03, US-04) | 15 | 🟡 In Progress | 4 / 16 Tasks (25%) |
+| [US-02–04](US-02-04.md) | Story | Application Foundation (US-02, US-03, US-04) | 15 | 🟡 In Progress | 5 / 16 Tasks (31.25%) |
 | [DO-02–04](DO-02-04.md) | DevOps | Workspace, DB Roles & CI Pipeline (DO-02–04) | — | 🟡 In Progress | 0 / 9 Tasks (0%) |
 
 ---
@@ -29,7 +29,7 @@
 | **02** | Configure Fastify backend skeleton & lifecycle | [US-02–04](US-02-04.md#task-2-scaffold-fastify-backend-application-skeleton) | 🟢 **COMPLETED** | `backend/src/app.ts`, `backend/src/server.ts`, `backend/src/config/env.ts` |
 | **03** | Configure React + Vite frontend skeleton | [US-02–04](US-02-04.md#task-3-scaffold-react--vite-frontend-application-skeleton) | 🟢 **COMPLETED** | `frontend/src/App.tsx`, `frontend/vite.config.ts`, `frontend/src/index.css` |
 | **04** | Define shared TypeScript contracts package | [US-02–04](US-02-04.md#task-4-define-shared-typescript-contracts-package) | 🟢 **COMPLETED** | `packages/contracts/src/index.ts` |
-| **05** | Implement service health & readiness endpoints | [US-02–04](US-02-04.md#task-5-implement-service-health--readiness-endpoints) | ⚪ **PENDING** | `apps/api/src/modules/health/` (`/health`, `/ready`) |
+| **05** | Implement service health & readiness endpoints | [US-02–04](US-02-04.md#task-5-implement-service-health--readiness-endpoints) | 🟢 **COMPLETED** | `backend/src/modules/health/` (`/health`, `/ready`) |
 | **06** | Configure Docker Compose dual-database topology | [US-02–04](US-02-04.md#task-6-docker-compose-multi-database-topology-analytics_db--app_db) | ⚪ **PENDING** | `infra/compose/compose.yaml` (port 5434) |
 | **07** | Seed synthetic analytics fixture with edge cases | [US-02–04](US-02-04.md#task-7-reproduce-synthetic-analytics-fixture--seed-edge-cases) | ⚪ **PENDING** | `database/analytics/schema/`, `database/analytics/seeds/` |
 | **08** | Implement application metadata database & migrations | [US-02–04](US-02-04.md#task-8-application-metadata-database-schema--migrations) | ⚪ **PENDING** | `database/app/migrations/` |

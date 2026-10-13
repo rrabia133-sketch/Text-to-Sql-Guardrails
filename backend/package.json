@@ -8,6 +8,7 @@
         "dev": "tsx watch src/server.ts",
         "build": "tsc",
         "typecheck": "tsc --noEmit",
+        "test": "tsx --test test/integration/**/*.test.ts",
         "start": "node dist/server.js"
     },
     "dependencies": {
@@ -16,10 +17,12 @@
         "@fastify/sensible": "^6.0.3",
         "@text2sql/contracts": "*",
         "dotenv": "^16.4.7",
-        "fastify": "^5.2.1"
+        "fastify": "^5.2.1",
+        "pg": "^8.23.1"
     },
     "devDependencies": {
         "@types/node": "^22.13.1",
+        "@types/pg": "^8.23.1",
         "tsx": "^4.19.2",
         "typescript": "^5.6.0"
     }
