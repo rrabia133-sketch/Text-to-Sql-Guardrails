@@ -1,0 +1,11 @@
+{
+    "name": "@text2sql/frontend",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "echo \"frontend dev script\"",
+        "build": "echo \"frontend build script\"",
+        "typecheck": "echo \"frontend typecheck script\"",
+        "test": "echo \"frontend test script\""
+    }
+}

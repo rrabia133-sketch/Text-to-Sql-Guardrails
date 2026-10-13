@@ -1,0 +1,21 @@
+{
+    "name": "text-to-sql-workspace",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Text-to-SQL Interface with rigorous AST guardrails and privilege containment",
+    "workspaces": [
+        "backend",
+        "frontend",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "npm run dev --workspaces --if-present",
+        "build": "npm run build --workspaces --if-present",
+        "lint": "npm run lint --workspaces --if-present",
+        "typecheck": "npm run typecheck --workspaces --if-present",
+        "test": "npm run test --workspaces --if-present"
+    },
+    "devDependencies": {
+        "typescript": "^5.6.0"
+    }
+}
