@@ -6,8 +6,13 @@ import { config } from "../config/env.js";
 
 export async function runMigrations() {
     console.log("🚀 Starting database migrations for app_db...");
+    const connectionString =
+        process.env.MIGRATION_DB_URL ||
+        config.APP_DB_URL.replace(/app_user:[^@]+/, "db_migrator:migrator_password") ||
+        "postgresql://db_migrator:migrator_password@127.0.0.1:5434/app_db";
+
     const pool = new Pool({
-        connectionString: config.APP_DB_URL,
+        connectionString,
     });
 
     let client;
