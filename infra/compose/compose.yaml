@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: text2sql_postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_dev_password_2026
+    ports:
+      # Pinned to loopback 127.0.0.1 on port 5434 to eliminate host collision
+      - "127.0.0.1:5434:5432"
+    volumes:
+      # Mount initialization scripts into the official Postgres entrypoint folder
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+      # Persistent named volume for database files
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  postgres_data:

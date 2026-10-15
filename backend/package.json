@@ -9,6 +9,7 @@
         "build": "tsc",
         "typecheck": "tsc --noEmit",
         "test": "tsx --test test/integration/**/*.test.ts",
+        "migrate": "tsx src/database/migrate.ts",
         "start": "node dist/server.js"
     },
     "dependencies": {
