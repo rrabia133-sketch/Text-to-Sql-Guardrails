@@ -38,7 +38,7 @@
 | **11** | Implement user identity & session ownership backend | [US-02–04](US-02-04.md#task-11-identity--session-domain-data-model--repository) | ⚪ **PENDING** | `apps/api/src/modules/auth/`, session middleware |
 | **12** | Fastify authentication & session plugin | [US-02–04](US-02-04.md#task-12-fastify-authentication--session-plugin) | ⚪ **PENDING** | `apps/api/src/plugins/auth.ts`, `auth.routes.ts` |
 | **13** | Ownership verification middleware & IDOR guards | [US-02–04](US-02-04.md#task-13-ownership-verification-middleware--idor-guards) | 🟢 **COMPLETED** | `backend/src/modules/auth/ownership.guard.ts` |
-| **14** | Build authenticated frontend shell & user switcher | [US-02–04](US-02-04.md#task-14-frontend-authentication-shell--session-switcher) | ⚪ **PENDING** | `apps/web/src/features/auth/`, layout state |
+| **14** | Build authenticated frontend shell & user switcher | [US-02–04](US-02-04.md#task-14-frontend-authentication-shell--session-switcher) | 🟢 **COMPLETED** | `frontend/src/features/auth/`, `Header.tsx` |
 | **15** | Build automated unauthorized & cross-user security tests | [US-02–04](US-02-04.md#task-15-automated-security--cross-user-penetration-tests) | ⚪ **PENDING** | `apps/api/test/security/cross-user-isolation.test.ts` |
 | **16** | Local setup documentation & clean-checkout verification | [US-02–04](US-02-04.md#task-16-local-setup-documentation--clean-checkout-verification) | ⚪ **PENDING** | `docs/sprint-2/setup.md`, `.env.example` |
 

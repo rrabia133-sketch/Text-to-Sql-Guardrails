@@ -81,10 +81,13 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     // Auth endpoints (/api/auth/login, /api/auth/logout, /api/auth/me, /api/auth/users)
     await app.register(authRoutes, { authRepo, prefix: "/api/auth" });
 
-    // Initial root probe
-    app.get("/", async () => {
+    // Initial root & API health probe
+    const rootProbe = async () => {
         return { name: "Text-to-SQL API", status: "running", version: "0.1.0" };
-    });
+    };
+    app.get("/", rootProbe);
+    app.get("/api", rootProbe);
+    app.get("/api/", rootProbe);
 
     return app;
 }
