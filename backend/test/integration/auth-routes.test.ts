@@ -4,13 +4,28 @@ import type { FastifyInstance } from "fastify";
 import { buildApp } from "../../src/app.js";
 import { config } from "../../src/config/env.js";
 
+import { InMemoryAuthRepository } from "../helpers/in-memory-auth.repo.js";
+
 const testConfig = { ...config, NODE_ENV: "test" as const };
 
 describe("Auth Routes & Session Plugin Integration Tests", () => {
     let app: FastifyInstance;
+    let authRepo: InMemoryAuthRepository;
 
     before(async () => {
-        app = await buildApp({ appConfig: testConfig });
+        authRepo = new InMemoryAuthRepository();
+        app = await buildApp({
+            appConfig: testConfig,
+            authRepo,
+            appPool: { end: async () => {} } as any,
+            dbChecker: {
+                checkHealth: async () => ({
+                    analyticsDb: { status: "connected", isReadOnly: true },
+                    appDb: { status: "connected" },
+                }),
+                close: async () => {},
+            } as any,
+        });
         await app.ready();
     });
 
