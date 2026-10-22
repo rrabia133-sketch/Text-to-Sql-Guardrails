@@ -99,7 +99,11 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     const providerRouter = opts.providerRouter || new ProviderRouter({ mode: currentConfig.PROVIDER_MODE });
     const queryArtifactRepo = opts.queryArtifactRepo || new QueryArtifactRepository(appPool);
     const clarificationService = opts.clarificationService || new ClarificationService();
-    const retryHandler = opts.retryHandler || new GenerationRetryHandler();
+    const retryHandler =
+        opts.retryHandler ||
+        new GenerationRetryHandler({
+            totalDeadlineMs: Math.max(currentConfig.GENERATION_TIMEOUT_LOCAL_MS * 2, 90000),
+        });
 
     await app.register(schemaRoutes, { schemaService, prefix: "/api/v1/schema" });
     await app.register(providerRoutes, { providerRouter, prefix: "/api/v1/providers" });
