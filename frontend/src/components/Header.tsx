@@ -12,7 +12,7 @@ export function Header() {
                 <div className="brand">
                     <div className="brand-icon">SQL</div>
                     <h1 className="brand-title">Text-to-SQL Guardrails</h1>
-                    <span className="brand-badge">Sprint 2</span>
+                    <span className="brand-badge">Sprint 3</span>
                 </div>
 
                 <div className="header-meta">

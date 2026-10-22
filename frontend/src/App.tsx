@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { Header } from "./components/Header";
 import { UserSwitcherModal } from "./features/auth/UserSwitcherModal";
+import { ProviderSelector } from "./features/query/ProviderSelector";
+import { QueryInputBar } from "./features/query/QueryInputBar";
+import { SqlPreviewPanel } from "./features/query/SqlPreviewPanel";
+import { ClarificationModal } from "./features/clarification/ClarificationModal";
+import type {
+    ProviderType,
+    QueryGenerationResponse,
+    ClarificationResponse,
+} from "@text2sql/contracts";
 
 interface ApiHealthResponse {
     name: string;
@@ -10,13 +19,21 @@ interface ApiHealthResponse {
 }
 
 function MainWorkspace() {
-    const { user, loading } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [apiStatus, setApiStatus] = useState<ApiHealthResponse | null>(null);
     const [connecting, setConnecting] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [prompt, setPrompt] = useState(
-        "Show total revenue per customer category for canceled orders in 2026"
-    );
+    const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
+    // Query Generation State
+    const [prompt, setPrompt] = useState("What was our total revenue last month?");
+    const [selectedProvider, setSelectedProvider] = useState<ProviderType>("ollama");
+    const [generating, setGenerating] = useState(false);
+    const [generationError, setGenerationError] = useState<string | null>(null);
+    const [generationResponse, setGenerationResponse] = useState<QueryGenerationResponse | null>(null);
+
+    // Clarification Dialog State
+    const [clarification, setClarification] = useState<ClarificationResponse | null>(null);
+    const [isClarificationOpen, setIsClarificationOpen] = useState(false);
 
     useEffect(() => {
         fetch("/api/")
@@ -33,7 +50,67 @@ function MainWorkspace() {
             });
     }, []);
 
-    if (loading) {
+    const handleGenerateQuery = async (
+        overridePrompt?: string,
+        clarificationSessionId?: string,
+        selectedOptionId?: string
+    ) => {
+        const questionToAsk = overridePrompt ?? prompt;
+        if (!questionToAsk.trim()) return;
+
+        setGenerating(true);
+        setGenerationError(null);
+
+        const payload: Record<string, any> = {
+            question: questionToAsk,
+            providerPreference: selectedProvider,
+        };
+
+        if (clarificationSessionId && selectedOptionId) {
+            payload.clarificationSessionId = clarificationSessionId;
+            payload.selectedClarificationOption = selectedOptionId;
+        }
+
+        try {
+            const res = await fetch("/api/v1/queries", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || `Generation failed (${res.status})`);
+            }
+
+            if (data.type === "clarification") {
+                setClarification(data);
+                setIsClarificationOpen(true);
+            } else if (data.type === "generation") {
+                setGenerationResponse(data);
+                setIsClarificationOpen(false);
+                setClarification(null);
+            }
+        } catch (err: any) {
+            setGenerationError(err?.message || "An unexpected error occurred during generation");
+        } finally {
+            setGenerating(false);
+        }
+    };
+
+    const handleClarificationSelection = (optionId: string) => {
+        if (!clarification) return;
+        handleGenerateQuery(
+            clarification.question,
+            clarification.clarificationSessionId,
+            optionId
+        );
+    };
+
+    if (authLoading) {
         return (
             <div className="loading-screen">
                 <div className="loading-spinner">Verifying session...</div>
@@ -46,59 +123,34 @@ function MainWorkspace() {
             <Header />
 
             {user ? (
-                /* Authenticated Workspace */
+                /* Authenticated Analyst Workspace */
                 <main className="workspace-main">
-                    <section className="panel-card" id="prompt-section">
-                        <div className="panel-header">
-                            <h2 className="panel-title">Natural Language Request</h2>
-                            <span className="brand-badge">Session: {user.username}</span>
-                        </div>
-                        <div className="panel-body">
-                            <textarea
-                                id="prompt-input"
-                                className="prompt-input"
-                                value={prompt}
-                                onChange={(e) => setPrompt(e.target.value)}
-                                placeholder="Ask a question about analytical orders, customers, or revenue..."
-                            />
-                            <button
-                                id="generate-sql-btn"
-                                className="action-btn"
-                                onClick={() => alert("Ready for Sprint 3 SQL generation pipeline!")}
-                            >
-                                Analyze & Generate SQL
-                            </button>
-                        </div>
-                    </section>
+                    <ProviderSelector
+                        selectedProvider={selectedProvider}
+                        onSelectProvider={(p) => setSelectedProvider(p)}
+                        disabled={generating}
+                    />
 
-                    <section className="panel-card" id="sql-preview-section">
-                        <div className="panel-header">
-                            <h2 className="panel-title">Validated SQL & AST Guardrails</h2>
-                            <span
-                                className="brand-badge"
-                                style={{ borderColor: "#10b981", color: "#10b981" }}
-                            >
-                                AST Validated
-                            </span>
-                        </div>
-                        <div className="panel-body">
-                            <pre className="code-viewer">
-                                <code>{`-- Target Database: analytics_db (read-only role: analytics_user)
--- Authenticated User: ${user.displayName} [${user.role}]
-SELECT 
-    c.category,
-    COUNT(o.order_id) AS canceled_count,
-    COALESCE(SUM(oi.quantity * oi.unit_price), 0) AS lost_revenue
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-WHERE o.status = 'canceled'
-  AND o.order_date >= '2026-01-01'
-GROUP BY c.category
-ORDER BY lost_revenue DESC;`}</code>
-                            </pre>
-                        </div>
-                    </section>
+                    <QueryInputBar
+                        prompt={prompt}
+                        onPromptChange={setPrompt}
+                        onSubmit={() => handleGenerateQuery()}
+                        loading={generating}
+                        error={generationError}
+                    />
+
+                    <SqlPreviewPanel
+                        generationResponse={generationResponse}
+                        loading={generating}
+                    />
+
+                    <ClarificationModal
+                        isOpen={isClarificationOpen}
+                        clarification={clarification}
+                        onSelectOption={handleClarificationSelection}
+                        onClose={() => setIsClarificationOpen(false)}
+                        submitting={generating}
+                    />
                 </main>
             ) : (
                 /* Unauthenticated Empty State */
@@ -109,15 +161,15 @@ ORDER BY lost_revenue DESC;`}</code>
                         <p>Sign in to access your protected SQL query workspace and session history.</p>
                         <button
                             className="action-btn"
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={() => setIsUserModalOpen(true)}
                         >
                             Select Demo User to Sign In
                         </button>
                     </div>
 
                     <UserSwitcherModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
+                        isOpen={isUserModalOpen}
+                        onClose={() => setIsUserModalOpen(false)}
                     />
                 </main>
             )}
@@ -137,13 +189,23 @@ ORDER BY lost_revenue DESC;`}</code>
                                     : "Fastify API: Offline"}
                         </span>
                     </div>
+
+                    <div className="status-pill">
+                        <span>Schema Grounding:</span>
+                        <span style={{ color: "#38bdf8" }}>v1-allowlisted</span>
+                    </div>
+
+                    <div className="status-pill">
+                        <span>Glossary:</span>
+                        <span style={{ color: "#a78bfa" }}>v1.0.0</span>
+                    </div>
                 </div>
 
                 <div className="status-group">
                     <div className="status-pill">
-                        <span>Role:</span>
+                        <span>Persona:</span>
                         <span style={{ color: user ? "#10b981" : "#9ca3af" }}>
-                            {user ? user.role.toUpperCase() : "GUEST"}
+                            {user ? `${user.displayName} [${user.role.toUpperCase()}]` : "GUEST"}
                         </span>
                     </div>
                 </div>

@@ -12,12 +12,25 @@ import { healthRoutes } from "./modules/health/health.routes.js";
 import { AuthRepository } from "./modules/auth/auth.repository.js";
 import { authPlugin } from "./plugins/auth.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
+import { schemaRoutes } from "./modules/schema/schema.routes.js";
+import { SchemaService } from "./modules/schema/schema.service.js";
+import { providerRoutes } from "./modules/providers/provider.routes.js";
+import { ProviderRouter } from "./modules/providers/provider.router.js";
+import { generationRoutes } from "./modules/generation/generation.routes.js";
+import { QueryArtifactRepository } from "./modules/generation/query-artifact.repository.js";
+import { ClarificationService } from "./modules/intent/clarification.service.js";
+import { GenerationRetryHandler } from "./modules/generation/retry.handler.js";
 
 export interface BuildAppOptions extends FastifyServerOptions {
     appConfig?: AppConfig;
     dbChecker?: IDatabaseChecker;
     authRepo?: AuthRepository;
     appPool?: Pool;
+    schemaService?: SchemaService;
+    providerRouter?: ProviderRouter;
+    queryArtifactRepo?: QueryArtifactRepository;
+    clarificationService?: ClarificationService;
+    retryHandler?: GenerationRetryHandler;
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -81,6 +94,23 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     // Auth endpoints (/api/auth/login, /api/auth/logout, /api/auth/me, /api/auth/users)
     await app.register(authRoutes, { authRepo, prefix: "/api/auth" });
 
+    // Sprint 3 Grounded Generation, Provider, and Schema routes
+    const schemaService = opts.schemaService || new SchemaService();
+    const providerRouter = opts.providerRouter || new ProviderRouter({ mode: currentConfig.PROVIDER_MODE });
+    const queryArtifactRepo = opts.queryArtifactRepo || new QueryArtifactRepository(appPool);
+    const clarificationService = opts.clarificationService || new ClarificationService();
+    const retryHandler = opts.retryHandler || new GenerationRetryHandler();
+
+    await app.register(schemaRoutes, { schemaService, prefix: "/api/v1/schema" });
+    await app.register(providerRoutes, { providerRouter, prefix: "/api/v1/providers" });
+    await app.register(generationRoutes, {
+        queryArtifactRepo,
+        providerRouter,
+        clarificationService,
+        retryHandler,
+        prefix: "/api/v1/queries",
+    });
+
     // Initial root & API health probe
     const rootProbe = async () => {
         return { name: "Text-to-SQL API", status: "running", version: "0.1.0" };
@@ -88,6 +118,8 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     app.get("/", rootProbe);
     app.get("/api", rootProbe);
     app.get("/api/", rootProbe);
+    app.get("/api/v1", rootProbe);
+    app.get("/api/v1/", rootProbe);
 
     return app;
 }

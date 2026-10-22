@@ -129,3 +129,11 @@ export interface ApiErrorResponse {
     timestamp: string;
     details?: unknown;
 }
+
+// ==========================================
+// 6. Sprint 3 Grounded Generation Contracts
+// ==========================================
+
+export * from "./glossary.js";
+export * from "./provider.js";
+export * from "./generation.js";

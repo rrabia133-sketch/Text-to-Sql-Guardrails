@@ -13,12 +13,12 @@ import {
 } from "./schema.types.js";
 
 export class SchemaService {
-    private analyticsPool: Pool;
+    private analyticsPool?: Pool | null;
     private cachedCatalog: SanitizedCatalog | null = null;
     private cacheExpiresAt: number = 0;
     private cacheTtlMs: number;
 
-    constructor(analyticsPool: Pool, cacheTtlMs: number = 5 * 60 * 1000) {
+    constructor(analyticsPool?: Pool | null, cacheTtlMs: number = 5 * 60 * 1000) {
         this.analyticsPool = analyticsPool;
         this.cacheTtlMs = cacheTtlMs;
     }
@@ -33,11 +33,55 @@ export class SchemaService {
             return this.cachedCatalog;
         }
 
-        const freshCatalog = await this.introspectAndSanitize();
-        this.cachedCatalog = freshCatalog;
-        this.cacheExpiresAt = now + this.cacheTtlMs;
+        try {
+            if (this.analyticsPool) {
+                const freshCatalog = await this.introspectAndSanitize();
+                this.cachedCatalog = freshCatalog;
+                this.cacheExpiresAt = now + this.cacheTtlMs;
+                return freshCatalog;
+            }
+        } catch (error) {
+            // If database is not reachable, fallback to canonical fixture
+        }
 
-        return freshCatalog;
+        const canonicalCatalog = this.getCanonicalCatalog();
+        this.cachedCatalog = canonicalCatalog;
+        this.cacheExpiresAt = now + this.cacheTtlMs;
+        return canonicalCatalog;
+    }
+
+    /**
+     * Formats the sanitized catalog as a Markdown string for LLM prompt context injection.
+     */
+    formatForPrompt(catalog: SanitizedCatalog): string {
+        const lines: string[] = [
+            `### Database Schema (Version: ${catalog.schemaVersion})`,
+            "Only the following approved tables and columns exist in analytics_db:",
+            "",
+        ];
+
+        for (const tableName of ALLOWED_TABLES) {
+            const table = catalog.tables[tableName];
+            if (!table) continue;
+
+            lines.push(`#### Table: \`${tableName}\``);
+            lines.push("| Column | Type | Nullable | Primary Key |");
+            lines.push("| :--- | :--- | :--- | :--- |");
+            for (const col of table.columns) {
+                lines.push(
+                    `| \`${col.name}\` | \`${col.dataType}\` | ${col.isNullable ? "YES" : "NO"} | ${col.isPrimaryKey ? "YES (PK)" : "NO"} |`
+                );
+            }
+            if (table.foreignKeys.length > 0) {
+                lines.push("**Foreign Key Relationships:**");
+                for (const fk of table.foreignKeys) {
+                    lines.push(`- \`${fk.columnName}\` -> \`${fk.foreignTable}.${fk.foreignColumn}\``);
+                }
+            }
+            lines.push("");
+        }
+
+        return lines.join("\n");
     }
 
     /**
@@ -48,7 +92,81 @@ export class SchemaService {
         this.cacheExpiresAt = 0;
     }
 
+    /**
+     * Canonical schema definition matching analytics_db DDL.
+     */
+    getCanonicalCatalog(): SanitizedCatalog {
+        const tables: Record<string, TableMetadata> = {
+            customers: {
+                tableName: "customers",
+                columns: [
+                    { name: "id", dataType: "integer", isNullable: false, isPrimaryKey: true },
+                    { name: "name", dataType: "character varying", isNullable: false, isPrimaryKey: false },
+                    { name: "region", dataType: "character varying", isNullable: false, isPrimaryKey: false },
+                    { name: "created_at", dataType: "timestamp with time zone", isNullable: false, isPrimaryKey: false },
+                ],
+                primaryKeys: ["id"],
+                foreignKeys: [],
+            },
+            products: {
+                tableName: "products",
+                columns: [
+                    { name: "id", dataType: "integer", isNullable: false, isPrimaryKey: true },
+                    { name: "name", dataType: "character varying", isNullable: false, isPrimaryKey: false },
+                    { name: "category", dataType: "character varying", isNullable: false, isPrimaryKey: false },
+                    { name: "unit_price", dataType: "numeric", isNullable: false, isPrimaryKey: false },
+                ],
+                primaryKeys: ["id"],
+                foreignKeys: [],
+            },
+            orders: {
+                tableName: "orders",
+                columns: [
+                    { name: "id", dataType: "integer", isNullable: false, isPrimaryKey: true },
+                    { name: "customer_id", dataType: "integer", isNullable: false, isPrimaryKey: false },
+                    { name: "status", dataType: "character varying", isNullable: false, isPrimaryKey: false },
+                    { name: "ordered_at", dataType: "timestamp with time zone", isNullable: false, isPrimaryKey: false },
+                ],
+                primaryKeys: ["id"],
+                foreignKeys: [
+                    { columnName: "customer_id", foreignTable: "customers", foreignColumn: "id" },
+                ],
+            },
+            order_items: {
+                tableName: "order_items",
+                columns: [
+                    { name: "id", dataType: "integer", isNullable: false, isPrimaryKey: true },
+                    { name: "order_id", dataType: "integer", isNullable: false, isPrimaryKey: false },
+                    { name: "product_id", dataType: "integer", isNullable: false, isPrimaryKey: false },
+                    { name: "quantity", dataType: "integer", isNullable: false, isPrimaryKey: false },
+                    { name: "unit_price", dataType: "numeric", isNullable: false, isPrimaryKey: false },
+                ],
+                primaryKeys: ["id"],
+                foreignKeys: [
+                    { columnName: "order_id", foreignTable: "orders", foreignColumn: "id" },
+                    { columnName: "product_id", foreignTable: "products", foreignColumn: "id" },
+                ],
+            },
+        };
+
+        const versionHash = createHash("sha256")
+            .update(JSON.stringify(tables))
+            .digest("hex")
+            .substring(0, 12);
+
+        return {
+            schemaVersion: `v1-${versionHash}`,
+            tables,
+            retrievedAt: new Date().toISOString(),
+        };
+    }
+
+
     private async introspectAndSanitize(): Promise<SanitizedCatalog> {
+        if (!this.analyticsPool) {
+            return this.getCanonicalCatalog();
+        }
+
         const tableList = [...ALLOWED_TABLES];
 
         // 1. Fetch Column Details

@@ -13,6 +13,15 @@ export interface AppConfig {
     SESSION_SECRET: string;
     ANALYTICS_DB_URL: string;
     APP_DB_URL: string;
+    PROVIDER_MODE: "local" | "hybrid" | "cloud";
+    OLLAMA_HOST: string;
+    OLLAMA_MODEL: string;
+    GROQ_API_KEY: string;
+    GROQ_MODEL: string;
+    DAILY_CLOUD_BUDGET_USD: number;
+    GENERATION_TIMEOUT_LOCAL_MS: number;
+    GENERATION_TIMEOUT_CLOUD_MS: number;
+    ANALYTICS_TIMEZONE: string;
 }
 
 export function validateConfig(raw: Partial<AppConfig>): AppConfig {
@@ -57,6 +66,44 @@ export function validateConfig(raw: Partial<AppConfig>): AppConfig {
         errors.push("Invalid APP_DB_URL: must start with postgresql:// or postgres://");
     }
 
+    const providerMode = (raw.PROVIDER_MODE || "local") as AppConfig["PROVIDER_MODE"];
+    if (!["local", "hybrid", "cloud"].includes(providerMode)) {
+        errors.push(
+            `Invalid PROVIDER_MODE: must be "local", "hybrid", or "cloud", got "${raw.PROVIDER_MODE}"`
+        );
+    }
+
+    const ollamaHost = raw.OLLAMA_HOST || "http://127.0.0.1:11434";
+    const ollamaModel = raw.OLLAMA_MODEL || "qwen2.5-coder:7b";
+    const groqApiKey = raw.GROQ_API_KEY || "";
+    const groqModel = raw.GROQ_MODEL || "llama-3.3-70b-versatile";
+
+    const dailyBudget =
+        typeof raw.DAILY_CLOUD_BUDGET_USD === "number"
+            ? raw.DAILY_CLOUD_BUDGET_USD
+            : Number.parseFloat(String(raw.DAILY_CLOUD_BUDGET_USD ?? "5.00"));
+    if (Number.isNaN(dailyBudget) || dailyBudget < 0) {
+        errors.push(`Invalid DAILY_CLOUD_BUDGET_USD: must be a positive number, got "${raw.DAILY_CLOUD_BUDGET_USD}"`);
+    }
+
+    const timeoutLocal =
+        typeof raw.GENERATION_TIMEOUT_LOCAL_MS === "number"
+            ? raw.GENERATION_TIMEOUT_LOCAL_MS
+            : Number.parseInt(String(raw.GENERATION_TIMEOUT_LOCAL_MS ?? "30000"), 10);
+    if (Number.isNaN(timeoutLocal) || timeoutLocal <= 0) {
+        errors.push(`Invalid GENERATION_TIMEOUT_LOCAL_MS: must be a positive integer, got "${raw.GENERATION_TIMEOUT_LOCAL_MS}"`);
+    }
+
+    const timeoutCloud =
+        typeof raw.GENERATION_TIMEOUT_CLOUD_MS === "number"
+            ? raw.GENERATION_TIMEOUT_CLOUD_MS
+            : Number.parseInt(String(raw.GENERATION_TIMEOUT_CLOUD_MS ?? "15000"), 10);
+    if (Number.isNaN(timeoutCloud) || timeoutCloud <= 0) {
+        errors.push(`Invalid GENERATION_TIMEOUT_CLOUD_MS: must be a positive integer, got "${raw.GENERATION_TIMEOUT_CLOUD_MS}"`);
+    }
+
+    const analyticsTimezone = raw.ANALYTICS_TIMEZONE || "UTC";
+
     if (errors.length > 0) {
         throw new Error(
             `[Configuration Error] Invalid environment configuration:\n - ${errors.join("\n - ")}`
@@ -71,6 +118,15 @@ export function validateConfig(raw: Partial<AppConfig>): AppConfig {
         SESSION_SECRET: sessionSecret,
         ANALYTICS_DB_URL: analyticsDbUrl,
         APP_DB_URL: appDbUrl,
+        PROVIDER_MODE: providerMode,
+        OLLAMA_HOST: ollamaHost,
+        OLLAMA_MODEL: ollamaModel,
+        GROQ_API_KEY: groqApiKey,
+        GROQ_MODEL: groqModel,
+        DAILY_CLOUD_BUDGET_USD: dailyBudget,
+        GENERATION_TIMEOUT_LOCAL_MS: timeoutLocal,
+        GENERATION_TIMEOUT_CLOUD_MS: timeoutCloud,
+        ANALYTICS_TIMEZONE: analyticsTimezone,
     };
 }
 
@@ -88,8 +144,24 @@ export function loadConfig(): AppConfig {
         APP_DB_URL:
             process.env.APP_DB_URL ||
             "postgresql://app_user:app_password@127.0.0.1:5434/app_db",
+        PROVIDER_MODE: (process.env.PROVIDER_MODE as AppConfig["PROVIDER_MODE"]) || "local",
+        OLLAMA_HOST: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
+        OLLAMA_MODEL: process.env.OLLAMA_MODEL || "qwen2.5-coder:7b",
+        GROQ_API_KEY: process.env.GROQ_API_KEY || "",
+        GROQ_MODEL: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        DAILY_CLOUD_BUDGET_USD: process.env.DAILY_CLOUD_BUDGET_USD
+            ? Number.parseFloat(process.env.DAILY_CLOUD_BUDGET_USD)
+            : 5.0,
+        GENERATION_TIMEOUT_LOCAL_MS: process.env.GENERATION_TIMEOUT_LOCAL_MS
+            ? Number.parseInt(process.env.GENERATION_TIMEOUT_LOCAL_MS, 10)
+            : 30000,
+        GENERATION_TIMEOUT_CLOUD_MS: process.env.GENERATION_TIMEOUT_CLOUD_MS
+            ? Number.parseInt(process.env.GENERATION_TIMEOUT_CLOUD_MS, 10)
+            : 15000,
+        ANALYTICS_TIMEZONE: process.env.ANALYTICS_TIMEZONE || "UTC",
     });
 }
 
 export const config = loadConfig();
+
 
