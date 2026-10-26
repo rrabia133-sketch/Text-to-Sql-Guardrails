@@ -27,7 +27,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-09–10](US-09-10.md) | Story | SQL Guardrails & Restricted Execution (US-09, US-10) | 24 | 🟡 **IN PROGRESS** | 1 / 17 Tasks (5.88%) |
+| [US-09–10](US-09-10.md) | Story | SQL Guardrails & Restricted Execution (US-09, US-10) | 24 | 🟡 **IN PROGRESS** | 2 / 17 Tasks (11.76%) |
 | [DO-06](DO-06.md) | DevOps | Bounded Connection Pools, Timeouts, Cancellation & Containment | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
 
 ---
@@ -37,7 +37,7 @@
 | Task # | Name | Assigned To | Status | Output Artifact |
 | :---: | :--- | :--- | :--- | :--- |
 | **01** | Guardrails contracts, error types & finding schemas | [US-09–10](US-09-10.md#task-1-guardrails-contracts-error-types--finding-schemas) | 🟢 **COMPLETED** | `packages/contracts/src/guardrails.ts` |
-| **02** | AST parser wrapper & single SELECT statement policy | [US-09–10](US-09-10.md#task-2-ast-parser-wrapper--single-select-statement-policy) | ⚪ PLANNED | `backend/src/modules/guardrails/ast-parser.service.ts` |
+| **02** | AST parser wrapper & single SELECT statement policy | [US-09–10](US-09-10.md#task-2-ast-parser-wrapper--single-select-statement-policy) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/ast-parser.service.ts` |
 | **03** | Recursive AST node visitor & unknown construct blocker | [US-09–10](US-09-10.md#task-3-recursive-ast-node-visitor--unknown-construct-blocker) | ⚪ PLANNED | `backend/src/modules/guardrails/node-visitor.ts` |
 | **04** | Scoped identifier & alias resolution engine | [US-09–10](US-09-10.md#task-4-scoped-identifier--alias-resolution-engine) | ⚪ PLANNED | `backend/src/modules/guardrails/scope-resolver.ts` |
 | **05** | Allowlist schema object & catalog protection verifier | [US-09–10](US-09-10.md#task-5-allowlist-schema-object--catalog-protection-verifier) | ⚪ PLANNED | `backend/src/modules/guardrails/schema-validator.ts` |
