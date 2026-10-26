@@ -98,28 +98,7 @@ export interface QueryResultResponse {
 }
 
 // ==========================================
-// 4. AST Guardrail & Safety Contracts
-// ==========================================
-
-export type GuardrailSeverity = "error" | "warning";
-
-export interface GuardrailViolation {
-    ruleId: string;
-    severity: GuardrailSeverity;
-    message: string;
-    statementIndex?: number;
-    forbiddenTableOrCommand?: string;
-}
-
-export interface GuardrailValidationResult {
-    valid: boolean;
-    status: "passed" | "rejected";
-    sql: string;
-    violations: GuardrailViolation[];
-}
-
-// ==========================================
-// 5. Standard Error Response Contract
+// 4. Standard Error Response Contract
 // ==========================================
 
 export interface ApiErrorResponse {
@@ -131,9 +110,11 @@ export interface ApiErrorResponse {
 }
 
 // ==========================================
-// 6. Sprint 3 Grounded Generation Contracts
+// 5. Domain Specific Contracts
 // ==========================================
 
 export * from "./glossary.js";
 export * from "./provider.js";
 export * from "./generation.js";
+export * from "./guardrails.js";
+
