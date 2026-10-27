@@ -97,12 +97,16 @@ describe("Sprint 4 - Task 16: Fastify Execution API Routes & Audit Logging (US-1
         it("returns 403 ARTIFACT_NOT_OWNED when query artifact belongs to another user", async () => {
             const artifactB = await queryArtifactRepo.create({
                 userId: userBId,
-                naturalLanguagePrompt: "Select customers for user B",
+                prompt: "Select customers for user B",
                 generatedSql: "SELECT id, name FROM customers;",
                 referencedTables: ["customers"],
                 referencedColumns: ["customers.id", "customers.name"],
                 assumptions: [],
-                status: "preview",
+                explanation: "Customers query for user B",
+                provider: "ollama",
+                model: "qwen2.5-coder:7b",
+                promptVersion: "1.0.0",
+                schemaVersion: "1.0.0",
             });
 
             const res = await app.inject({
@@ -118,13 +122,18 @@ describe("Sprint 4 - Task 16: Fastify Execution API Routes & Audit Logging (US-1
         it("returns 409 TRANSACTION_VIOLATION when artifact is not in preview state", async () => {
             const artifact = await queryArtifactRepo.create({
                 userId: userAId,
-                naturalLanguagePrompt: "Orders count",
+                prompt: "Orders count",
                 generatedSql: "SELECT COUNT(*) FROM orders;",
                 referencedTables: ["orders"],
                 referencedColumns: ["orders.id"],
                 assumptions: [],
-                status: "completed",
+                explanation: "Count of all orders",
+                provider: "ollama",
+                model: "qwen2.5-coder:7b",
+                promptVersion: "1.0.0",
+                schemaVersion: "1.0.0",
             });
+            await queryArtifactRepo.updateStatus(artifact.id, "completed");
 
             const res = await app.inject({
                 method: "POST",
@@ -139,12 +148,16 @@ describe("Sprint 4 - Task 16: Fastify Execution API Routes & Audit Logging (US-1
         it("successfully executes owned preview artifact and returns result payload", async () => {
             const artifact = await queryArtifactRepo.create({
                 userId: userAId,
-                naturalLanguagePrompt: "Top customers",
+                prompt: "Top customers",
                 generatedSql: "SELECT id, name FROM customers LIMIT 10;",
                 referencedTables: ["customers"],
                 referencedColumns: ["customers.id", "customers.name"],
                 assumptions: [],
-                status: "preview",
+                explanation: "Top 10 customers",
+                provider: "ollama",
+                model: "qwen2.5-coder:7b",
+                promptVersion: "1.0.0",
+                schemaVersion: "1.0.0",
             });
 
             const res = await app.inject({
@@ -176,12 +189,16 @@ describe("Sprint 4 - Task 16: Fastify Execution API Routes & Audit Logging (US-1
 
             const artifact = await queryArtifactRepo.create({
                 userId: userAId,
-                naturalLanguagePrompt: "Third query",
+                prompt: "Third query",
                 generatedSql: "SELECT id FROM orders;",
                 referencedTables: ["orders"],
                 referencedColumns: ["orders.id"],
                 assumptions: [],
-                status: "preview",
+                explanation: "Third orders query",
+                provider: "ollama",
+                model: "qwen2.5-coder:7b",
+                promptVersion: "1.0.0",
+                schemaVersion: "1.0.0",
             });
 
             const res = await app.inject({

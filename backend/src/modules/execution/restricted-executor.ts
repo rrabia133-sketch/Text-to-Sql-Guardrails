@@ -90,12 +90,20 @@ import { ResourceLimiter } from "./resource-limiter.js";
 
 export class RestrictedExecutor {
     private readonly limiter: ResourceLimiter;
+    private readonly defaultOptions?: RestrictedExecutionOptions;
 
     constructor(
         private readonly pool?: Pool | null,
-        limiter?: ResourceLimiter
+        limiterOrOptions?: ResourceLimiter | RestrictedExecutionOptions
     ) {
-        this.limiter = limiter ?? new ResourceLimiter();
+        if (limiterOrOptions instanceof ResourceLimiter) {
+            this.limiter = limiterOrOptions;
+        } else if (limiterOrOptions) {
+            this.limiter = new ResourceLimiter();
+            this.defaultOptions = limiterOrOptions;
+        } else {
+            this.limiter = new ResourceLimiter();
+        }
     }
 
     /**
@@ -105,10 +113,10 @@ export class RestrictedExecutor {
         sql: string,
         options?: RestrictedExecutionOptions
     ): Promise<RestrictedExecutionResult> {
-        const statementTimeoutMs = options?.statementTimeoutMs ?? 5000;
-        const lockTimeoutMs = options?.lockTimeoutMs ?? 1000;
-        const maxRows = options?.maxRows ?? 500;
-        const maxBytes = options?.maxBytes ?? 1024 * 1024; // 1 MiB
+        const statementTimeoutMs = options?.statementTimeoutMs ?? this.defaultOptions?.statementTimeoutMs ?? 5000;
+        const lockTimeoutMs = options?.lockTimeoutMs ?? this.defaultOptions?.lockTimeoutMs ?? 1000;
+        const maxRows = options?.maxRows ?? this.defaultOptions?.maxRows ?? 500;
+        const maxBytes = options?.maxBytes ?? this.defaultOptions?.maxBytes ?? 1024 * 1024; // 1 MiB
 
         if (!this.pool) {
             // Mock execution for unit tests or when pool is not available
@@ -217,7 +225,7 @@ export class RestrictedExecutor {
      */
     private executeMock(sql: string, options?: RestrictedExecutionOptions): RestrictedExecutionResult {
         const lower = sql.toLowerCase().trim();
-        const maxRows = options?.maxRows ?? 500;
+        const maxRows = options?.maxRows ?? this.defaultOptions?.maxRows ?? 500;
 
         // Simulate write rejection in mock mode
         if (
@@ -225,7 +233,9 @@ export class RestrictedExecutor {
             lower.startsWith("update") ||
             lower.startsWith("delete") ||
             lower.startsWith("drop") ||
-            lower.startsWith("alter")
+            lower.startsWith("alter") ||
+            lower.startsWith("truncate") ||
+            lower.startsWith("create")
         ) {
             return {
                 ok: false,
@@ -250,6 +260,9 @@ export class RestrictedExecutor {
             { id: 2, name: "Global Tech", region: "EMEA" },
         ];
 
+        const truncated = mockRows.length > maxRows;
+        const sliced = mockRows.slice(0, maxRows);
+
         return {
             ok: true,
             columns: [
@@ -257,11 +270,11 @@ export class RestrictedExecutor {
                 { name: "name", pgType: "text", jsType: "string", nullable: true },
                 { name: "region", pgType: "text", jsType: "string", nullable: true },
             ],
-            rows: mockRows.slice(0, maxRows),
-            rowCount: Math.min(mockRows.length, maxRows),
-            byteSize: Buffer.byteLength(JSON.stringify(mockRows), "utf8"),
+            rows: sliced,
+            rowCount: sliced.length,
+            byteSize: Buffer.byteLength(JSON.stringify(sliced), "utf8"),
             executionTimeMs: 12,
-            truncated: false,
+            truncated,
         };
     }
 }

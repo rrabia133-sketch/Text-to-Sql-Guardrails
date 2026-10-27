@@ -27,7 +27,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-09–10](US-09-10.md) | Story | SQL Guardrails & Restricted Execution (US-09, US-10) | 24 | 🟡 **IN PROGRESS** | 15 / 17 Tasks (88.24%) |
+| [US-09–10](US-09-10.md) | Story | SQL Guardrails & Restricted Execution (US-09, US-10) | 24 | 🟢 **COMPLETED** | 17 / 17 Tasks (100%) |
 | [DO-06](DO-06.md) | DevOps | Bounded Connection Pools, Timeouts, Cancellation & Containment | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
 
 ---
@@ -51,8 +51,8 @@
 | **13** | Restricted database executor with explicit read-only transaction | [US-09–10](US-09-10.md#task-13-restricted-database-executor-with-explicit-read-only-transaction) | 🟢 **COMPLETED** | `backend/src/modules/execution/restricted-executor.ts` |
 | **14** | Resource limiter: statement timeout, row count & byte caps | [US-09–10](US-09-10.md#task-14-resource-limiter-statement-timeout-row-count--byte-caps) | 🟢 **COMPLETED** | `backend/src/modules/execution/resource-limiter.ts` |
 | **15** | Concurrency throttle, cancellation & connection pool cleanup | [US-09–10](US-09-10.md#task-15-concurrency-throttle-cancellation--connection-pool-cleanup) | 🟢 **COMPLETED** | `backend/src/modules/execution/concurrency-manager.ts` |
-| **16** | Fastify execution API routes & audit logging | [US-09–10](US-09-10.md#task-16-fastify-execution-api-routes--audit-logging) | ⚪ PLANNED | `backend/src/modules/execution/execution.routes.ts` |
-| **17** | Adversarial security test suite & database privilege benchmark | [US-09–10](US-09-10.md#task-17-adversarial-security-test-suite--database-privilege-benchmark) | ⚪ PLANNED | `backend/test/security/guardrails-adversarial.test.ts` |
+| **16** | Fastify execution API routes & audit logging | [US-09–10](US-09-10.md#task-16-fastify-execution-api-routes--audit-logging) | 🟢 **COMPLETED** | `backend/src/modules/execution/execution.routes.ts` |
+| **17** | Adversarial security test suite & database privilege benchmark | [US-09–10](US-09-10.md#task-17-adversarial-security-test-suite--database-privilege-benchmark) | 🟢 **COMPLETED** | `backend/test/security/guardrails-adversarial.test.ts` |
 
 ---
 

@@ -6,12 +6,19 @@ export interface AuditLogEntry {
     resourceId?: string;
     details?: Record<string, unknown>;
     ipAddress?: string;
+    timestamp?: string;
 }
 
 export class AuditLogger {
+    private memoryLogs: AuditLogEntry[] = [];
+
     constructor(private readonly pool?: Pool | null) { }
 
     public async log(entry: AuditLogEntry): Promise<void> {
+        this.memoryLogs.push({
+            timestamp: entry.timestamp || new Date().toISOString(),
+            ...entry,
+        });
         if (!this.pool) return;
         try {
             const query = `
@@ -30,5 +37,13 @@ export class AuditLogger {
         } catch {
             // Audit log failures should not fail query transactions
         }
+    }
+
+    public getMemoryLogs(): AuditLogEntry[] {
+        return [...this.memoryLogs];
+    }
+
+    public clear(): void {
+        this.memoryLogs = [];
     }
 }
