@@ -20,17 +20,31 @@ import { generationRoutes } from "./modules/generation/generation.routes.js";
 import { QueryArtifactRepository } from "./modules/generation/query-artifact.repository.js";
 import { ClarificationService } from "./modules/intent/clarification.service.js";
 import { GenerationRetryHandler } from "./modules/generation/retry.handler.js";
+import { executionRoutes } from "./modules/execution/execution.routes.js";
+import { ExecutionRepository } from "./modules/execution/execution.repository.js";
+import { ArtifactGate } from "./modules/execution/artifact-gate.js";
+import { ConcurrencyManager } from "./modules/execution/concurrency-manager.js";
+import { CancellationService } from "./modules/execution/cancellation.service.js";
+import { RestrictedExecutor } from "./modules/execution/restricted-executor.js";
+import { AuditLogger } from "./modules/execution/audit-logger.js";
 
 export interface BuildAppOptions extends FastifyServerOptions {
     appConfig?: AppConfig;
     dbChecker?: IDatabaseChecker;
     authRepo?: AuthRepository;
     appPool?: Pool;
+    analyticsPool?: Pool;
     schemaService?: SchemaService;
     providerRouter?: ProviderRouter;
     queryArtifactRepo?: QueryArtifactRepository;
     clarificationService?: ClarificationService;
     retryHandler?: GenerationRetryHandler;
+    executionRepo?: ExecutionRepository;
+    artifactGate?: ArtifactGate;
+    concurrencyManager?: ConcurrencyManager;
+    cancellationService?: CancellationService;
+    restrictedExecutor?: RestrictedExecutor;
+    auditLogger?: AuditLogger;
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -51,6 +65,13 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
             max: 5,
         });
 
+    const analyticsPool =
+        opts.analyticsPool ||
+        new Pool({
+            connectionString: currentConfig.ANALYTICS_DB_URL,
+            max: 10,
+        });
+
     const authRepo = opts.authRepo || new AuthRepository(appPool);
 
     const app = Fastify({
@@ -67,7 +88,10 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
             await dbChecker.close();
         }
         if (!opts.appPool) {
-            await appPool.end();
+            await appPool.end().catch(() => {});
+        }
+        if (!opts.analyticsPool) {
+            await analyticsPool.end().catch(() => {});
         }
     });
 
@@ -113,6 +137,24 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         clarificationService,
         retryHandler,
         prefix: "/api/v1/queries",
+    });
+    // Sprint 4 Restricted Database Execution routes
+    const executionRepo = opts.executionRepo || new ExecutionRepository(appPool);
+    const artifactGate = opts.artifactGate || new ArtifactGate(queryArtifactRepo);
+    const concurrencyManager = opts.concurrencyManager || new ConcurrencyManager();
+    const cancellationService = opts.cancellationService || new CancellationService(analyticsPool);
+    const restrictedExecutor = opts.restrictedExecutor || new RestrictedExecutor(analyticsPool);
+    const auditLogger = opts.auditLogger || new AuditLogger(appPool);
+
+    await app.register(executionRoutes, {
+        executionRepo,
+        artifactGate,
+        concurrencyManager,
+        cancellationService,
+        restrictedExecutor,
+        auditLogger,
+        queryArtifactRepo,
+        prefix: "/api/v1",
     });
 
     // Initial root & API health probe

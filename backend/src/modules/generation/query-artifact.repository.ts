@@ -128,14 +128,14 @@ export class QueryArtifactRepository {
      * Retrieves an artifact by ID, strictly enforcing user ownership isolation.
      * Returns null if artifact does not exist or belongs to another user.
      */
-    async findById(id: string, userId: string): Promise<QueryArtifactRecord | null> {
+    async findById(id: string, userId?: string): Promise<QueryArtifactRecord | null> {
         if (this.pool) {
             try {
-                const query = `
-                    SELECT * FROM query_artifacts
-                    WHERE id = $1 AND user_id = $2;
-                `;
-                const res = await this.pool.query(query, [id, userId]);
+                const query = userId
+                    ? `SELECT * FROM query_artifacts WHERE id = $1 AND user_id = $2;`
+                    : `SELECT * FROM query_artifacts WHERE id = $1;`;
+                const params = userId ? [id, userId] : [id];
+                const res = await this.pool.query(query, params);
                 if (res.rows?.[0]) {
                     const row = res.rows[0];
                     return {
@@ -166,11 +166,74 @@ export class QueryArtifactRepository {
         }
 
         const memRecord = this.inMemoryStore.get(id);
-        if (!memRecord || memRecord.userId !== userId) {
+        if (!memRecord || (userId && memRecord.userId !== userId)) {
             return null;
         }
 
         return memRecord;
+    }
+
+    /**
+     * Updates the status of an artifact.
+     */
+    async updateStatus(id: string, status: QueryArtifactRecord["status"]): Promise<QueryArtifactRecord | null> {
+        const now = new Date().toISOString();
+
+        if (this.pool) {
+            try {
+                const query = `
+                    UPDATE query_artifacts
+                    SET status = $1, updated_at = $2
+                    WHERE id = $3
+                    RETURNING *;
+                `;
+                const res = await this.pool.query(query, [status, now, id]);
+                if (res.rows?.[0]) {
+                    const row = res.rows[0];
+                    return {
+                        id: row.id,
+                        userId: row.user_id,
+                        prompt: row.prompt,
+                        generatedSql: row.generated_sql,
+                        status: row.status,
+                        assumptions: typeof row.assumptions === "string" ? JSON.parse(row.assumptions) : row.assumptions || [],
+                        referencedTables: row.referenced_tables || [],
+                        referencedColumns: row.referenced_columns || [],
+                        explanation: row.explanation || "",
+                        provider: row.provider,
+                        model: row.model,
+                        promptVersion: row.prompt_version,
+                        schemaVersion: row.schema_version,
+                        executionTimeMs: row.execution_time_ms,
+                        rowCount: row.row_count,
+                        errorMessage: row.error_message,
+                        createdAt: new Date(row.created_at).toISOString(),
+                        updatedAt: new Date(row.updated_at).toISOString(),
+                        expiresAt: new Date(row.expires_at).toISOString(),
+                    };
+                }
+            } catch {
+                // Fallback
+            }
+        }
+
+        const memRecord = this.inMemoryStore.get(id);
+        if (!memRecord) return null;
+
+        const updated: QueryArtifactRecord = {
+            ...memRecord,
+            status,
+            updatedAt: now,
+        };
+        this.inMemoryStore.set(id, updated);
+        return updated;
+    }
+
+    /**
+     * Clears in-memory store (for testing).
+     */
+    clear(): void {
+        this.inMemoryStore.clear();
     }
 
     /**

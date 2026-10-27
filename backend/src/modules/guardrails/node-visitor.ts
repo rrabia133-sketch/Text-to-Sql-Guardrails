@@ -73,6 +73,11 @@ export const APPROVED_AST_NODE_TYPES: Set<string> = new Set([
  * Explicit forbidden node types mapped to precise security reason codes.
  */
 export const FORBIDDEN_NODE_TYPES: Record<string, { code: GuardrailViolationCode; description: string }> = {
+    // Administrative Commands
+    set: { code: "ADMINISTRATIVE_COMMAND", description: "Administrative statement 'SET'" },
+    show: { code: "ADMINISTRATIVE_COMMAND", description: "Administrative statement 'SHOW'" },
+    reset: { code: "ADMINISTRATIVE_COMMAND", description: "Administrative statement 'RESET'" },
+    listen: { code: "ADMINISTRATIVE_COMMAND", description: "Administrative statement 'LISTEN'" },
     notify: { code: "ADMINISTRATIVE_COMMAND", description: "Administrative statement 'NOTIFY'" },
     vacuum: { code: "ADMINISTRATIVE_COMMAND", description: "Administrative statement 'VACUUM'" },
 

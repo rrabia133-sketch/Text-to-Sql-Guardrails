@@ -27,7 +27,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-09–10](US-09-10.md) | Story | SQL Guardrails & Restricted Execution (US-09, US-10) | 24 | 🟡 **IN PROGRESS** | 3 / 17 Tasks (17.65%) |
+| [US-09–10](US-09-10.md) | Story | SQL Guardrails & Restricted Execution (US-09, US-10) | 24 | 🟡 **IN PROGRESS** | 15 / 17 Tasks (88.24%) |
 | [DO-06](DO-06.md) | DevOps | Bounded Connection Pools, Timeouts, Cancellation & Containment | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
 
 ---
@@ -39,18 +39,18 @@
 | **01** | Guardrails contracts, error types & finding schemas | [US-09–10](US-09-10.md#task-1-guardrails-contracts-error-types--finding-schemas) | 🟢 **COMPLETED** | `packages/contracts/src/guardrails.ts` |
 | **02** | AST parser wrapper & single SELECT statement policy | [US-09–10](US-09-10.md#task-2-ast-parser-wrapper--single-select-statement-policy) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/ast-parser.service.ts` |
 | **03** | Recursive AST node visitor & unknown construct blocker | [US-09–10](US-09-10.md#task-3-recursive-ast-node-visitor--unknown-construct-blocker) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/node-visitor.ts` |
-| **04** | Scoped identifier & alias resolution engine | [US-09–10](US-09-10.md#task-4-scoped-identifier--alias-resolution-engine) | ⚪ PLANNED | `backend/src/modules/guardrails/scope-resolver.ts` |
-| **05** | Allowlist schema object & catalog protection verifier | [US-09–10](US-09-10.md#task-5-allowlist-schema-object--catalog-protection-verifier) | ⚪ PLANNED | `backend/src/modules/guardrails/schema-validator.ts` |
-| **06** | Approved function whitelist & dangerous function blocker | [US-09–10](US-09-10.md#task-6-approved-function-whitelist--dangerous-function-blocker) | ⚪ PLANNED | `backend/src/modules/guardrails/function-validator.ts` |
-| **07** | SQL normalizer, row-cap enforcement & post-transform revalidation | [US-09–10](US-09-10.md#task-7-sql-normalizer-row-cap-enforcement--post-transform-revalidation) | ⚪ PLANNED | `backend/src/modules/guardrails/normalizer.ts` |
-| **08** | EXPLAIN plan cost gatekeeper & query complexity analyzer | [US-09–10](US-09-10.md#task-8-explain-plan-cost-gatekeeper--query-complexity-analyzer) | ⚪ PLANNED | `backend/src/modules/guardrails/plan-cost-gate.ts` |
-| **09** | Unified guardrails orchestrator & finding aggregation service | [US-09–10](US-09-10.md#task-9-unified-guardrails-orchestrator--finding-aggregation-service) | ⚪ PLANNED | `backend/src/modules/guardrails/guardrails.service.ts` |
-| **10** | Shared execution contracts & result types | [US-09–10](US-09-10.md#task-10-shared-execution-contracts--result-types) | ⚪ PLANNED | `packages/contracts/src/execution.ts` |
-| **11** | Execution database migration & repository in app_db | [US-09–10](US-09-10.md#task-11-execution-database-migration--repository-in-app_db) | ⚪ PLANNED | `database/app/migrations/05-init-executions.sql` |
-| **12** | Immutable artifact ownership, expiry & SQL hash gate | [US-09–10](US-09-10.md#task-12-immutable-artifact-ownership-expiry--sql-hash-gate) | ⚪ PLANNED | `backend/src/modules/execution/artifact-gate.ts` |
-| **13** | Restricted database executor with explicit read-only transaction | [US-09–10](US-09-10.md#task-13-restricted-database-executor-with-explicit-read-only-transaction) | ⚪ PLANNED | `backend/src/modules/execution/restricted-executor.ts` |
-| **14** | Resource limiter: statement timeout, row count & byte caps | [US-09–10](US-09-10.md#task-14-resource-limiter-statement-timeout-row-count--byte-caps) | ⚪ PLANNED | `backend/src/modules/execution/resource-limiter.ts` |
-| **15** | Concurrency throttle, cancellation & connection pool cleanup | [US-09–10](US-09-10.md#task-15-concurrency-throttle-cancellation--connection-pool-cleanup) | ⚪ PLANNED | `backend/src/modules/execution/concurrency-manager.ts` |
+| **04** | Scoped identifier & alias resolution engine | [US-09–10](US-09-10.md#task-4-scoped-identifier--alias-resolution-engine) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/scope-resolver.ts` |
+| **05** | Allowlist schema object & catalog protection verifier | [US-09–10](US-09-10.md#task-5-allowlist-schema-object--catalog-protection-verifier) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/schema-validator.ts` |
+| **06** | Approved function whitelist & dangerous function blocker | [US-09–10](US-09-10.md#task-6-approved-function-whitelist--dangerous-function-blocker) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/function-validator.ts` |
+| **07** | SQL normalizer, row-cap enforcement & post-transform revalidation | [US-09–10](US-09-10.md#task-7-sql-normalizer-row-cap-enforcement--post-transform-revalidation) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/normalizer.ts` |
+| **08** | EXPLAIN plan cost gatekeeper & query complexity analyzer | [US-09–10](US-09-10.md#task-8-explain-plan-cost-gatekeeper--query-complexity-analyzer) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/plan-cost-gate.ts` |
+| **09** | Unified guardrails orchestrator & finding aggregation service | [US-09–10](US-09-10.md#task-9-unified-guardrails-orchestrator--finding-aggregation-service) | 🟢 **COMPLETED** | `backend/src/modules/guardrails/guardrails.service.ts` |
+| **10** | Shared execution contracts & result types | [US-09–10](US-09-10.md#task-10-shared-execution-contracts--result-types) | 🟢 **COMPLETED** | `packages/contracts/src/execution.ts` |
+| **11** | Execution database migration & repository in app_db | [US-09–10](US-09-10.md#task-11-execution-database-migration--repository-in-app_db) | 🟢 **COMPLETED** | `database/app/migrations/05-init-executions.sql` |
+| **12** | Immutable artifact ownership, expiry & SQL hash gate | [US-09–10](US-09-10.md#task-12-immutable-artifact-ownership-expiry--sql-hash-gate) | 🟢 **COMPLETED** | `backend/src/modules/execution/artifact-gate.ts` |
+| **13** | Restricted database executor with explicit read-only transaction | [US-09–10](US-09-10.md#task-13-restricted-database-executor-with-explicit-read-only-transaction) | 🟢 **COMPLETED** | `backend/src/modules/execution/restricted-executor.ts` |
+| **14** | Resource limiter: statement timeout, row count & byte caps | [US-09–10](US-09-10.md#task-14-resource-limiter-statement-timeout-row-count--byte-caps) | 🟢 **COMPLETED** | `backend/src/modules/execution/resource-limiter.ts` |
+| **15** | Concurrency throttle, cancellation & connection pool cleanup | [US-09–10](US-09-10.md#task-15-concurrency-throttle-cancellation--connection-pool-cleanup) | 🟢 **COMPLETED** | `backend/src/modules/execution/concurrency-manager.ts` |
 | **16** | Fastify execution API routes & audit logging | [US-09–10](US-09-10.md#task-16-fastify-execution-api-routes--audit-logging) | ⚪ PLANNED | `backend/src/modules/execution/execution.routes.ts` |
 | **17** | Adversarial security test suite & database privilege benchmark | [US-09–10](US-09-10.md#task-17-adversarial-security-test-suite--database-privilege-benchmark) | ⚪ PLANNED | `backend/test/security/guardrails-adversarial.test.ts` |
 
