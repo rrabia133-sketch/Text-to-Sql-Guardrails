@@ -60,16 +60,35 @@ export const ClarificationResponseSchema = z.object({
 
 export type ClarificationResponse = z.infer<typeof ClarificationResponseSchema>;
 
+import { ConfidenceBandSchema, ConfidenceScoreResultSchema } from "./confidence.js";
+import { SemanticValidationResultSchema, SemanticRepairAttemptSchema } from "./semantic.js";
+
+export const QueryArtifactStatusSchema = z.enum([
+    "preview",
+    "preview_ready",
+    "preview_review",
+    "preview_blocked",
+    "executing",
+    "executed",
+    "failed",
+]);
+export type QueryArtifactStatus = z.infer<typeof QueryArtifactStatusSchema>;
+
 export const QueryGenerationResponseSchema = z.object({
     type: z.literal("generation"),
     artifactId: z.string(),
-    status: z.literal("preview"),
+    status: QueryArtifactStatusSchema.default("preview"),
     sql: z.string(),
     assumptions: z.array(z.string()),
     referencedTables: z.array(z.string()),
     referencedColumns: z.array(z.string()),
     explanation: z.string(),
     confidencePreview: z.number().min(0).max(1),
+    confidenceScore: z.number().min(0).max(100).optional(),
+    confidenceBand: ConfidenceBandSchema.optional(),
+    confidenceResult: ConfidenceScoreResultSchema.optional(),
+    semanticValidation: SemanticValidationResultSchema.optional(),
+    repairAttempt: SemanticRepairAttemptSchema.optional(),
     provider: ProviderTypeSchema,
     model: z.string(),
     versions: z.object({

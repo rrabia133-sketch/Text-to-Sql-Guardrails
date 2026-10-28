@@ -1,7 +1,7 @@
 # Sprint 4 — SQL Guardrails and Restricted Execution
 
 - **Duration:** 2 Weeks (Baseline)
-- **Status:** 🟡 **IN PROGRESS**
+- **Status:** 🟢 **COMPLETED**
 - **Sprint Goal:** Deliver comprehensive recursive AST safety guardrails, schema-scoped identifier resolution, canonical normalization, row-cap enforcement, EXPLAIN plan cost gating, and a secure, restricted PostgreSQL database execution engine:
   - Recursive AST policy engine using `pgsql-ast-parser` that fails closed against non-SELECT queries, multi-statements, nested writes, forbidden functions, system catalogs (`pg_*`, `information_schema`), locking clauses (`FOR UPDATE`), and unknown AST nodes.
   - Lexical scope tracking and identifier resolution for table aliases, Common Table Expressions (`WITH ... AS (...)`), subqueries, and column projections against approved schema tables (`customers`, `products`, `orders`, `order_items`).
@@ -28,7 +28,7 @@
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
 | [US-09–10](US-09-10.md) | Story | SQL Guardrails & Restricted Execution (US-09, US-10) | 24 | 🟢 **COMPLETED** | 17 / 17 Tasks (100%) |
-| [DO-06](DO-06.md) | DevOps | Bounded Connection Pools, Timeouts, Cancellation & Containment | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
+| [DO-06](DO-06.md) | DevOps | Bounded Connection Pools, Timeouts, Cancellation & Containment | — | 🟢 **COMPLETED** | 4 / 4 Tasks (100%) |
 
 ---
 
@@ -60,10 +60,10 @@
 
 | Task # | Name | Assigned To | Status | Output Artifact |
 | :---: | :--- | :--- | :--- | :--- |
-| **D1** | Bounded Analytics Connection Pool & Kernel GUC Configuration | [DO-06](DO-06.md#task-1-bounded-analytics-connection-pool--kernel-guc-configuration) | ⚪ PLANNED | `backend/src/config/env.ts`, `analytics-pool.ts` |
-| **D2** | Kernel Privilege Denial & Read-Only Transaction Verification | [DO-06](DO-06.md#task-2-kernel-privilege-denial--read-only-transaction-verification) | ⚪ PLANNED | `backend/test/security/privilege-denial.test.ts` |
-| **D3** | Asynchronous Backend Cancellation & Disconnect Cleanup | [DO-06](DO-06.md#task-3-asynchronous-backend-cancellation--disconnect-cleanup) | ⚪ PLANNED | `backend/src/modules/execution/cancellation.service.ts` |
-| **D4** | Resource Stress, Concurrency & Byte-Limit Verification Benchmarks | [DO-06](DO-06.md#task-4-resource-stress-concurrency--byte-limit-verification-benchmarks) | ⚪ PLANNED | `backend/test/security/stress-limits.test.ts` |
+| **D1** | Bounded Analytics Connection Pool & Kernel GUC Configuration | [DO-06](DO-06.md#task-1-bounded-analytics-connection-pool--kernel-guc-configuration) | 🟢 **COMPLETED** | `backend/src/config/env.ts`, `analytics-pool.ts` |
+| **D2** | Kernel Privilege Denial & Read-Only Transaction Verification | [DO-06](DO-06.md#task-2-kernel-privilege-denial--read-only-transaction-verification) | 🟢 **COMPLETED** | `backend/test/security/privilege-containment.test.ts` |
+| **D3** | Asynchronous Backend Cancellation & Disconnect Cleanup | [DO-06](DO-06.md#task-3-asynchronous-backend-cancellation--disconnect-cleanup) | 🟢 **COMPLETED** | `backend/src/modules/execution/cancellation.service.ts` |
+| **D4** | Resource Stress, Concurrency & Byte-Limit Verification Benchmarks | [DO-06](DO-06.md#task-4-resource-stress-concurrency--byte-limit-verification-benchmarks) | 🟢 **COMPLETED** | `backend/test/security/restricted-execution.test.ts` |
 
 ---
 
@@ -71,14 +71,14 @@
 
 Before advancing to Sprint 5 (Semantic validation and confidence), all of the following exit criteria must be met:
 
-- [ ] **100% Adversarial Rejection:** 100% of curated adversarial SQL injection, multi-statement, catalog traversal, locking, and destructive queries are blocked before database dispatch.
-- [ ] **Recursive Scope & CTE Integrity:** Table aliases and CTEs resolve accurately to the 4 allowlisted tables; unresolvable or shadow references fail closed.
-- [ ] **Row-Cap & Normalization Revalidation:** Missing LIMIT clauses are injected (`LIMIT 50`) and excessive limits capped (`LIMIT 100`), with the transformed query revalidated through the full AST visitor.
-- [ ] **EXPLAIN Plan Cost Gate:** Queries exceeding maximum planner cost threshold (`MAX_PLAN_COST = 10000`) are blocked before physical execution.
-- [ ] **Immutable Owned Artifact Gate:** Only server-persisted query artifacts owned by the active user with matching SQL hashes and unexpired status (`< 15 minutes`) can execute.
-- [ ] **Kernel Privilege Defense:** Real PostgreSQL `analytics_user` role denies write, DDL, temporary table creation, or administrative operations independently of AST validation.
-- [ ] **Deterministic Resource Caps:** Statement timeout (5s), lock timeout (1s), row limit (500 rows), and payload byte limit (1 MiB) are enforced and verified.
-- [ ] **Concurrency & Clean Cancellation:** Concurrency throttler limits active queries (2/user, 10 global), and client disconnect or cancel action terminates backend execution via `pg_cancel_backend` without leaking pool connections.
-- [ ] **Audit Logging Without Data Leaks:** Execution outcomes are logged in `app_db.audit_logs` without storing sensitive customer PII or query result sets.
+- [x] **100% Adversarial Rejection:** 100% of curated adversarial SQL injection, multi-statement, catalog traversal, locking, and destructive queries are blocked before database dispatch.
+- [x] **Recursive Scope & CTE Integrity:** Table aliases and CTEs resolve accurately to the 4 allowlisted tables; unresolvable or shadow references fail closed.
+- [x] **Row-Cap & Normalization Revalidation:** Missing LIMIT clauses are injected (`LIMIT 50`) and excessive limits capped (`LIMIT 100`), with the transformed query revalidated through the full AST visitor.
+- [x] **EXPLAIN Plan Cost Gate:** Queries exceeding maximum planner cost threshold (`MAX_PLAN_COST = 10000`) are blocked before physical execution.
+- [x] **Immutable Owned Artifact Gate:** Only server-persisted query artifacts owned by the active user with matching SQL hashes and unexpired status (`< 15 minutes`) can execute.
+- [x] **Kernel Privilege Defense:** Real PostgreSQL `analytics_user` role denies write, DDL, temporary table creation, or administrative operations independently of AST validation.
+- [x] **Deterministic Resource Caps:** Statement timeout (5s), lock timeout (1s), row limit (500 rows), and payload byte limit (1 MiB) are enforced and verified.
+- [x] **Concurrency & Clean Cancellation:** Concurrency throttler limits active queries (2/user, 10 global), and client disconnect or cancel action terminates backend execution via `pg_cancel_backend` without leaking pool connections.
+- [x] **Audit Logging Without Data Leaks:** Execution outcomes are logged in `app_db.audit_logs` without storing sensitive customer PII or query result sets.
 
 ---

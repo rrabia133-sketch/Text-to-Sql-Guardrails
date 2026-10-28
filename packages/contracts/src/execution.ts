@@ -36,6 +36,8 @@ export const ColumnTypeMetadataSchema = z.object({
 });
 export type ColumnTypeMetadata = z.infer<typeof ColumnTypeMetadataSchema>;
 
+import { ReviewAcknowledgementSchema } from "./confidence.js";
+
 // ==========================================
 // 3. Execution Request Contract
 // ==========================================
@@ -43,6 +45,7 @@ export type ColumnTypeMetadata = z.infer<typeof ColumnTypeMetadataSchema>;
 export const ExecuteQueryRequestSchema = z.object({
     artifactId: z.string().min(1),
     idempotencyKey: z.string().optional(),
+    acknowledgement: ReviewAcknowledgementSchema.optional(),
 });
 export type ExecuteQueryRequest = z.infer<typeof ExecuteQueryRequestSchema>;
 
@@ -62,6 +65,9 @@ export const ExecutionErrorCodeSchema = z.enum([
     "TRANSACTION_VIOLATION",
     "DATABASE_ERROR",
     "CLIENT_CANCELLED",
+    "REVIEW_ACKNOWLEDGEMENT_REQUIRED",
+    "SEMANTIC_VALIDATION_FAILED",
+    "BLOCKED_CONFIDENCE_BAND",
 ]);
 export type ExecutionErrorCode = z.infer<typeof ExecutionErrorCodeSchema>;
 

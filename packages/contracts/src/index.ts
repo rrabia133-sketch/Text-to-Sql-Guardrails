@@ -118,4 +118,6 @@ export * from "./provider.js";
 export * from "./generation.js";
 export * from "./guardrails.js";
 export * from "./execution.js";
+export * from "./semantic.js";
+export * from "./confidence.js";
 
