@@ -34,7 +34,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-11–12](US-11-12.md) | Story | Semantic Validation & Explained Confidence (US-11, US-12) | 26 | 🟡 **IN PROGRESS** | 1 / 17 Tasks (6%) |
+| [US-11–12](US-11-12.md) | Story | Semantic Validation & Explained Confidence (US-11, US-12) | 26 | 🟡 **IN PROGRESS** | 5 / 17 Tasks (29%) |
 | [DO-07](DO-07.md) | DevOps | Evaluation Harness, Dataset Versioning & Holdout Separation | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
 
 ---
@@ -44,10 +44,10 @@
 | Task # | Name | Assigned To | Status | Output Artifact |
 | :---: | :--- | :--- | :--- | :--- |
 | **01** | Semantic validation & confidence contracts | [US-11–12](US-11-12.md#task-1-semantic-validation--confidence-contracts) | 🟢 **COMPLETED** | `packages/contracts/src/semantic.ts`, `confidence.ts` |
-| **02** | Structured intent slot extraction service | [US-11–12](US-11-12.md#task-2-structured-intent-slot-extraction-service) | ⚪ PLANNED | `backend/src/modules/intent/intent-extractor.service.ts` |
-| **03** | Metric definition & aggregation verifier | [US-11–12](US-11-12.md#task-3-metric-definition--aggregation-verifier) | ⚪ PLANNED | `backend/src/modules/semantic/metric-verifier.ts` |
-| **04** | Filter, status & temporal boundary validator | [US-11–12](US-11-12.md#task-4-filter-status--temporal-boundary-validator) | ⚪ PLANNED | `backend/src/modules/semantic/filter-verifier.ts` |
-| **05** | Join cardinality, fanout & duplicate row detector | [US-11–12](US-11-12.md#task-5-join-cardinality-fanout--duplicate-row-detector) | ⚪ PLANNED | `backend/src/modules/semantic/cardinality-verifier.ts` |
+| **02** | Structured intent slot extraction service | [US-11–12](US-11-12.md#task-2-structured-intent-slot-extraction-service) | 🟢 **COMPLETED** | `backend/src/modules/intent/intent-extractor.service.ts` |
+| **03** | Metric definition & aggregation verifier | [US-11–12](US-11-12.md#task-3-metric-definition--aggregation-verifier) | 🟢 **COMPLETED** | `backend/src/modules/semantic/metric-verifier.ts` |
+| **04** | Filter, status & temporal boundary validator | [US-11–12](US-11-12.md#task-4-filter-status--temporal-boundary-validator) | 🟢 **COMPLETED** | `backend/src/modules/semantic/filter-verifier.ts` |
+| **05** | Join cardinality, fanout & duplicate row detector | [US-11–12](US-11-12.md#task-5-join-cardinality-fanout--duplicate-row-detector) | 🟢 **COMPLETED** | `backend/src/modules/semantic/cardinality-verifier.ts` |
 | **06** | Glossary business rule & formula alignment checker | [US-11–12](US-11-12.md#task-6-glossary-business-rule--formula-alignment-checker) | ⚪ PLANNED | `backend/src/modules/semantic/glossary-verifier.ts` |
 | **07** | Deterministic semantic validation orchestrator | [US-11–12](US-11-12.md#task-7-deterministic-semantic-validation-orchestrator) | ⚪ PLANNED | `backend/src/modules/semantic/semantic-validator.service.ts` |
 | **08** | Bounded verifier & secondary candidate stability generator | [US-11–12](US-11-12.md#task-8-bounded-verifier--secondary-candidate-stability-generator) | ⚪ PLANNED | `backend/src/modules/semantic/candidate-verifier.service.ts` |

@@ -245,15 +245,14 @@ export class IntentExtractorService {
         return undefined;
     }
 
-    /**
-     * 7. Extracts explicit row limit / Top-N numbers ("top 5", "limit 10").
-     */
+    /** * 7. Extracts explicit row limit / Top-N / Bottom-N numbers ("top 5", "bottom 10", "limit 10"). */
     private extractRowLimit(lower: string): number | undefined {
-        const match = lower.match(/\b(?:top|first|limit)\s+(\d+)\b/);
+        const match = lower.match(/\b(?:top|first|limit|bottom|lowest|highest)\s+(\d+)\b/);
         if (match) {
             const limit = Number.parseInt(match[1], 10);
             return Number.isNaN(limit) || limit <= 0 ? undefined : limit;
         }
         return undefined;
     }
+
 }
