@@ -34,7 +34,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-11–12](US-11-12.md) | Story | Semantic Validation & Explained Confidence (US-11, US-12) | 26 | 🟡 **IN PROGRESS** | 7 / 17 Tasks (41%) |
+| [US-11–12](US-11-12.md) | Story | Semantic Validation & Explained Confidence (US-11, US-12) | 26 | 🟢 **COMPLETED** | 17 / 17 Tasks (100%) |
 | [DO-07](DO-07.md) | DevOps | Evaluation Harness, Dataset Versioning & Holdout Separation | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
 
 ---
@@ -50,16 +50,16 @@
 | **05** | Join cardinality, fanout & duplicate row detector | [US-11–12](US-11-12.md#task-5-join-cardinality-fanout--duplicate-row-detector) | 🟢 **COMPLETED** | `backend/src/modules/semantic/cardinality-verifier.ts` |
 | **06** | Glossary business rule & formula alignment checker | [US-11–12](US-11-12.md#task-6-glossary-business-rule--formula-alignment-checker) | 🟢 **COMPLETED** | `backend/src/modules/semantic/glossary-verifier.ts` |
 | **07** | Deterministic semantic validation orchestrator | [US-11–12](US-11-12.md#task-7-deterministic-semantic-validation-orchestrator) | 🟢 **COMPLETED** | `backend/src/modules/semantic/semantic-validator.service.ts` |
-| **08** | Bounded verifier & secondary candidate stability generator | [US-11–12](US-11-12.md#task-8-bounded-verifier--secondary-candidate-stability-generator) | ⚪ PLANNED | `backend/src/modules/semantic/candidate-verifier.service.ts` |
-| **09** | Bounded automated repair engine (max 1 repair attempt) | [US-11–12](US-11-12.md#task-9-bounded-automated-repair-engine-max-1-repair-attempt) | ⚪ PLANNED | `backend/src/modules/semantic/repair-engine.service.ts` |
-| **10** | 4-Component transparent confidence scoring engine | [US-11–12](US-11-12.md#task-10-4-component-transparent-confidence-scoring-engine) | ⚪ PLANNED | `backend/src/modules/semantic/confidence.service.ts` |
-| **11** | Artifact state machine & review acknowledgement gate | [US-11–12](US-11-12.md#task-11-artifact-state-machine--review-acknowledgement-gate) | ⚪ PLANNED | `backend/src/modules/execution/artifact-state.service.ts` |
-| **12** | Semantic findings database migration & repository in app_db | [US-11–12](US-11-12.md#task-12-semantic-findings-database-migration--repository-in-app_db) | ⚪ PLANNED | `database/app/migrations/06-init-semantic-confidence.sql` |
-| **13** | Fastify semantic validation & confidence API routes | [US-11–12](US-11-12.md#task-13-fastify-semantic-validation--confidence-api-routes) | ⚪ PLANNED | `backend/src/modules/generation/generation.routes.ts` |
-| **14** | Frontend confidence scorecard & heuristic disclaimer | [US-11–12](US-11-12.md#task-14-frontend-confidence-scorecard--heuristic-disclaimer) | ⚪ PLANNED | `frontend/src/features/query/ConfidenceCard.tsx` |
-| **15** | Frontend review acknowledgement toggle & modal | [US-11–12](US-11-12.md#task-15-frontend-review-acknowledgement-toggle--modal) | ⚪ PLANNED | `frontend/src/features/query/ReviewAcknowledgementModal.tsx` |
-| **16** | Automated semantic mismatch, empty result & abstention tests | [US-11–12](US-11-12.md#task-16-automated-semantic-mismatch-empty-result--abstention-tests) | ⚪ PLANNED | `backend/test/semantic/semantic-mismatch.test.ts` |
-| **17** | End-to-end generation to semantic review & execution suite | [US-11–12](US-11-12.md#task-17-end-to-end-generation-to-semantic-review--execution-suite) | ⚪ PLANNED | `backend/test/integration/semantic-pipeline.test.ts` |
+| **08** | Bounded verifier & secondary candidate stability generator | [US-11–12](US-11-12.md#task-8-bounded-verifier--secondary-candidate-stability-generator) | 🟢 **COMPLETED** | `backend/src/modules/semantic/candidate-verifier.service.ts` |
+| **09** | Bounded automated repair engine (max 1 repair attempt) | [US-11–12](US-11-12.md#task-9-bounded-automated-repair-engine-max-1-repair-attempt) | 🟢 **COMPLETED** | `backend/src/modules/semantic/repair-engine.service.ts` |
+| **10** | 4-Component transparent confidence scoring engine | [US-11–12](US-11-12.md#task-10-4-component-transparent-confidence-scoring-engine) | 🟢 **COMPLETED** | `backend/src/modules/semantic/confidence.service.ts` |
+| **11** | Artifact state machine & review acknowledgement gate | [US-11–12](US-11-12.md#task-11-artifact-state-machine--review-acknowledgement-gate) | 🟢 **COMPLETED** | `backend/src/modules/execution/artifact-state.service.ts` |
+| **12** | Semantic findings database migration & repository in app_db | [US-11–12](US-11-12.md#task-12-semantic-findings-database-migration--repository-in-app_db) | 🟢 **COMPLETED** | `database/app/migrations/06-init-semantic-confidence.sql` |
+| **13** | Fastify semantic validation & confidence API routes | [US-11–12](US-11-12.md#task-13-fastify-semantic-validation--confidence-api-routes) | 🟢 **COMPLETED** | `backend/src/modules/generation/generation.routes.ts` |
+| **14** | Frontend confidence scorecard & heuristic disclaimer | [US-11–12](US-11-12.md#task-14-frontend-confidence-scorecard--heuristic-disclaimer) | 🟢 **COMPLETED** | `frontend/src/features/query/ConfidenceCard.tsx` |
+| **15** | Frontend review acknowledgement toggle & modal | [US-11–12](US-11-12.md#task-15-frontend-review-acknowledgement-toggle--modal) | 🟢 **COMPLETED** | `frontend/src/features/query/ReviewAcknowledgementModal.tsx` |
+| **16** | Automated semantic mismatch, empty result & abstention tests | [US-11–12](US-11-12.md#task-16-automated-semantic-mismatch-empty-result--abstention-tests) | 🟢 **COMPLETED** | `backend/test/semantic/semantic-mismatch.test.ts` |
+| **17** | End-to-end generation to semantic review & execution suite | [US-11–12](US-11-12.md#task-17-end-to-end-generation-to-semantic-review--execution-suite) | 🟢 **COMPLETED** | `backend/test/integration/semantic-pipeline.test.ts` |
 
 ---
 
@@ -78,13 +78,13 @@
 
 Before advancing to Sprint 6 (Complete user experience & analyst workflow), all of the following exit criteria must be met:
 
-- [ ] **Critical Mismatch Block:** Queries with detected semantic mismatches (wrong aggregation, missing mandatory date filter, unhandled order status, or duplicate fanout joins) are flagged with CRITICAL findings and blocked from physical execution.
-- [ ] **Bounded Repair Guarantee:** Semantic repair executes at most once (`maxRepairAttempts = 1`), and the repaired SQL is revalidated through the full AST parser and security guardrails without weakening safety constraints.
-- [ ] **Transparent Score Formula:** Confidence score computes deterministically across the 4 explicit components (35% intent slot, 30% glossary/join/aggregation, 20% verifier, 15% candidate stability).
-- [ ] **Explicit Unavailable Evidence:** Any unavailable score component contributes 0 and is visibly labeled as unavailable; it is never silently renormalized away to artificially inflate confidence.
-- [ ] **Fail-Closed Gate:** A high confidence score (85–100) is strictly subordinate to security; it can never bypass an AST guardrail violation, schema failure, or plan cost rejection.
-- [ ] **Review Band Acknowledgement:** Medium-confidence queries (`review` band, 65–84) require an explicit analyst review acknowledgement before execution can be scheduled.
-- [ ] **Empty Result Distinguishability:** Valid queries returning zero rows are explicitly distinguished from failed, timed-out, or semantically mismatched queries.
-- [ ] **Heuristic Labeling:** All UI displays and API responses clearly label uncalibrated scores as "Heuristic Confidence" and disclaim probabilistic accuracy claims.
+- [x] **Critical Mismatch Block:** Queries with detected semantic mismatches (wrong aggregation, missing mandatory date filter, unhandled order status, or duplicate fanout joins) are flagged with CRITICAL findings and blocked from physical execution.
+- [x] **Bounded Repair Guarantee:** Semantic repair executes at most once (`maxRepairAttempts = 1`), and the repaired SQL is revalidated through the full AST parser and security guardrails without weakening safety constraints.
+- [x] **Transparent Score Formula:** Confidence score computes deterministically across the 4 explicit components (35% intent slot, 30% glossary/join/aggregation, 20% verifier, 15% candidate stability).
+- [x] **Explicit Unavailable Evidence:** Any unavailable score component contributes 0 and is visibly labeled as unavailable; it is never silently renormalized away to artificially inflate confidence.
+- [x] **Fail-Closed Gate:** A high confidence score (85–100) is strictly subordinate to security; it can never bypass an AST guardrail violation, schema failure, or plan cost rejection.
+- [x] **Review Band Acknowledgement:** Medium-confidence queries (`review` band, 65–84) require an explicit analyst review acknowledgement before execution can be scheduled.
+- [x] **Empty Result Distinguishability:** Valid queries returning zero rows are explicitly distinguished from failed, timed-out, or semantically mismatched queries.
+- [x] **Heuristic Labeling:** All UI displays and API responses clearly label uncalibrated scores as "Heuristic Confidence" and disclaim probabilistic accuracy claims.
 - [ ] **Holdout Separation Integrity:** The frozen holdout benchmark dataset remains strictly untouched and isolated from tuning scripts and prompt engineering runs.
 - [ ] **Benchmark Quality Targets:** Development evaluation achieves ≤5% wrong-answer rate on high-confidence queries, ≥90% refusal/clarification recall on ambiguous queries, and ≤15% false refusal rate on supported queries.
