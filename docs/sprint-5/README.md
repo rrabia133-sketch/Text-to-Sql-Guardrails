@@ -34,7 +34,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-11–12](US-11-12.md) | Story | Semantic Validation & Explained Confidence (US-11, US-12) | 26 | 🟡 **IN PROGRESS** | 5 / 17 Tasks (29%) |
+| [US-11–12](US-11-12.md) | Story | Semantic Validation & Explained Confidence (US-11, US-12) | 26 | 🟡 **IN PROGRESS** | 7 / 17 Tasks (41%) |
 | [DO-07](DO-07.md) | DevOps | Evaluation Harness, Dataset Versioning & Holdout Separation | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
 
 ---
@@ -48,8 +48,8 @@
 | **03** | Metric definition & aggregation verifier | [US-11–12](US-11-12.md#task-3-metric-definition--aggregation-verifier) | 🟢 **COMPLETED** | `backend/src/modules/semantic/metric-verifier.ts` |
 | **04** | Filter, status & temporal boundary validator | [US-11–12](US-11-12.md#task-4-filter-status--temporal-boundary-validator) | 🟢 **COMPLETED** | `backend/src/modules/semantic/filter-verifier.ts` |
 | **05** | Join cardinality, fanout & duplicate row detector | [US-11–12](US-11-12.md#task-5-join-cardinality-fanout--duplicate-row-detector) | 🟢 **COMPLETED** | `backend/src/modules/semantic/cardinality-verifier.ts` |
-| **06** | Glossary business rule & formula alignment checker | [US-11–12](US-11-12.md#task-6-glossary-business-rule--formula-alignment-checker) | ⚪ PLANNED | `backend/src/modules/semantic/glossary-verifier.ts` |
-| **07** | Deterministic semantic validation orchestrator | [US-11–12](US-11-12.md#task-7-deterministic-semantic-validation-orchestrator) | ⚪ PLANNED | `backend/src/modules/semantic/semantic-validator.service.ts` |
+| **06** | Glossary business rule & formula alignment checker | [US-11–12](US-11-12.md#task-6-glossary-business-rule--formula-alignment-checker) | 🟢 **COMPLETED** | `backend/src/modules/semantic/glossary-verifier.ts` |
+| **07** | Deterministic semantic validation orchestrator | [US-11–12](US-11-12.md#task-7-deterministic-semantic-validation-orchestrator) | 🟢 **COMPLETED** | `backend/src/modules/semantic/semantic-validator.service.ts` |
 | **08** | Bounded verifier & secondary candidate stability generator | [US-11–12](US-11-12.md#task-8-bounded-verifier--secondary-candidate-stability-generator) | ⚪ PLANNED | `backend/src/modules/semantic/candidate-verifier.service.ts` |
 | **09** | Bounded automated repair engine (max 1 repair attempt) | [US-11–12](US-11-12.md#task-9-bounded-automated-repair-engine-max-1-repair-attempt) | ⚪ PLANNED | `backend/src/modules/semantic/repair-engine.service.ts` |
 | **10** | 4-Component transparent confidence scoring engine | [US-11–12](US-11-12.md#task-10-4-component-transparent-confidence-scoring-engine) | ⚪ PLANNED | `backend/src/modules/semantic/confidence.service.ts` |
