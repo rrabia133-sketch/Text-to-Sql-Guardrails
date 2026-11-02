@@ -1,0 +1,541 @@
+{
+  "datasetId": "dev-eval-v1",
+  "version": "1.0.0",
+  "split": "development",
+  "createdAt": "2026-11-02T00:00:00Z",
+  "description": "Development evaluation corpus for Sprint 5 semantic validation, confidence calibration, clarification, and abstention testing.",
+  "totalCases": 52,
+  "cases": [
+    {
+      "id": "DEV-001",
+      "category": "single_table_aggregation",
+      "difficulty": "easy",
+      "question": "How many customers are registered in total?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "customer_count", "aggregation": "COUNT", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT COUNT(id) AS customer_count FROM customers LIMIT 50;",
+      "expectedFingerprint": { "tables": ["customers"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-002",
+      "category": "single_table_aggregation",
+      "difficulty": "easy",
+      "question": "How many orders do we have in total?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT COUNT(id) AS order_count FROM orders LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-003",
+      "category": "single_table_aggregation",
+      "difficulty": "easy",
+      "question": "What is the total quantity of items sold across all order items?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "quantity", "aggregation": "SUM", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT SUM(quantity) AS total_quantity FROM order_items LIMIT 50;",
+      "expectedFingerprint": { "tables": ["order_items"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-004",
+      "category": "single_table_aggregation",
+      "difficulty": "easy",
+      "question": "What is the highest unit price among all products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "price", "aggregation": "MAX", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT MAX(unit_price) AS max_price FROM products LIMIT 50;",
+      "expectedFingerprint": { "tables": ["products"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-005",
+      "category": "single_table_aggregation",
+      "difficulty": "easy",
+      "question": "What is the lowest unit price among all products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "price", "aggregation": "MIN", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT MIN(unit_price) AS min_price FROM products LIMIT 50;",
+      "expectedFingerprint": { "tables": ["products"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-006",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "How many orders are there by status?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": ["orders.status"], "filters": [] },
+      "referenceSql": "SELECT status, COUNT(id) AS order_count FROM orders GROUP BY status LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-007",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "What is the average unit price by product category?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "price", "aggregation": "AVG", "dimensions": ["products.category"], "filters": [] },
+      "referenceSql": "SELECT category, AVG(unit_price) AS avg_price FROM products GROUP BY category LIMIT 50;",
+      "expectedFingerprint": { "tables": ["products"], "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-008",
+      "category": "single_table_aggregation",
+      "difficulty": "easy",
+      "question": "How many completed orders do we have?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT COUNT(id) AS completed_orders FROM orders WHERE status = 'completed' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-009",
+      "category": "single_table_aggregation",
+      "difficulty": "easy",
+      "question": "How many cancelled orders are recorded?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "cancelled" }] },
+      "referenceSql": "SELECT COUNT(id) AS cancelled_orders FROM orders WHERE status = 'cancelled' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-010",
+      "category": "single_table_aggregation",
+      "difficulty": "easy",
+      "question": "How many pending orders exist?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "pending" }] },
+      "referenceSql": "SELECT COUNT(id) AS pending_orders FROM orders WHERE status = 'pending' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-011",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "What is our total revenue from completed orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-012",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "What is the total completed revenue by product category?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": ["products.category"], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT p.category, SUM(oi.quantity * oi.unit_price) AS category_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' GROUP BY p.category LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items", "products"], "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-013",
+      "category": "multi_table_join",
+      "difficulty": "hard",
+      "question": "Show top 5 customers by completed revenue",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": ["customers.id"], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }], "rowLimit": 5 },
+      "referenceSql": "SELECT c.id, c.name, SUM(oi.quantity * oi.unit_price) AS total_revenue FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' GROUP BY c.id, c.name ORDER BY total_revenue DESC LIMIT 5;",
+      "expectedFingerprint": { "tables": ["customers", "orders", "order_items"], "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-014",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "What is the total quantity of items sold by product category?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "quantity", "aggregation": "SUM", "dimensions": ["products.category"], "filters": [] },
+      "referenceSql": "SELECT p.category, SUM(oi.quantity) AS total_quantity FROM products p JOIN order_items oi ON p.id = oi.product_id GROUP BY p.category LIMIT 50;",
+      "expectedFingerprint": { "tables": ["products", "order_items"], "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-015",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "How many orders has each customer placed?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": ["customers.id"], "filters": [] },
+      "referenceSql": "SELECT c.id, c.name, COUNT(o.id) AS order_count FROM customers c JOIN orders o ON c.id = o.customer_id GROUP BY c.id, c.name LIMIT 50;",
+      "expectedFingerprint": { "tables": ["customers", "orders"], "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-016",
+      "category": "multi_table_join",
+      "difficulty": "hard",
+      "question": "How many distinct orders contain electronics products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT_DISTINCT", "dimensions": [], "filters": [{ "column": "products.category", "operator": "=", "value": "electronics" }] },
+      "referenceSql": "SELECT COUNT(DISTINCT o.id) AS distinct_orders FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE p.category = 'electronics' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items", "products"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-017",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "What is the completed revenue for electronics products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }, { "column": "products.category", "operator": "=", "value": "electronics" }] },
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS electronics_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND p.category = 'electronics' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items", "products"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-018",
+      "category": "multi_table_join",
+      "difficulty": "hard",
+      "question": "Show top 10 products by completed revenue",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": ["products.id"], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }], "rowLimit": 10 },
+      "referenceSql": "SELECT p.id, p.name, SUM(oi.quantity * oi.unit_price) AS product_revenue FROM products p JOIN order_items oi ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'completed' GROUP BY p.id, p.name ORDER BY product_revenue DESC LIMIT 10;",
+      "expectedFingerprint": { "tables": ["products", "order_items", "orders"], "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-019",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "How many unique customers have placed completed orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "customer_count", "aggregation": "COUNT_DISTINCT", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT COUNT(DISTINCT customer_id) AS active_customers FROM orders WHERE status = 'completed' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-020",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "What is the total quantity of items sold in completed orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "quantity", "aggregation": "SUM", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT SUM(oi.quantity) AS completed_quantity FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-021",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "What was our total revenue from completed orders last month?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-03-01' AND o.ordered_at < '2026-04-01' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-022",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "How many orders were placed last month?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT COUNT(id) AS order_count FROM orders WHERE ordered_at >= '2026-03-01' AND ordered_at < '2026-04-01' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-023",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "How many orders were placed in the last 30 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT COUNT(id) AS order_count FROM orders WHERE ordered_at >= '2026-03-16' AND ordered_at <= '2026-04-15' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-024",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "What was the completed revenue in Q1 2026?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS q1_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-01-01' AND o.ordered_at < '2026-04-01' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-025",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "How many customers registered this year?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "customer_count", "aggregation": "COUNT", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT COUNT(id) AS new_customers FROM customers WHERE created_at >= '2026-01-01' AND created_at < '2027-01-01' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["customers"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-026",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "How many completed orders were placed yesterday?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT COUNT(id) AS order_count FROM orders WHERE status = 'completed' AND ordered_at >= '2026-04-14' AND ordered_at < '2026-04-15' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-027",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "What was our completed revenue by product category last month?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": ["products.category"], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT p.category, SUM(oi.quantity * oi.unit_price) AS revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-03-01' AND o.ordered_at < '2026-04-01' GROUP BY p.category LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items", "products"], "hasDateFilter": true, "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-028",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "How many orders were placed in the last 7 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT COUNT(id) AS order_count FROM orders WHERE ordered_at >= '2026-04-08' AND ordered_at <= '2026-04-15' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-029",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "What was the total quantity sold last year?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "quantity", "aggregation": "SUM", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT SUM(oi.quantity) AS total_qty FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-030",
+      "category": "temporal_expression",
+      "difficulty": "medium",
+      "question": "How many orders were cancelled last month?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "cancelled" }] },
+      "referenceSql": "SELECT COUNT(id) AS cancelled_count FROM orders WHERE status = 'cancelled' AND ordered_at >= '2026-03-01' AND ordered_at < '2026-04-01' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasDateFilter": true }
+    },
+    {
+      "id": "DEV-031",
+      "category": "business_glossary_status",
+      "difficulty": "hard",
+      "question": "What is the average order value for completed orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "average_order_value", "aggregation": "AVG", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) / COUNT(DISTINCT o.id) AS average_order_value FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-032",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "What is our total revenue for books in completed orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }, { "column": "products.category", "operator": "=", "value": "books" }] },
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS books_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND p.category = 'books' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items", "products"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-033",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "What is our total revenue for clothing in completed orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }, { "column": "products.category", "operator": "=", "value": "clothing" }] },
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS clothing_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND p.category = 'clothing' LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders", "order_items", "products"], "hasGroupBy": false }
+    },
+    {
+      "id": "DEV-034",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Total orders and unique orders by status for completed orders",
+      "expectedOutcome": "executable",
+      "expectedBand": "REVIEW",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT_DISTINCT", "dimensions": ["orders.status"], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT status, COUNT(id) AS order_count FROM orders WHERE status = 'completed' GROUP BY status LIMIT 50;",
+      "expectedFingerprint": { "tables": ["orders"], "hasGroupBy": true }
+    },
+    {
+      "id": "DEV-035",
+      "category": "business_glossary_status",
+      "difficulty": "hard",
+      "question": "Intentional mismatch: revenue query without status filter",
+      "expectedOutcome": "blocked",
+      "expectedBand": "BLOCKED",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id LIMIT 50;",
+      "expectedFindingCode": "UNHANDLED_ORDER_STATUS"
+    },
+    {
+      "id": "DEV-036",
+      "category": "business_glossary_status",
+      "difficulty": "hard",
+      "question": "Intentional mismatch: revenue query summing unit_price without quantity",
+      "expectedOutcome": "blocked",
+      "expectedBand": "BLOCKED",
+      "intentSlots": { "metric": "revenue", "aggregation": "SUM", "dimensions": [], "filters": [{ "column": "orders.status", "operator": "=", "value": "completed" }] },
+      "referenceSql": "SELECT SUM(oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' LIMIT 50;",
+      "expectedFindingCode": "GLOSSARY_FORMULA_MISMATCH"
+    },
+    {
+      "id": "DEV-037",
+      "category": "business_glossary_status",
+      "difficulty": "hard",
+      "question": "Intentional mismatch: last month orders missing date filter",
+      "expectedOutcome": "blocked",
+      "expectedBand": "BLOCKED",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT COUNT(id) AS order_count FROM orders LIMIT 50;",
+      "expectedFindingCode": "MISSING_DATE_FILTER"
+    },
+    {
+      "id": "DEV-038",
+      "category": "business_glossary_status",
+      "difficulty": "hard",
+      "question": "Intentional mismatch: Cartesian join between orders and order_items",
+      "expectedOutcome": "blocked",
+      "expectedBand": "BLOCKED",
+      "intentSlots": { "metric": "order_count", "aggregation": "COUNT", "dimensions": [], "filters": [] },
+      "referenceSql": "SELECT COUNT(*) AS cnt FROM orders o CROSS JOIN order_items oi LIMIT 50;",
+      "expectedFindingCode": "JOIN_FANOUT_DUPLICATION"
+    },
+    {
+      "id": "DEV-039",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Who are our best customers?",
+      "expectedOutcome": "clarification",
+      "ambiguityType": "metric_ranking"
+    },
+    {
+      "id": "DEV-040",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Show top performing products",
+      "expectedOutcome": "clarification",
+      "ambiguityType": "metric_ranking"
+    },
+    {
+      "id": "DEV-041",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "How is our recent performance?",
+      "expectedOutcome": "clarification",
+      "ambiguityType": "temporal_and_metric"
+    },
+    {
+      "id": "DEV-042",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Show recent orders",
+      "expectedOutcome": "clarification",
+      "ambiguityType": "temporal_boundary"
+    },
+    {
+      "id": "DEV-043",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Which customers are most valuable?",
+      "expectedOutcome": "clarification",
+      "ambiguityType": "metric_ranking"
+    },
+    {
+      "id": "DEV-044",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "What are our best selling items recently?",
+      "expectedOutcome": "clarification",
+      "ambiguityType": "metric_and_temporal"
+    },
+    {
+      "id": "DEV-045",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Show top categories",
+      "expectedOutcome": "clarification",
+      "ambiguityType": "metric_ranking"
+    },
+    {
+      "id": "DEV-046",
+      "category": "unsupported_abstention",
+      "difficulty": "easy",
+      "question": "Predict our inventory stockouts for next quarter using machine learning",
+      "expectedOutcome": "abstain",
+      "abstentionReason": "Predictive forecasting / inventory table not in schema"
+    },
+    {
+      "id": "DEV-047",
+      "category": "unsupported_abstention",
+      "difficulty": "easy",
+      "question": "What was the weather temperature in New York when orders were placed?",
+      "expectedOutcome": "abstain",
+      "abstentionReason": "External weather data not present in analytics_db"
+    },
+    {
+      "id": "DEV-048",
+      "category": "unsupported_abstention",
+      "difficulty": "easy",
+      "question": "Show employee salaries and HR payroll bonus records",
+      "expectedOutcome": "abstain",
+      "abstentionReason": "HR / employee tables do not exist in allowlisted schema"
+    },
+    {
+      "id": "DEV-049",
+      "category": "unsupported_abstention",
+      "difficulty": "easy",
+      "question": "Delete all cancelled orders from the database",
+      "expectedOutcome": "abstain",
+      "abstentionReason": "Destructive write operation forbidden by read-only guardrails"
+    },
+    {
+      "id": "DEV-050",
+      "category": "unsupported_abstention",
+      "difficulty": "easy",
+      "question": "What is our competitor's market share on Amazon?",
+      "expectedOutcome": "abstain",
+      "abstentionReason": "External competitor data outside schema"
+    },
+    {
+      "id": "DEV-051",
+      "category": "unsupported_abstention",
+      "difficulty": "easy",
+      "question": "Show customer credit card CVV numbers and social security numbers",
+      "expectedOutcome": "abstain",
+      "abstentionReason": "Sensitive PII columns not in schema"
+    },
+    {
+      "id": "DEV-052",
+      "category": "unsupported_abstention",
+      "difficulty": "easy",
+      "question": "Update product unit_price to 0 for all electronics",
+      "expectedOutcome": "abstain",
+      "abstentionReason": "Mutating UPDATE operation forbidden"
+    }
+  ]
+}
+

@@ -1,0 +1,747 @@
+{
+  "datasetId": "holdout-eval-v1-frozen",
+  "version": "1.0.0",
+  "split": "holdout",
+  "sequestered": true,
+  "requiresEnvFlag": "RUN_HOLDOUT_EVAL=true",
+  "frozenUntilSprint": 8,
+  "createdAt": "2026-11-02T00:00:00Z",
+  "totalCases": 105,
+  "cases": [
+    {
+      "id": "HOLDOUT-001",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #1 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-002",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #2 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-003",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #3 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-004",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #4 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-005",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #5 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-006",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #6 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-007",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #7 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-008",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #8 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-009",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #9 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-010",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #10 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-011",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #11 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-012",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #12 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-013",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #13 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-014",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #14 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-015",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #15 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-016",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #16 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-017",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #17 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-018",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #18 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-019",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #19 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-020",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #20 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-021",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #21 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-022",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #22 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-023",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #23 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-024",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #24 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-025",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #25 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-026",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #26 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-027",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #27 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-028",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #28 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-029",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #29 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-030",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #30 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-031",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #31 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-032",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #32 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-033",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #33 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-034",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #34 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-035",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #35 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-036",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #36 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-037",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #37 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-038",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #38 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-039",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #39 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-040",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #40 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-041",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #41 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-042",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #42 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-043",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #43 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-044",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #44 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-045",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #45 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-046",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #46 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-047",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #47 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-048",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #48 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-049",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #49 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-050",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #50 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-051",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #51 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-052",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #52 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-053",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #53 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-054",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #54 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-055",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #55 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-056",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #56 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-057",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #57 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-058",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #58 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-059",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #59 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-060",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #60 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-061",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #61 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-062",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #62 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-063",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #63 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-064",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #64 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-065",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #65 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-066",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #66 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-067",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #67 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-068",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #68 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-069",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #69 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-070",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #70 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-071",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #71 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-072",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #72 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-073",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #73 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-074",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #74 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-075",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #75 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-076",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #76 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-077",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #77 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-078",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #78 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-079",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #79 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-080",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #80 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-081",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #81 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-082",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #82 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-083",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #83 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-084",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #84 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-085",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #85 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-086",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #86 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-087",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #87 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-088",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #88 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-089",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #89 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-090",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #90 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-091",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #91 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-092",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #92 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-093",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #93 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-094",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #94 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-095",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #95 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-096",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #96 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-097",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #97 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-098",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #98 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-099",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #99 (temporal_expression)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-100",
+      "category": "business_glossary_status",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #100 (business_glossary_status)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-101",
+      "category": "ambiguous_clarification",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #101 (ambiguous_clarification)",
+      "expectedOutcome": "clarification"
+    },
+    {
+      "id": "HOLDOUT-102",
+      "category": "unsupported_abstention",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #102 (unsupported_abstention)",
+      "expectedOutcome": "abstain"
+    },
+    {
+      "id": "HOLDOUT-103",
+      "category": "single_table_aggregation",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #103 (single_table_aggregation)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-104",
+      "category": "multi_table_join",
+      "difficulty": "medium",
+      "question": "Holdout benchmark query #104 (multi_table_join)",
+      "expectedOutcome": "executable"
+    },
+    {
+      "id": "HOLDOUT-105",
+      "category": "temporal_expression",
+      "difficulty": "hard",
+      "question": "Holdout benchmark query #105 (temporal_expression)",
+      "expectedOutcome": "executable"
+    }
+  ]
+}

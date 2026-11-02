@@ -1,7 +1,7 @@
 # Sprint 5 — Semantic Validation and Confidence
 
 - **Duration:** 2 Weeks (Baseline)
-- **Status:** 🟡 **IN PROGRESS**
+- **Status:** 🟢 **COMPLETED**
 - **Sprint Goal:** Deliver comprehensive semantic validation, intent-slot verification, automated bounded repair, transparent multi-component confidence scoring, decision bands, and evaluation benchmark tooling:
   - Structured intent slot extraction (metric, dimensions, filters, dates, timezone, granularity, sorting, row bounds).
   - Deterministic semantic validation against AST structure, glossary metrics, date boundaries, completed order statuses, and join cardinalities (detecting fanout duplication and missing aggregations).
@@ -35,7 +35,7 @@
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
 | [US-11–12](US-11-12.md) | Story | Semantic Validation & Explained Confidence (US-11, US-12) | 26 | 🟢 **COMPLETED** | 17 / 17 Tasks (100%) |
-| [DO-07](DO-07.md) | DevOps | Evaluation Harness, Dataset Versioning & Holdout Separation | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
+| [DO-07](DO-07.md) | DevOps | Evaluation Harness, Dataset Versioning & Holdout Separation | — | 🟢 **COMPLETED** | 4 / 4 Tasks (100%) |
 
 ---
 
@@ -67,10 +67,10 @@
 
 | Task # | Name | Assigned To | Status | Output Artifact |
 | :---: | :--- | :--- | :--- | :--- |
-| **D1** | Development Evaluation Corpus & Ambiguity Fixtures | [DO-07](DO-07.md#task-1-development-evaluation-corpus--ambiguity-fixtures) | ⚪ PLANNED | `backend/test/fixtures/evaluation/development-set.json` |
-| **D2** | Frozen Holdout Dataset Sequestration & Access Isolation Gate | [DO-07](DO-07.md#task-2-frozen-holdout-dataset-sequestration--access-isolation-gate) | ⚪ PLANNED | `backend/test/fixtures/evaluation/holdout-set.json` |
-| **D3** | Automated Semantic Evaluation Harness & Benchmark Runner | [DO-07](DO-07.md#task-3-automated-semantic-evaluation-harness--benchmark-runner) | ⚪ PLANNED | `backend/src/modules/evaluation/benchmark-runner.ts` |
-| **D4** | Confidence Calibration Ledger & Reliability Binning Report | [DO-07](DO-07.md#task-4-confidence-calibration-ledger--reliability-binning-report) | ⚪ PLANNED | `docs/sprint-5/benchmark-report.md` |
+| **D1** | Development Evaluation Corpus & Ambiguity Fixtures | [DO-07](DO-07.md#task-1-development-evaluation-corpus--ambiguity-fixtures) | 🟢 **COMPLETED** | `backend/test/fixtures/evaluation/development-set.json` |
+| **D2** | Frozen Holdout Dataset Sequestration & Access Isolation Gate | [DO-07](DO-07.md#task-2-frozen-holdout-dataset-sequestration--access-isolation-gate) | 🟢 **COMPLETED** | `backend/test/fixtures/evaluation/holdout-set.json` |
+| **D3** | Automated Semantic Evaluation Harness & Benchmark Runner | [DO-07](DO-07.md#task-3-automated-semantic-evaluation-harness--benchmark-runner) | 🟢 **COMPLETED** | `backend/src/modules/evaluation/benchmark-runner.ts` |
+| **D4** | Confidence Calibration Ledger & Reliability Binning Report | [DO-07](DO-07.md#task-4-confidence-calibration-ledger--reliability-binning-report) | 🟢 **COMPLETED** | `docs/sprint-5/benchmark-report.md` |
 
 ---
 
@@ -86,5 +86,5 @@ Before advancing to Sprint 6 (Complete user experience & analyst workflow), all 
 - [x] **Review Band Acknowledgement:** Medium-confidence queries (`review` band, 65–84) require an explicit analyst review acknowledgement before execution can be scheduled.
 - [x] **Empty Result Distinguishability:** Valid queries returning zero rows are explicitly distinguished from failed, timed-out, or semantically mismatched queries.
 - [x] **Heuristic Labeling:** All UI displays and API responses clearly label uncalibrated scores as "Heuristic Confidence" and disclaim probabilistic accuracy claims.
-- [ ] **Holdout Separation Integrity:** The frozen holdout benchmark dataset remains strictly untouched and isolated from tuning scripts and prompt engineering runs.
-- [ ] **Benchmark Quality Targets:** Development evaluation achieves ≤5% wrong-answer rate on high-confidence queries, ≥90% refusal/clarification recall on ambiguous queries, and ≤15% false refusal rate on supported queries.
+- [x] **Holdout Separation Integrity:** The frozen holdout benchmark dataset remains strictly untouched and isolated from tuning scripts and prompt engineering runs.
+- [x] **Benchmark Quality Targets:** Development evaluation achieves ≤5% wrong-answer rate on high-confidence queries, ≥90% refusal/clarification recall on ambiguous queries, and ≤15% false refusal rate on supported queries.
