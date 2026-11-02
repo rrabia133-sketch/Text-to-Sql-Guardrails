@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import type { UserSummary } from "@text2sql/contracts";
 
 export interface AuthContextType {
@@ -7,14 +7,50 @@ export interface AuthContextType {
     availableUsers: UserSummary[];
     login: (username: string) => Promise<void>;
     logout: () => Promise<void>;
+    refreshUsers: () => Promise<void>;
 }
+
+const DEFAULT_DEMO_USERS: UserSummary[] = [
+    {
+        id: "usr_analyst_a",
+        username: "analyst_a",
+        displayName: "Analyst Alice",
+        role: "analyst",
+    },
+    {
+        id: "usr_analyst_b",
+        username: "analyst_b",
+        displayName: "Analyst Bob",
+        role: "analyst",
+    },
+    {
+        id: "usr_admin_01",
+        username: "admin_user",
+        displayName: "Admin",
+        role: "admin",
+    },
+];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserSummary | null>(null);
     const [loading, setLoading] = useState(true);
-    const [availableUsers, setAvailableUsers] = useState<UserSummary[]>([]);
+    const [availableUsers, setAvailableUsers] = useState<UserSummary[]>(DEFAULT_DEMO_USERS);
+
+    const refreshUsers = useCallback(async () => {
+        try {
+            const usersRes = await fetch("/api/auth/users");
+            if (usersRes.ok) {
+                const data = await usersRes.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    setAvailableUsers(data);
+                }
+            }
+        } catch {
+            // Keep default demo users if API is still warming up
+        }
+    }, []);
 
     useEffect(() => {
         async function initAuth() {
@@ -33,20 +69,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             try {
                 // 2. Fetch seed users for switcher
-                const usersRes = await fetch("/api/auth/users");
-                if (usersRes.ok) {
-                    const data = await usersRes.json();
-                    setAvailableUsers(data);
-                }
-            } catch (err) {
-                console.error("Failed to load demo accounts:", err);
+                await refreshUsers();
             } finally {
                 setLoading(false);
             }
         }
 
-        initAuth();
-    }, []);
+        void initAuth();
+    }, [refreshUsers]);
 
     const login = async (username: string) => {
         const res = await fetch("/api/auth/login", {
@@ -77,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, availableUsers, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, availableUsers, login, logout, refreshUsers }}>
             {children}
         </AuthContext.Provider>
     );
