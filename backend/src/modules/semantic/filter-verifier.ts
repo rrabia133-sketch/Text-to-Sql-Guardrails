@@ -142,7 +142,7 @@ export class FilterVerifier {
      * Checks if predicates contain a date/timestamp comparison.
      */
     private checkDateFilter(predicates: ExtractedPredicate[]): boolean {
-        const dateKeywords = ["created_at", "order_date", "updated_at", "date"];
+        const dateKeywords = ["created_at", "ordered_at", "order_date", "updated_at", "date"];
         const comparisonOps = [">=", ">", "<=", "<", "=", "BETWEEN"];
 
         return predicates.some((p) => {

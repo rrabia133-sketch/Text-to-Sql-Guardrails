@@ -170,7 +170,7 @@ describe("Task 15: Fastify Generation, Provider, and Schema API Routes (US-06 / 
         assert.equal(res.statusCode, 201);
         const data = JSON.parse(res.body);
         assert.equal(data.type, "generation");
-        assert.equal(data.status, "preview");
+        assert.ok(data.status.startsWith("preview"));
         assert.ok(data.artifactId);
         assert.ok(data.sql.includes("SELECT"));
         assert.deepEqual(data.referencedTables, ["customers"]);
@@ -216,6 +216,6 @@ describe("Task 15: Fastify Generation, Provider, and Schema API Routes (US-06 / 
         assert.equal(resumeRes.statusCode, 201);
         const genData = JSON.parse(resumeRes.body);
         assert.equal(genData.type, "generation");
-        assert.equal(genData.status, "preview");
+        assert.ok(genData.status.startsWith("preview"));
     });
 });

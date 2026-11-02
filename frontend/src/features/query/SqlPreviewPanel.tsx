@@ -1,19 +1,68 @@
-import { useState } from "react";
-import type { QueryGenerationResponse } from "@text2sql/contracts";
+import { useState, useEffect } from "react";
+import type {
+    ConfidenceBand,
+    QueryGenerationResponse,
+    ExecutionResultResponse,
+    ReviewAcknowledgement,
+} from "@text2sql/contracts";
+import { ConfidenceCard } from "./ConfidenceCard";
+import { ReviewAcknowledgementModal } from "./ReviewAcknowledgementModal";
 
-interface SqlPreviewPanelProps {
+export interface SqlPreviewPanelProps {
     generationResponse: QueryGenerationResponse | null;
     loading: boolean;
 }
 
 export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanelProps) {
     const [copied, setCopied] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [executing, setExecuting] = useState(false);
+    const [executionError, setExecutionError] = useState<string | null>(null);
+    const [executionResult, setExecutionResult] = useState<ExecutionResultResponse | null>(null);
+
+    useEffect(() => {
+        setIsReviewModalOpen(false);
+        setExecuting(false);
+        setExecutionError(null);
+        setExecutionResult(null);
+    }, [generationResponse?.artifactId]);
 
     const handleCopy = () => {
         if (!generationResponse?.sql) return;
         navigator.clipboard.writeText(generationResponse.sql);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const executeArtifact = async (acknowledgement?: ReviewAcknowledgement) => {
+        if (!generationResponse) return;
+        setExecuting(true);
+        setExecutionError(null);
+
+        try {
+            const res = await fetch(
+                `/api/v1/queries/${encodeURIComponent(generationResponse.artifactId)}/execute`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(
+                        acknowledgement ? { acknowledgement } : {}
+                    ),
+                }
+            );
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || `Execution refused (${res.status})`);
+            }
+
+            setExecutionResult(data);
+            setIsReviewModalOpen(false);
+        } catch (err: any) {
+            setExecutionError(err?.message || "Query execution failed.");
+        } finally {
+            setExecuting(false);
+        }
     };
 
     if (loading) {
@@ -50,15 +99,48 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
         );
     }
 
+    const normalizedBand: ConfidenceBand = (
+        generationResponse.confidenceBand?.toUpperCase() ||
+        (generationResponse.status === "preview_blocked"
+            ? "BLOCKED"
+            : generationResponse.status === "preview_review"
+            ? "REVIEW"
+            : "HIGH")
+    ) as ConfidenceBand;
+
+    const isBlocked =
+        normalizedBand === "BLOCKED" ||
+        generationResponse.status === "preview_blocked" ||
+        generationResponse.status === "failed";
+
+    const isReviewRequired =
+        !isBlocked &&
+        (normalizedBand === "REVIEW" || generationResponse.status === "preview_review");
+
+    const handleRunClick = () => {
+        if (isBlocked || executing) return;
+        if (isReviewRequired) {
+            setIsReviewModalOpen(true);
+            return;
+        }
+        void executeArtifact();
+    };
+
+    const findings = generationResponse.semanticFindings || [];
+
     return (
         <section className="panel-card" id="sql-preview-section">
             <div className="panel-header">
                 <div className="panel-title-group">
                     <h2 className="panel-title">Grounded SQL Preview</h2>
-                    <span className="brand-badge preview-badge">Status: {generationResponse.status.toUpperCase()}</span>
+                    <span className="brand-badge preview-badge">
+                        Status: {generationResponse.status.toUpperCase()}
+                    </span>
                 </div>
                 <div className="header-meta-tags">
-                    <span className="provider-tag">{generationResponse.provider.toUpperCase()} ({generationResponse.model})</span>
+                    <span className="provider-tag">
+                        {generationResponse.provider.toUpperCase()} ({generationResponse.model})
+                    </span>
                     <button
                         type="button"
                         className="copy-btn"
@@ -67,31 +149,127 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
                     >
                         {copied ? "✓ Copied" : "📋 Copy SQL"}
                     </button>
+
+                    <button
+                        type="button"
+                        className={`run-query-btn ${
+                            isBlocked
+                                ? "run-btn-blocked"
+                                : isReviewRequired
+                                ? "run-btn-review"
+                                : "run-btn-ready"
+                        }`}
+                        onClick={handleRunClick}
+                        disabled={isBlocked || executing}
+                        title={
+                            isBlocked
+                                ? "Execution blocked due to critical semantic or safety findings"
+                                : isReviewRequired
+                                ? "Review and acknowledge warnings before running query"
+                                : "Execute read-only SQL query against analytics_db"
+                        }
+                    >
+                        {executing
+                            ? "Running..."
+                            : isBlocked
+                            ? "🚫 Execution Blocked"
+                            : isReviewRequired
+                            ? "⚠️ Review & Run Query"
+                            : "▶ Run Query"}
+                    </button>
                 </div>
             </div>
 
             <div className="panel-body">
-                {/* Sprint 3 Explicit Non-Execution Notice */}
-                <div className="preview-only-banner" role="status">
-                    <div className="banner-icon">🔒</div>
-                    <div className="banner-text">
-                        <strong>Preview Only — Execution Disabled Until Sprint 4</strong>
-                        <p>
-                            This query has been schema-grounded and validated. Execution against <code>analytics_db</code> with AST safety guardrails and strict privilege containment will activate in Sprint 4.
-                        </p>
+                {typeof generationResponse.confidenceScore === "number" && (
+                    <ConfidenceCard
+                        score={generationResponse.confidenceScore}
+                        band={normalizedBand}
+                        breakdown={generationResponse.confidenceBreakdown}
+                        findings={findings}
+                    />
+                )}
+
+                {/* Corrective Guidance Banner when Blocked */}
+                {isBlocked && (
+                    <div className="blocked-guidance-banner" role="alert">
+                        <div className="banner-icon">🛑</div>
+                        <div className="banner-text">
+                            <strong>Execution Blocked — Critical Semantic or Guardrail Refusal</strong>
+                            <p>
+                                This query cannot be executed because one or more critical findings or low-confidence rules failed. Refine your question with specific metrics, filters, or date boundaries and regenerate.
+                            </p>
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {executionError && (
+                    <div className="blocked-guidance-banner" role="alert">
+                        <div className="banner-icon">⚠️</div>
+                        <div className="banner-text">
+                            <strong>Execution Error</strong>
+                            <p>{executionError}</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* SQL Code Block */}
                 <div className="code-block-wrapper">
                     <div className="code-header">
                         <span className="code-lang">PostgreSQL (SELECT only)</span>
-                        <span className="schema-ver-badge">Schema: {generationResponse.versions.schemaVersion}</span>
+                        <span className="schema-ver-badge">
+                            Schema: {generationResponse.versions.schemaVersion}
+                        </span>
                     </div>
                     <pre className="code-viewer">
                         <code>{generationResponse.sql}</code>
                     </pre>
                 </div>
+
+                {/* Execution Results Summary (when executed) */}
+                {executionResult && (
+                    <div className="execution-result-box" role="region" aria-label="Query results">
+                        <div className="execution-result-header">
+                            <h4 className="box-title">
+                                Query Execution Results ({executionResult.rowCount} row
+                                {executionResult.rowCount === 1 ? "" : "s"} in{" "}
+                                {executionResult.executionTimeMs}ms)
+                            </h4>
+                            <span className="confidence-band-badge band-high">COMPLETED</span>
+                        </div>
+                        {executionResult.rows.length === 0 ? (
+                            <p className="explanation-text">
+                                Query executed cleanly and returned 0 matching rows.
+                            </p>
+                        ) : (
+                            <div className="results-table-scroll">
+                                <table className="results-table">
+                                    <thead>
+                                        <tr>
+                                            {executionResult.columns.map((col) => (
+                                                <th key={col.name}>{col.name}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {executionResult.rows.map((row, rIdx) => (
+                                            <tr key={rIdx}>
+                                                {executionResult.columns.map((col) => (
+                                                    <td key={col.name}>
+                                                        {row[col.name] === null ||
+                                                        row[col.name] === undefined
+                                                            ? "NULL"
+                                                            : String(row[col.name])}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Referenced Tables & Metadata */}
                 <div className="metadata-grid">
@@ -140,11 +318,28 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
 
                 {/* Version Registry Footer */}
                 <div className="version-registry-bar">
-                    <span>Artifact ID: <code>{generationResponse.artifactId}</code></span>
-                    <span>Prompt: <code>v{generationResponse.versions.promptVersion}</code></span>
-                    <span>Glossary: <code>v{generationResponse.versions.glossaryVersion}</code></span>
+                    <span>
+                        Artifact ID: <code>{generationResponse.artifactId}</code>
+                    </span>
+                    <span>
+                        Prompt: <code>v{generationResponse.versions.promptVersion}</code>
+                    </span>
+                    <span>
+                        Glossary: <code>v{generationResponse.versions.glossaryVersion}</code>
+                    </span>
                 </div>
             </div>
+
+            <ReviewAcknowledgementModal
+                isOpen={isReviewModalOpen}
+                artifactId={generationResponse.artifactId}
+                sql={generationResponse.sql}
+                assumptions={generationResponse.assumptions}
+                warnings={findings}
+                submitting={executing}
+                onConfirm={(ack) => void executeArtifact(ack)}
+                onCancel={() => setIsReviewModalOpen(false)}
+            />
         </section>
     );
 }
