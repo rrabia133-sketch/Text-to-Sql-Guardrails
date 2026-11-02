@@ -1,14 +1,23 @@
 import type { FastifyPluginAsync } from "fastify";
+import { parse } from "pgsql-ast-parser";
 import { requireAuth } from "../../plugins/auth.js";
 import {
     QueryGenerationRequestSchema,
     type QueryGenerationResponse,
+    type SemanticRepairAttempt,
 } from "@text2sql/contracts";
 import { QueryArtifactRepository } from "./query-artifact.repository.js";
 import { ProviderRouter } from "../providers/provider.router.js";
 import { PromptBuilder } from "./prompts/prompt-builder.js";
 import { ClarificationService } from "../intent/clarification.service.js";
 import { GenerationRetryHandler } from "./retry.handler.js";
+import { IntentExtractorService } from "../intent/intent-extractor.service.js";
+import { GuardrailsService } from "../guardrails/guardrails.service.js";
+import { SemanticValidatorService } from "../semantic/semantic-validator.service.js";
+import { RepairEngineService } from "../semantic/repair-engine.service.js";
+import { ConfidenceService } from "../semantic/confidence.service.js";
+import { ArtifactStateService } from "../execution/artifact-state.service.js";
+import { SemanticRepository } from "../semantic/semantic.repository.js";
 
 export interface GenerationRoutesOptions {
     queryArtifactRepo?: QueryArtifactRepository;
@@ -16,6 +25,13 @@ export interface GenerationRoutesOptions {
     promptBuilder?: PromptBuilder;
     clarificationService?: ClarificationService;
     retryHandler?: GenerationRetryHandler;
+    intentExtractor?: IntentExtractorService;
+    guardrailsService?: GuardrailsService;
+    semanticValidator?: SemanticValidatorService;
+    repairEngine?: RepairEngineService;
+    confidenceService?: ConfidenceService;
+    artifactStateService?: ArtifactStateService;
+    semanticRepo?: SemanticRepository;
     prefix?: string;
 }
 
@@ -28,6 +44,19 @@ export const generationRoutes: FastifyPluginAsync<GenerationRoutesOptions> = asy
     const promptBuilder = opts.promptBuilder || new PromptBuilder();
     const clarificationService = opts.clarificationService || new ClarificationService();
     const retryHandler = opts.retryHandler || new GenerationRetryHandler();
+    const intentExtractor = opts.intentExtractor || new IntentExtractorService();
+    const guardrailsService = opts.guardrailsService || new GuardrailsService();
+    const semanticValidator = opts.semanticValidator || new SemanticValidatorService();
+    const repairEngine =
+        opts.repairEngine ||
+        new RepairEngineService({
+            guardrailsService,
+            semanticValidator,
+            providerRouter,
+        });
+    const confidenceService = opts.confidenceService || new ConfidenceService(semanticValidator);
+    const artifactStateService = opts.artifactStateService || new ArtifactStateService();
+    const semanticRepo = opts.semanticRepo || new SemanticRepository();
 
     // POST /api/v1/queries
     fastify.post(
@@ -96,11 +125,52 @@ export const generationRoutes: FastifyPluginAsync<GenerationRoutesOptions> = asy
                     completionTokens: genResult.completionTokens,
                 });
 
-                // 7. Persist Query Artifact in app_db with unexecuted 'preview' status
-                const artifact = await queryArtifactRepo.create({
+                // 7. Extract Intent Slots & Run Deterministic Guardrails + Semantic Validation
+                const intentSlots = intentExtractor.extract(effectiveQuestion);
+                let guardrailResult = await guardrailsService.validate(genResult.output.sql);
+                let currentSql = guardrailResult.normalizedSql || genResult.output.sql;
+
+                const parsedAst = parse(currentSql)[0];
+                let semanticValidation = semanticValidator.validate(parsedAst, intentSlots);
+
+                // 8. Bounded Automated Semantic Repair (Max 1 attempt)
+                let repairAttempt: SemanticRepairAttempt | undefined;
+                if (!semanticValidation.isValid && semanticValidation.hasRepairableFindings) {
+                    const repairResult = await repairEngine.repair(
+                        currentSql,
+                        effectiveQuestion,
+                        intentSlots,
+                        semanticValidation,
+                        { provider }
+                    );
+                    repairAttempt = repairResult.attempt;
+
+                    if (repairResult.success && repairResult.semanticResult) {
+                        currentSql = repairResult.normalizedSql || repairResult.attempt.repairedSql;
+                        semanticValidation = repairResult.semanticResult;
+                        if (repairResult.guardrailResult) {
+                            guardrailResult = repairResult.guardrailResult;
+                        }
+                    }
+                }
+
+                // 9. Compute 4-Component Confidence Score & Resolve Artifact State
+                const confidenceResult = confidenceService.computeConfidence({
+                    semanticResult: semanticValidation,
+                    guardrailResult,
+                });
+
+                const resolvedStatus = artifactStateService.resolveState({
+                    confidenceBand: confidenceResult.band,
+                    hasCriticalFindings: confidenceResult.hasCriticalFindings,
+                    guardrailsValid: guardrailResult.valid,
+                });
+
+                // 10. Persist Query Artifact in app_db and update lifecycle state
+                const createdArtifact = await queryArtifactRepo.create({
                     userId: request.user!.id,
                     prompt: effectiveQuestion,
-                    generatedSql: genResult.output.sql,
+                    generatedSql: currentSql,
                     assumptions: genResult.output.assumptions,
                     referencedTables: genResult.output.referencedTables,
                     referencedColumns: genResult.output.referencedColumns,
@@ -111,16 +181,39 @@ export const generationRoutes: FastifyPluginAsync<GenerationRoutesOptions> = asy
                     schemaVersion: promptContext.metadata.schemaVersion,
                 });
 
+                const artifact =
+                    (await queryArtifactRepo.updateStatus(createdArtifact.id, resolvedStatus)) ||
+                    createdArtifact;
+
+                await semanticRepo.saveArtifactSemanticMetadata({
+                    artifactId: artifact.id,
+                    confidenceScore: confidenceResult.score,
+                    confidenceBand: confidenceResult.band,
+                    confidenceBreakdown: confidenceResult.breakdown,
+                    confidenceResult,
+                    semanticFindings: semanticValidation.findings,
+                    semanticValidation,
+                    repairAttempts: repairAttempt ? repairAttempt.attemptNumber : 0,
+                    repairAttempt,
+                });
+
                 const responseData: QueryGenerationResponse = {
                     type: "generation",
                     artifactId: artifact.id,
-                    status: "preview",
+                    status: resolvedStatus,
                     sql: artifact.generatedSql,
                     assumptions: artifact.assumptions,
                     referencedTables: artifact.referencedTables,
                     referencedColumns: artifact.referencedColumns,
                     explanation: artifact.explanation,
-                    confidencePreview: 0.95,
+                    confidencePreview: Math.round((confidenceResult.score / 100) * 100) / 100,
+                    confidenceScore: confidenceResult.score,
+                    confidenceBand: confidenceResult.band,
+                    confidenceBreakdown: confidenceResult.breakdown,
+                    confidenceResult,
+                    semanticFindings: semanticValidation.findings,
+                    semanticValidation,
+                    repairAttempt,
                     provider: genResult.provider as any,
                     model: genResult.model,
                     versions: {
@@ -164,6 +257,13 @@ export const generationRoutes: FastifyPluginAsync<GenerationRoutesOptions> = asy
                 });
             }
 
+            const semanticMeta = await semanticRepo.getArtifactSemanticMetadata(id);
+            const confidenceScore = semanticMeta?.confidenceScore;
+            const confidencePreview =
+                confidenceScore !== undefined
+                    ? Math.round((confidenceScore / 100) * 100) / 100
+                    : 0.95;
+
             return reply.status(200).send({
                 type: "generation",
                 artifactId: artifact.id,
@@ -173,7 +273,14 @@ export const generationRoutes: FastifyPluginAsync<GenerationRoutesOptions> = asy
                 referencedTables: artifact.referencedTables,
                 referencedColumns: artifact.referencedColumns,
                 explanation: artifact.explanation,
-                confidencePreview: 0.95,
+                confidencePreview,
+                confidenceScore: semanticMeta?.confidenceScore,
+                confidenceBand: semanticMeta?.confidenceBand,
+                confidenceBreakdown: semanticMeta?.confidenceBreakdown,
+                confidenceResult: semanticMeta?.confidenceResult,
+                semanticFindings: semanticMeta?.semanticFindings,
+                semanticValidation: semanticMeta?.semanticValidation,
+                repairAttempt: semanticMeta?.repairAttempt,
                 provider: artifact.provider,
                 model: artifact.model,
                 versions: {

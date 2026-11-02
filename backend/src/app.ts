@@ -27,6 +27,7 @@ import { ConcurrencyManager } from "./modules/execution/concurrency-manager.js";
 import { CancellationService } from "./modules/execution/cancellation.service.js";
 import { RestrictedExecutor } from "./modules/execution/restricted-executor.js";
 import { AuditLogger } from "./modules/execution/audit-logger.js";
+import { SemanticRepository } from "./modules/semantic/semantic.repository.js";
 
 export interface BuildAppOptions extends FastifyServerOptions {
     appConfig?: AppConfig;
@@ -45,6 +46,7 @@ export interface BuildAppOptions extends FastifyServerOptions {
     cancellationService?: CancellationService;
     restrictedExecutor?: RestrictedExecutor;
     auditLogger?: AuditLogger;
+    semanticRepo?: SemanticRepository;
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -122,6 +124,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     const schemaService = opts.schemaService || new SchemaService();
     const providerRouter = opts.providerRouter || new ProviderRouter({ mode: currentConfig.PROVIDER_MODE });
     const queryArtifactRepo = opts.queryArtifactRepo || new QueryArtifactRepository(appPool);
+    const semanticRepo = opts.semanticRepo || new SemanticRepository(appPool);
     const clarificationService = opts.clarificationService || new ClarificationService();
     const retryHandler =
         opts.retryHandler ||
@@ -136,6 +139,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         providerRouter,
         clarificationService,
         retryHandler,
+        semanticRepo,
         prefix: "/api/v1/queries",
     });
     // Sprint 4 Restricted Database Execution routes
@@ -154,6 +158,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         restrictedExecutor,
         auditLogger,
         queryArtifactRepo,
+        semanticRepo,
         prefix: "/api/v1",
     });
 

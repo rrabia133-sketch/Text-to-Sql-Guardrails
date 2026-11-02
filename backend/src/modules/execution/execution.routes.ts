@@ -9,6 +9,7 @@ import { ExecutionRepository } from "./execution.repository.js";
 import { RestrictedExecutor } from "./restricted-executor.js";
 import { AuditLogger } from "./audit-logger.js";
 import { QueryArtifactRepository } from "../generation/query-artifact.repository.js";
+import { SemanticRepository } from "../semantic/semantic.repository.js";
 
 export interface ExecutionRoutesOptions {
     artifactGate?: ArtifactGate;
@@ -18,6 +19,7 @@ export interface ExecutionRoutesOptions {
     restrictedExecutor?: RestrictedExecutor;
     auditLogger?: AuditLogger;
     queryArtifactRepo?: QueryArtifactRepository;
+    semanticRepo?: SemanticRepository;
 }
 
 export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async (
@@ -31,6 +33,7 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
     const executionRepo = opts.executionRepo || new ExecutionRepository();
     const restrictedExecutor = opts.restrictedExecutor || new RestrictedExecutor();
     const auditLogger = opts.auditLogger || new AuditLogger();
+    const semanticRepo = opts.semanticRepo || new SemanticRepository();
 
     // -------------------------------------------------------------
     // POST /api/v1/queries/:id/execute
@@ -54,7 +57,7 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
                     ARTIFACT_EXPIRED: 410,
                     TRANSACTION_VIOLATION: 409,
                     HASH_MISMATCH: 400,
-                    REVIEW_ACKNOWLEDGEMENT_REQUIRED: 422,
+                    REVIEW_ACKNOWLEDGEMENT_REQUIRED: 400,
                     BLOCKED_CONFIDENCE_BAND: 403,
                     SEMANTIC_VALIDATION_FAILED: 422,
                 };
@@ -69,6 +72,10 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
             }
 
             const artifact = gateResult.artifact!;
+
+            if (request.body?.acknowledgement?.confirmed) {
+                await semanticRepo.recordReviewAcknowledgement(artifactId, request.body.acknowledgement);
+            }
 
             // 2. Active Concurrency Bound Check (Max 2 user, 10 global)
             const acquireResult = concurrencyManager.acquire(userId, executionId);
