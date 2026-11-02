@@ -6,7 +6,19 @@ export interface QueryArtifactRecord {
     userId: string;
     prompt: string;
     generatedSql: string;
-    status: "preview" | "pending" | "validating" | "generating" | "executing" | "completed" | "failed" | "rejected";
+    status:
+        | "preview"
+        | "preview_ready"
+        | "preview_review"
+        | "preview_blocked"
+        | "pending"
+        | "validating"
+        | "generating"
+        | "executing"
+        | "completed"
+        | "executed"
+        | "failed"
+        | "rejected";
     assumptions: string[];
     referencedTables: string[];
     referencedColumns: string[];

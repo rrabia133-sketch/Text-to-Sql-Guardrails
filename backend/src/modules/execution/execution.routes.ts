@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
 import { randomUUID } from "node:crypto";
+import type { ReviewAcknowledgement } from "@text2sql/contracts";
 import { requireAuth } from "../../plugins/auth.js";
 import { ArtifactGate } from "./artifact-gate.js";
 import { ConcurrencyManager } from "./concurrency-manager.js";
@@ -34,7 +35,7 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
     // -------------------------------------------------------------
     // POST /api/v1/queries/:id/execute
     // -------------------------------------------------------------
-    fastify.post<{ Params: { id: string }; Body?: { idempotencyKey?: string } }>(
+    fastify.post<{ Params: { id: string }; Body?: { idempotencyKey?: string; acknowledgement?: ReviewAcknowledgement } }>(
         "/queries/:id/execute",
         { preHandler: [requireAuth] },
         async (request, reply) => {
@@ -43,7 +44,9 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
             const executionId = `exec_${randomUUID()}`;
 
             // 1. Immutable Artifact Ownership & Expiry Verification
-            const gateResult = await artifactGate.verify(artifactId, userId);
+            const gateResult = await artifactGate.verify(artifactId, userId, {
+                acknowledgement: request.body?.acknowledgement,
+            });
             if (!gateResult.ok) {
                 const statusMap: Record<string, number> = {
                     ARTIFACT_NOT_FOUND: 404,
@@ -51,6 +54,9 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
                     ARTIFACT_EXPIRED: 410,
                     TRANSACTION_VIOLATION: 409,
                     HASH_MISMATCH: 400,
+                    REVIEW_ACKNOWLEDGEMENT_REQUIRED: 422,
+                    BLOCKED_CONFIDENCE_BAND: 403,
+                    SEMANTIC_VALIDATION_FAILED: 422,
                 };
                 const statusCode = statusMap[gateResult.errorCode || ""] || 400;
 

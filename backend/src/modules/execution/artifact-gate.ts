@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import type { ExecutionErrorCode } from "@text2sql/contracts";
+import type { ExecutionErrorCode, ReviewAcknowledgement } from "@text2sql/contracts";
 import type { QueryArtifactRepository, QueryArtifactRecord } from "../generation/query-artifact.repository.js";
+import { ArtifactStateService } from "./artifact-state.service.js";
 
 export interface ArtifactGateResult {
     ok: boolean;
@@ -13,10 +14,18 @@ export interface ArtifactGateResult {
 export interface VerifyArtifactOptions {
     clientProvidedSql?: string;
     clientProvidedHash?: string;
+    acknowledgement?: ReviewAcknowledgement;
 }
 
 export class ArtifactGate {
-    constructor(private readonly artifactRepo: QueryArtifactRepository) { }
+    private readonly stateService: ArtifactStateService;
+
+    constructor(
+        private readonly artifactRepo: QueryArtifactRepository,
+        stateService?: ArtifactStateService
+    ) {
+        this.stateService = stateService || new ArtifactStateService();
+    }
 
     /**
      * Computes the deterministic SHA-256 hash of a canonical SQL string.
@@ -27,7 +36,8 @@ export class ArtifactGate {
 
     /**
      * Verifies that the requested artifact exists, belongs to the requesting user,
-     * is in 'preview' status, has not expired, and matches its cryptographic hash.
+     * is in an executable status (preview, preview_ready, or preview_review with confirmed acknowledgement),
+     * has not expired, and matches its cryptographic hash.
      */
     public async verify(
         artifactId: string,
@@ -53,12 +63,13 @@ export class ArtifactGate {
             };
         }
 
-        // 3. Artifact lifecycle status validation (only 'preview' is executable)
-        if (artifact.status !== "preview") {
+        // 3. Artifact lifecycle status & review acknowledgement gate
+        const stateCheck = this.stateService.canExecute(artifact.status, options?.acknowledgement);
+        if (!stateCheck.allowed) {
             return {
                 ok: false,
-                errorCode: "TRANSACTION_VIOLATION",
-                errorMessage: `Artifact '${artifactId}' is in '${artifact.status}' state and cannot be executed (only 'preview' artifacts may be executed).`,
+                errorCode: stateCheck.errorCode || "TRANSACTION_VIOLATION",
+                errorMessage: stateCheck.errorMessage || `Artifact '${artifactId}' is in '${artifact.status}' state and cannot be executed (only 'preview' artifacts may be executed).`,
             };
         }
 
