@@ -121,3 +121,5 @@ export * from "./execution.js";
 export * from "./semantic.js";
 export * from "./confidence.js";
 
+export * from "./history.js";
+export * from "./export.js";

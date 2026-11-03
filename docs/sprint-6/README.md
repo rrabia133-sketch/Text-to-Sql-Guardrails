@@ -26,7 +26,7 @@
 
 | Work Item | Type | Title | SP | Status | Progress |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| [US-13–15](US-13-15.md) | Story | Complete Analyst Journey: Preview/Run, Results/CSV, History & Feedback (US-13, US-14, US-15) | 15 | 🟡 **IN PROGRESS** | 0 / 15 Tasks (0%) |
+| [US-13–15](US-13-15.md) | Story | Complete Analyst Journey: Preview/Run, Results/CSV, History & Feedback (US-13, US-14, US-15) | 15 | 🟡 **IN PROGRESS** | 1 / 15 Tasks (7%) |
 | [DO-08](DO-08.md) | DevOps | Retention Schedules, Ephemeral Result Cleanup & Safe CSV Policy | — | 🟡 **IN PROGRESS** | 0 / 4 Tasks (0%) |
 
 ---
@@ -35,7 +35,7 @@
 
 | Task # | Name | Assigned To | Status | Output Artifact |
 | :---: | :--- | :--- | :--- | :--- |
-| **01** | History, feedback, CSV export & retention contracts | [US-13–15](US-13-15.md#task-1-history-feedback-csv-export--retention-contracts) | ⚪ PLANNED | `packages/contracts/src/history.ts`, `export.ts` |
+| **01** | History, feedback, CSV export & retention contracts | [US-13–15](US-13-15.md#task-1-history-feedback-csv-export--retention-contracts) | 🟢 **COMPLETED** | `packages/contracts/src/history.ts`, `export.ts` |
 | **02** | Database migration for feedback, result cache TTL & history indexes | [US-13–15](US-13-15.md#task-2-database-migration-for-feedback-result-cache-ttl--history-indexes) | ⚪ PLANNED | `database/app/migrations/07-init-history-feedback-retention.sql` |
 | **03** | Idempotent execution guard & schema/policy version freshness check | [US-13–15](US-13-15.md#task-3-idempotent-execution-guard--schemapolicy-version-freshness-check) | ⚪ PLANNED | `backend/src/modules/execution/artifact-gate.ts` |
 | **04** | Ephemeral execution result store (15-minute TTL) & ownership lookup | [US-13–15](US-13-15.md#task-4-ephemeral-execution-result-store-15-minute-ttl--ownership-lookup) | ⚪ PLANNED | `backend/src/modules/execution/result-cache.service.ts` |
