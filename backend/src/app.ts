@@ -28,6 +28,13 @@ import { CancellationService } from "./modules/execution/cancellation.service.js
 import { RestrictedExecutor } from "./modules/execution/restricted-executor.js";
 import { AuditLogger } from "./modules/execution/audit-logger.js";
 import { SemanticRepository } from "./modules/semantic/semantic.repository.js";
+import { retentionRoutes } from "./modules/retention/retention.routes.js";
+import { RetentionService } from "./modules/retention/retention.service.js";
+import { historyRoutes } from "./modules/history/history.routes.js";
+import { HistoryRepository } from "./modules/history/history.repository.js";
+import { exportRoutes } from "./modules/export/export.routes.js";
+import { CsvExporterService } from "./modules/export/csv-exporter.service.js";
+import { ResultCacheService } from "./modules/execution/result-cache.service.js";
 
 export interface BuildAppOptions extends FastifyServerOptions {
     appConfig?: AppConfig;
@@ -47,6 +54,10 @@ export interface BuildAppOptions extends FastifyServerOptions {
     restrictedExecutor?: RestrictedExecutor;
     auditLogger?: AuditLogger;
     semanticRepo?: SemanticRepository;
+    resultCacheService?: ResultCacheService;
+    csvExporterService?: CsvExporterService;
+    historyRepo?: HistoryRepository;
+    retentionService?: RetentionService;
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -149,6 +160,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     const cancellationService = opts.cancellationService || new CancellationService(analyticsPool);
     const restrictedExecutor = opts.restrictedExecutor || new RestrictedExecutor(analyticsPool);
     const auditLogger = opts.auditLogger || new AuditLogger(appPool);
+    const resultCacheService = opts.resultCacheService || new ResultCacheService();
 
     await app.register(executionRoutes, {
         executionRepo,
@@ -159,6 +171,43 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         auditLogger,
         queryArtifactRepo,
         semanticRepo,
+        resultCacheService,
+        prefix: "/api/v1",
+    });
+
+
+    const csvExporterService = opts.csvExporterService || new CsvExporterService();
+
+    await app.register(exportRoutes, {
+        resultCacheService,
+        csvExporterService,
+        executionRepo,
+        auditLogger,
+        prefix: "/api/v1",
+    });
+
+
+    const historyRepo = opts.historyRepo || new HistoryRepository(appPool);
+
+    await app.register(historyRoutes, {
+        historyRepo,
+        queryArtifactRepo,
+        auditLogger,
+        prefix: "/api/v1",
+    });
+
+
+    const retentionService =
+        opts.retentionService ||
+        new RetentionService({
+            pool: appPool,
+            resultCacheService,
+            auditLogger,
+        });
+
+    await app.register(retentionRoutes, {
+        retentionService,
+        auditLogger,
         prefix: "/api/v1",
     });
 

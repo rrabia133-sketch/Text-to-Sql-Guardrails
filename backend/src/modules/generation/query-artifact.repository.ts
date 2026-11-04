@@ -27,6 +27,8 @@ export interface QueryArtifactRecord {
     model: string;
     promptVersion: string;
     schemaVersion: string;
+    policyVersion?: string;
+    deletedAt?: string | null;
     executionTimeMs?: number | null;
     rowCount?: number | null;
     errorMessage?: string | null;
@@ -48,6 +50,7 @@ export interface CreateQueryArtifactParams {
     model: string;
     promptVersion: string;
     schemaVersion: string;
+    policyVersion?: string;
     expiresInMinutes?: number;
 }
 
@@ -84,6 +87,8 @@ export class QueryArtifactRepository {
             model: params.model,
             promptVersion: params.promptVersion,
             schemaVersion: params.schemaVersion,
+            policyVersion: params.policyVersion || "1.0.0",
+            deletedAt: null,
             executionTimeMs: null,
             rowCount: null,
             errorMessage: null,
@@ -164,6 +169,8 @@ export class QueryArtifactRepository {
                         model: row.model,
                         promptVersion: row.prompt_version,
                         schemaVersion: row.schema_version,
+                        policyVersion: row.policy_version || "1.0.0",
+                        deletedAt: row.deleted_at ? new Date(row.deleted_at).toISOString() : null,
                         executionTimeMs: row.execution_time_ms,
                         rowCount: row.row_count,
                         errorMessage: row.error_message,

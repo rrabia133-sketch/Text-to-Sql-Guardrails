@@ -3,6 +3,10 @@ import type { ExecutionErrorCode, ReviewAcknowledgement } from "@text2sql/contra
 import type { QueryArtifactRepository, QueryArtifactRecord } from "../generation/query-artifact.repository.js";
 import { ArtifactStateService } from "./artifact-state.service.js";
 
+
+export const DEFAULT_ACTIVE_SCHEMA_VERSIONS = ["v1", "v1.0", "1.0.0"];
+export const DEFAULT_ACTIVE_POLICY_VERSION = "1.0.0";
+
 export interface ArtifactGateResult {
     ok: boolean;
     errorCode?: ExecutionErrorCode;
@@ -15,6 +19,8 @@ export interface VerifyArtifactOptions {
     clientProvidedSql?: string;
     clientProvidedHash?: string;
     acknowledgement?: ReviewAcknowledgement;
+    activeSchemaVersion?: string;
+    activePolicyVersion?: string;
 }
 
 export class ArtifactGate {
@@ -80,6 +86,29 @@ export class ArtifactGate {
                 ok: false,
                 errorCode: "ARTIFACT_EXPIRED",
                 errorMessage: `Query artifact '${artifactId}' expired at ${artifact.expiresAt}. Please generate a fresh preview.`,
+            };
+        }
+
+
+        // 4b. Schema & Policy Version Freshness Check
+        const activePolicyVersion = options?.activePolicyVersion || DEFAULT_ACTIVE_POLICY_VERSION;
+        if (artifact.policyVersion && artifact.policyVersion !== activePolicyVersion) {
+            return {
+                ok: false,
+                errorCode: "STALE_POLICY_VERSION",
+                errorMessage: `Query artifact policy version '${artifact.policyVersion}' is stale (active policy version is '${activePolicyVersion}'). Please generate a fresh preview.`,
+            };
+        }
+
+        const isSchemaFresh = options?.activeSchemaVersion
+            ? artifact.schemaVersion === options.activeSchemaVersion
+            : DEFAULT_ACTIVE_SCHEMA_VERSIONS.includes(artifact.schemaVersion) || artifact.schemaVersion.startsWith("v1");
+
+        if (!isSchemaFresh) {
+            return {
+                ok: false,
+                errorCode: "STALE_SCHEMA_VERSION",
+                errorMessage: `Query artifact schema version '${artifact.schemaVersion}' is stale (active schema versions are 'v1' / '1.0.0'). Please generate a fresh preview.`,
             };
         }
 

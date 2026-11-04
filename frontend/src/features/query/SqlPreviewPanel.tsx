@@ -7,6 +7,8 @@ import type {
 } from "@text2sql/contracts";
 import { ConfidenceCard } from "./ConfidenceCard";
 import { ReviewAcknowledgementModal } from "./ReviewAcknowledgementModal";
+import { ResultsTablePanel } from "../results/ResultsTablePanel";
+import { FeedbackWidget } from "../feedback/FeedbackWidget";
 
 export interface SqlPreviewPanelProps {
     generationResponse: QueryGenerationResponse | null;
@@ -226,50 +228,19 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
                     </pre>
                 </div>
 
-                {/* Execution Results Summary (when executed) */}
-                {executionResult && (
-                    <div className="execution-result-box" role="region" aria-label="Query results">
-                        <div className="execution-result-header">
-                            <h4 className="box-title">
-                                Query Execution Results ({executionResult.rowCount} row
-                                {executionResult.rowCount === 1 ? "" : "s"} in{" "}
-                                {executionResult.executionTimeMs}ms)
-                            </h4>
-                            <span className="confidence-band-badge band-high">COMPLETED</span>
-                        </div>
-                        {executionResult.rows.length === 0 ? (
-                            <p className="explanation-text">
-                                Query executed cleanly and returned 0 matching rows.
-                            </p>
-                        ) : (
-                            <div className="results-table-scroll">
-                                <table className="results-table">
-                                    <thead>
-                                        <tr>
-                                            {executionResult.columns.map((col) => (
-                                                <th key={col.name}>{col.name}</th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {executionResult.rows.map((row, rIdx) => (
-                                            <tr key={rIdx}>
-                                                {executionResult.columns.map((col) => (
-                                                    <td key={col.name}>
-                                                        {row[col.name] === null ||
-                                                        row[col.name] === undefined
-                                                            ? "NULL"
-                                                            : String(row[col.name])}
-                                                    </td>
-                                                ))}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
+                {/* Execution Results Panel (Task 10 & 11) */}
+                {(executing || executionError || executionResult) && (
+                    <ResultsTablePanel
+                        result={executionResult}
+                        error={executionError}
+                        loading={executing}
+                    />
                 )}
+
+                {/* Analyst Feedback Widget (Task 13) */}
+                <FeedbackWidget
+                    artifactId={generationResponse.artifactId}
+                />
 
                 {/* Referenced Tables & Metadata */}
                 <div className="metadata-grid">

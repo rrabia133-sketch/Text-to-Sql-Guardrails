@@ -14,6 +14,8 @@ export interface ExecutionRecord {
     truncated: boolean;
     errorCode?: ExecutionErrorCode | null;
     errorMessage?: string | null;
+    idempotencyKey?: string | null;
+    resultExpiresAt?: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -30,6 +32,8 @@ export interface CreateExecutionParams {
     truncated?: boolean;
     errorCode?: ExecutionErrorCode | null;
     errorMessage?: string | null;
+    idempotencyKey?: string | null;
+    resultExpiresAt?: string | null;
 }
 
 export interface UpdateExecutionParams {
@@ -69,6 +73,8 @@ export class ExecutionRepository {
             truncated: params.truncated ?? false,
             errorCode: params.errorCode ?? null,
             errorMessage: params.errorMessage ?? null,
+            idempotencyKey: params.idempotencyKey ?? null,
+            resultExpiresAt: params.resultExpiresAt ?? null,
             createdAt: now,
             updatedAt: now,
         };
@@ -259,6 +265,27 @@ export class ExecutionRepository {
             .length;
     }
 
+
+    async findByIdempotencyKey(userId: string, artifactId: string, idempotencyKey: string): Promise<ExecutionRecord | null> {
+        if (this.pool) {
+            try {
+                const res = await this.pool.query(
+                    "SELECT * FROM query_executions WHERE user_id = $1 AND artifact_id = $2 AND idempotency_key = $3 ORDER BY created_at DESC LIMIT 1;",
+                    [userId, artifactId, idempotencyKey]
+                );
+                if (res.rows.length > 0) {
+                    return this.mapRowToRecord(res.rows[0]);
+                }
+                return null;
+            } catch {
+                // Fallback
+            }
+        }
+        return Array.from(this.inMemoryStore.values()).find(
+            e => e.userId === userId && e.artifactId === artifactId && e.idempotencyKey === idempotencyKey
+        ) || null;
+    }
+
     clear(): void {
         this.inMemoryStore.clear();
     }
@@ -276,6 +303,8 @@ export class ExecutionRepository {
             truncated: row.truncated,
             errorCode: row.error_code,
             errorMessage: row.error_message,
+            idempotencyKey: row.idempotency_key ?? null,
+            resultExpiresAt: row.result_expires_at ? new Date(row.result_expires_at).toISOString() : null,
             createdAt: new Date(row.created_at).toISOString(),
             updatedAt: new Date(row.updated_at).toISOString(),
         };

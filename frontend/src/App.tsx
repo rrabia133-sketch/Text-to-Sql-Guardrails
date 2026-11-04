@@ -6,10 +6,12 @@ import { ProviderSelector } from "./features/query/ProviderSelector";
 import { QueryInputBar } from "./features/query/QueryInputBar";
 import { SqlPreviewPanel } from "./features/query/SqlPreviewPanel";
 import { ClarificationModal } from "./features/clarification/ClarificationModal";
+import { QueryHistoryPanel } from "./features/history/QueryHistoryPanel";
 import type {
     ProviderType,
     QueryGenerationResponse,
     ClarificationResponse,
+    HistoryItemSummary,
 } from "@text2sql/contracts";
 
 interface ApiHealthResponse {
@@ -23,6 +25,12 @@ function MainWorkspace() {
     const [apiStatus, setApiStatus] = useState<ApiHealthResponse | null>(null);
     const [connecting, setConnecting] = useState(true);
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
+    // Query History Drawer State (US-15)
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+    // WCAG 2.2 AA ARIA Live Region State
+    const [ariaLiveMessage, setAriaLiveMessage] = useState("");
 
     // Query Generation State
     const [prompt, setPrompt] = useState("What was our total revenue last month?");
@@ -50,6 +58,20 @@ function MainWorkspace() {
             });
     }, []);
 
+    // Global keyboard shortcuts (Ctrl+H / Cmd+H for query history)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "h") {
+                e.preventDefault();
+                if (user) {
+                    setIsHistoryOpen((prev) => !prev);
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [user]);
+
     const handleGenerateQuery = async (
         overridePrompt?: string,
         clarificationSessionId?: string,
@@ -60,6 +82,7 @@ function MainWorkspace() {
 
         setGenerating(true);
         setGenerationError(null);
+        setAriaLiveMessage("Generating schema-grounded SQL query...");
 
         const payload: Record<string, any> = {
             question: questionToAsk,
@@ -89,13 +112,19 @@ function MainWorkspace() {
             if (data.type === "clarification") {
                 setClarification(data);
                 setIsClarificationOpen(true);
+                setAriaLiveMessage("Clarification needed. Please select an option.");
             } else if (data.type === "generation") {
                 setGenerationResponse(data);
                 setIsClarificationOpen(false);
                 setClarification(null);
+                setAriaLiveMessage(
+                    `SQL generated successfully with confidence band ${data.confidenceBand || "HIGH"}.`
+                );
             }
         } catch (err: any) {
-            setGenerationError(err?.message || "An unexpected error occurred during generation");
+            const errMsg = err?.message || "An unexpected error occurred during generation";
+            setGenerationError(errMsg);
+            setAriaLiveMessage(`Error: ${errMsg}`);
         } finally {
             setGenerating(false);
         }
@@ -110,6 +139,24 @@ function MainWorkspace() {
         );
     };
 
+    const handleSelectHistoryItem = (item: HistoryItemSummary) => {
+        setPrompt(item.question);
+        setIsHistoryOpen(false);
+        setAriaLiveMessage(`Loaded query: ${item.question}`);
+
+        // Fetch full artifact preview
+        fetch(`/api/v1/queries/${encodeURIComponent(item.artifactId)}`, {
+            credentials: "include",
+        })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data: QueryGenerationResponse | null) => {
+                if (data) {
+                    setGenerationResponse(data);
+                }
+            })
+            .catch(() => {});
+    };
+
     if (authLoading) {
         return (
             <div className="loading-screen">
@@ -120,7 +167,12 @@ function MainWorkspace() {
 
     return (
         <div className="app-container">
-            <Header />
+            {/* Screen Reader ARIA live region */}
+            <div className="sr-only" role="status" aria-live="polite">
+                {ariaLiveMessage}
+            </div>
+
+            <Header onOpenHistory={() => setIsHistoryOpen(true)} />
 
             {user ? (
                 /* Authenticated Analyst Workspace */
@@ -150,6 +202,12 @@ function MainWorkspace() {
                         onSelectOption={handleClarificationSelection}
                         onClose={() => setIsClarificationOpen(false)}
                         submitting={generating}
+                    />
+
+                    <QueryHistoryPanel
+                        isOpen={isHistoryOpen}
+                        onClose={() => setIsHistoryOpen(false)}
+                        onSelectHistoryItem={handleSelectHistoryItem}
                     />
                 </main>
             ) : (

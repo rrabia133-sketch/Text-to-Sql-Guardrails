@@ -68,6 +68,11 @@ export const ExecutionErrorCodeSchema = z.enum([
     "REVIEW_ACKNOWLEDGEMENT_REQUIRED",
     "SEMANTIC_VALIDATION_FAILED",
     "BLOCKED_CONFIDENCE_BAND",
+    "STALE_SCHEMA_VERSION",
+    "STALE_POLICY_VERSION",
+    "RAW_SQL_SUBMISSION_FORBIDDEN",
+    "RESULT_EXPIRED",
+    "EXECUTION_NOT_FOUND",
 ]);
 export type ExecutionErrorCode = z.infer<typeof ExecutionErrorCodeSchema>;
 

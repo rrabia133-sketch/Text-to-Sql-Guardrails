@@ -94,7 +94,7 @@ describe("Sprint 5 - Task 16: Confidence Scoring & Decision Band Suite (US-11 / 
 
         assert.ok(
             scoreResult.score >= CONFIDENCE_THRESHOLDS.REVIEW_MIN &&
-                scoreResult.score < CONFIDENCE_THRESHOLDS.HIGH_MIN,
+            scoreResult.score < CONFIDENCE_THRESHOLDS.HIGH_MIN,
             `Expected REVIEW score in [65, 84], got ${scoreResult.score}`
         );
         assert.equal(scoreResult.band, "REVIEW");

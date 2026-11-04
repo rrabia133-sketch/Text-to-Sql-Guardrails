@@ -10,6 +10,8 @@ import { RestrictedExecutor } from "./restricted-executor.js";
 import { AuditLogger } from "./audit-logger.js";
 import { QueryArtifactRepository } from "../generation/query-artifact.repository.js";
 import { SemanticRepository } from "../semantic/semantic.repository.js";
+import { ResultCacheService } from "./result-cache.service.js";
+import type { ExecutionResultResponse } from "@text2sql/contracts";
 
 export interface ExecutionRoutesOptions {
     artifactGate?: ArtifactGate;
@@ -20,6 +22,7 @@ export interface ExecutionRoutesOptions {
     auditLogger?: AuditLogger;
     queryArtifactRepo?: QueryArtifactRepository;
     semanticRepo?: SemanticRepository;
+    resultCacheService?: ResultCacheService;
 }
 
 export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async (
@@ -34,6 +37,7 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
     const restrictedExecutor = opts.restrictedExecutor || new RestrictedExecutor();
     const auditLogger = opts.auditLogger || new AuditLogger();
     const semanticRepo = opts.semanticRepo || new SemanticRepository();
+    const resultCacheService = opts.resultCacheService || new ResultCacheService();
 
     // -------------------------------------------------------------
     // POST /api/v1/queries/:id/execute
@@ -45,6 +49,28 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
             const artifactId = request.params.id;
             const userId = request.user!.id;
             const executionId = `exec_${randomUUID()}`;
+
+            // 0a. Fail-Closed Prevention of Raw SQL / Query Submission
+            const rawBody = request.body as Record<string, unknown> | undefined;
+            if (rawBody && ("sql" in rawBody || "query" in rawBody)) {
+                return reply.status(400).send({
+                    statusCode: 400,
+                    error: "RAW_SQL_SUBMISSION_FORBIDDEN",
+                    message: "Client raw SQL submission is forbidden. Executions must reference a validated server-side query artifact.",
+                    timestamp: new Date().toISOString(),
+                });
+            }
+
+            // 0b. Idempotency Check (Duplicate request returns cached result without re-executing)
+            const idempotencyKey = request.body?.idempotencyKey;
+            if (idempotencyKey) {
+                const cached = resultCacheService.getIdempotentResult(userId, artifactId, idempotencyKey);
+                if (cached) {
+                    reply.header("x-cache-hit", "true");
+                    return reply.status(200).send(cached);
+                }
+            }
+
 
             // 1. Immutable Artifact Ownership & Expiry Verification
             const gateResult = await artifactGate.verify(artifactId, userId, {
@@ -60,6 +86,9 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
                     REVIEW_ACKNOWLEDGEMENT_REQUIRED: 400,
                     BLOCKED_CONFIDENCE_BAND: 403,
                     SEMANTIC_VALIDATION_FAILED: 422,
+                    STALE_SCHEMA_VERSION: 409,
+                    STALE_POLICY_VERSION: 409,
+                    RAW_SQL_SUBMISSION_FORBIDDEN: 400,
                 };
                 const statusCode = statusMap[gateResult.errorCode || ""] || 400;
 
@@ -98,6 +127,7 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
                     userId,
                     status: "running",
                     sqlExecuted: artifact.generatedSql,
+                    idempotencyKey: idempotencyKey || null,
                 });
 
                 // 4. Register with Cancellation Service
@@ -173,7 +203,7 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
                     ipAddress: request.ip,
                 });
 
-                return reply.status(200).send({
+                const responsePayload: ExecutionResultResponse = {
                     executionId,
                     artifactId,
                     status: "completed",
@@ -184,7 +214,14 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
                     executionTimeMs: execResult.executionTimeMs,
                     truncated: execResult.truncated,
                     executedAt: new Date().toISOString(),
-                });
+                };
+
+                resultCacheService.setExecutionResult(executionId, userId, artifactId, responsePayload);
+                if (idempotencyKey) {
+                    resultCacheService.setIdempotentResult(userId, artifactId, idempotencyKey, responsePayload);
+                }
+
+                return reply.status(200).send(responsePayload);
             } finally {
                 concurrencyManager.release(userId, executionId);
                 cancellationService.unregister(executionId);
@@ -224,6 +261,36 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
             return reply.status(200).send(record);
         }
     );
+    // -------------------------------------------------------------
+    // GET /api/v1/executions/:id/results (Ephemeral 15m Cache)
+    // -------------------------------------------------------------
+    fastify.get<{ Params: { id: string } }>(
+        "/executions/:id/results",
+        { preHandler: [requireAuth] },
+        async (request, reply) => {
+            const executionId = request.params.id;
+            const userId = request.user!.id;
+
+            const lookup = resultCacheService.getExecutionResult(executionId, userId);
+            if (!lookup.ok) {
+                const statusMap: Record<string, number> = {
+                    NOT_FOUND: 404,
+                    FORBIDDEN: 403,
+                    EXPIRED: 410,
+                };
+                const statusCode = statusMap[lookup.status] || 400;
+                return reply.status(statusCode).send({
+                    statusCode,
+                    error: lookup.errorCode,
+                    message: lookup.errorMessage,
+                    timestamp: new Date().toISOString(),
+                });
+            }
+
+            return reply.status(200).send(lookup.result);
+        }
+    );
+
 
     // -------------------------------------------------------------
     // POST /api/v1/executions/:id/cancel
