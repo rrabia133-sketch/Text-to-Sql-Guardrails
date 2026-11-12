@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { Header } from "./components/Header";
 import { UserSwitcherModal } from "./features/auth/UserSwitcherModal";
+import { AuthWelcomeScreen } from "./features/auth/AuthWelcomeScreen";
 import { ProviderSelector } from "./features/query/ProviderSelector";
 import { QueryInputBar } from "./features/query/QueryInputBar";
 import { SqlPreviewPanel } from "./features/query/SqlPreviewPanel";
@@ -213,25 +214,14 @@ function MainWorkspace() {
                     />
                 </main>
             ) : (
-                /* Unauthenticated Empty State */
-                <main className="unauth-workspace">
-                    <div className="empty-state-card">
-                        <div className="empty-state-icon">🔒</div>
-                        <h2>Authentication Required</h2>
-                        <p>Sign in to access your protected SQL query workspace and session history.</p>
-                        <button
-                            className="action-btn"
-                            onClick={() => setIsUserModalOpen(true)}
-                        >
-                            Select Demo User to Sign In
-                        </button>
-                    </div>
-
+                /* Unauthenticated Welcome & Sign-In Stage */
+                <>
+                    <AuthWelcomeScreen onOpenModal={() => setIsUserModalOpen(true)} />
                     <UserSwitcherModal
                         isOpen={isUserModalOpen}
                         onClose={() => setIsUserModalOpen(false)}
                     />
-                </main>
+                </>
             )}
 
             <footer className="app-statusbar">
@@ -252,19 +242,19 @@ function MainWorkspace() {
 
                     <div className="status-pill">
                         <span>Schema Grounding:</span>
-                        <span style={{ color: "#38bdf8" }}>v1-allowlisted</span>
+                        <span style={{ color: "#0369a1", fontWeight: 600 }}>v1-allowlisted</span>
                     </div>
 
                     <div className="status-pill">
                         <span>Glossary:</span>
-                        <span style={{ color: "#a78bfa" }}>v1.0.0</span>
+                        <span style={{ color: "#6d28d9", fontWeight: 600 }}>v1.0.0</span>
                     </div>
                 </div>
 
                 <div className="status-group">
                     <div className="status-pill">
                         <span>Persona:</span>
-                        <span style={{ color: user ? "#10b981" : "#9ca3af" }}>
+                        <span style={{ color: user ? "#047857" : "#475569", fontWeight: 600 }}>
                             {user ? `${user.displayName} [${user.role.toUpperCase()}]` : "GUEST"}
                         </span>
                     </div>

@@ -16,7 +16,7 @@ export function Header({ onOpenHistory }: HeaderProps = {}) {
                 <div className="brand">
                     <div className="brand-icon">SQL</div>
                     <h1 className="brand-title">Text-to-SQL Guardrails</h1>
-                    <span className="brand-badge">Sprint 6</span>
+                    <span className="brand-badge">AST &amp; Airgap Guarded</span>
                 </div>
 
                 <div className="header-meta">
