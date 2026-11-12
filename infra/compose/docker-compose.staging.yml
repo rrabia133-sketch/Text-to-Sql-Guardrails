@@ -1,0 +1,96 @@
+services:
+  # ==========================================
+  # 1. Internal Protected PostgreSQL Service
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: text2sql_postgres_staging
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_staging_password_2026
+    # Ports are NOT published to the host machine in staging to prevent host-level access
+    expose:
+      - "5432"
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+      - postgres_staging_data:/var/lib/postgresql/data
+    networks:
+      - internal-db-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  # ==========================================
+  # 2. Fastify API Server (Non-Root)
+  # ==========================================
+  backend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.backend
+    container_name: text2sql_backend_staging
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: "0.0.0.0"
+      APP_DATABASE_URL: "postgresql://app_user:app_password@postgres:5432/app_db"
+      ANALYTICS_DATABASE_URL: "postgresql://analytics_user:analytics_password@postgres:5432/analytics_db"
+      SESSION_SECRET: "staging_session_secret_min_32_characters_long_2026_!"
+      PROVIDER_MODE: "local"
+      OLLAMA_BASE_URL: "http://host.docker.internal:11434"
+      LOG_LEVEL: "info"
+    expose:
+      - "3000"
+    networks:
+      - internal-db-net
+      - frontend-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/api/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # ==========================================
+  # 3. Static Web Frontend & Reverse Proxy
+  # ==========================================
+  frontend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.frontend
+    container_name: text2sql_frontend_staging
+    ports:
+      # Pinned to loopback 127.0.0.1 on port 8080
+      - "127.0.0.1:8080:8080"
+    networks:
+      - frontend-net
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  # Internal network connecting backend and postgres (airgapped from frontend client traffic)
+  internal-db-net:
+    driver: bridge
+    internal: true
+  # Frontend network connecting browser proxy to Fastify API
+  frontend-net:
+    driver: bridge
+
+volumes:
+  postgres_staging_data:
+

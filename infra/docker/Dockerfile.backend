@@ -1,0 +1,65 @@
+# Multi-stage hardened non-root container for Fastify Backend
+# Stage 1: Build & Compilation
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Install build dependencies
+COPY package.json package-lock.json ./
+COPY packages/contracts/package.json ./packages/contracts/
+COPY backend/package.json ./backend/
+
+# Install all dependencies including devDependencies for build
+RUN npm ci
+
+# Copy source files
+COPY tsconfig.base.json ./
+COPY packages/contracts/ ./packages/contracts/
+COPY backend/ ./backend/
+
+# Build contracts and backend
+RUN npm run build --workspace=@text2sql/contracts
+RUN npm run build --workspace=@text2sql/backend
+
+# Prune devDependencies for minimal runtime
+RUN npm prune --omit=dev --workspace=@text2sql/contracts --workspace=@text2sql/backend
+
+# ==========================================
+# Stage 2: Minimal Non-Root Runtime
+# ==========================================
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+# Set production environment
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
+# Install dumb-init or curl for healthchecks
+RUN apk add --no-cache curl
+
+# Copy runtime node_modules and built artifacts
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/packages/contracts/package.json ./packages/contracts/
+COPY --from=builder /app/packages/contracts/dist ./packages/contracts/dist
+COPY --from=builder /app/backend/package.json ./backend/
+COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/backend/node_modules ./backend/node_modules
+
+# Ensure non-root ownership (UID 1000: node)
+RUN chown -R node:node /app
+
+# Switch to unprivileged non-root user
+USER node
+
+EXPOSE 3000
+
+# Container healthcheck
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://127.0.0.1:3000/api/ || exit 1
+
+# Start Fastify server
+CMD ["node", "backend/dist/server.js"]
+

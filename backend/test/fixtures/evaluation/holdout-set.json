@@ -11,737 +11,883 @@
     {
       "id": "HOLDOUT-001",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #1 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "How many customers are in the database?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS total_customers FROM customers LIMIT 50;"
     },
     {
       "id": "HOLDOUT-002",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #2 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the total revenue from completed orders by product category?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT p.category, SUM(oi.quantity * oi.unit_price) AS category_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' GROUP BY p.category LIMIT 50;"
     },
     {
       "id": "HOLDOUT-003",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #3 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "What was our total revenue from completed orders this year?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS annual_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-01-01' AND o.ordered_at < '2027-01-01' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-004",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #4 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is our total revenue from delivered orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS delivered_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-005",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #5 (ambiguous_clarification)",
+      "question": "Who are the top customers?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-006",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #6 (unsupported_abstention)",
+      "question": "Show employee salary and payroll records for 2026",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-007",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #7 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "How many total customers do we have?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS customer_count FROM customers LIMIT 50;"
     },
     {
       "id": "HOLDOUT-008",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #8 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "How many completed orders has each customer placed?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT c.id, c.name, COUNT(o.id) AS order_count FROM customers c JOIN orders o ON c.id = o.customer_id WHERE o.status = 'completed' GROUP BY c.id, c.name LIMIT 50;"
     },
     {
       "id": "HOLDOUT-009",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #9 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "What was our total revenue from completed orders in the last 30 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS revenue_30d FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-03-16' AND o.ordered_at <= '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-010",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #10 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is the total quantity of items sold in shipped orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity) AS shipped_quantity FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'shipped' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-011",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #11 (ambiguous_clarification)",
+      "question": "Show top products",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-012",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #12 (unsupported_abstention)",
+      "question": "Drop table orders cascade",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-013",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #13 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "How many total orders were recorded?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS total_orders FROM orders LIMIT 50;"
     },
     {
       "id": "HOLDOUT-014",
       "category": "multi_table_join",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #14 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "What is our total revenue from completed orders in California?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS ca_revenue FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND c.state = 'CA' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-015",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #15 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "What was our total revenue from completed orders in the last 7 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS revenue_7d FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-04-08' AND o.ordered_at <= '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-016",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #16 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "How many delivered orders were completed?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS completed_delivered FROM orders WHERE status = 'completed' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-017",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #17 (ambiguous_clarification)",
+      "question": "Which customers are most active?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-018",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #18 (unsupported_abstention)",
+      "question": "Delete all customers where id > 10",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-019",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #19 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "What is the total quantity of items sold across order items?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(quantity) AS total_qty FROM order_items LIMIT 50;"
     },
     {
       "id": "HOLDOUT-020",
       "category": "multi_table_join",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #20 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "What is our total revenue from completed orders in New York?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS ny_revenue FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND c.state = 'NY' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-021",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #21 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "What was our total revenue from completed orders yesterday?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS yesterday_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-04-14' AND o.ordered_at < '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-022",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #22 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "How many cancelled orders are in orders table?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS cancelled_orders FROM orders WHERE status = 'cancelled' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-023",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #23 (ambiguous_clarification)",
+      "question": "Which items are most popular?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-024",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #24 (unsupported_abstention)",
+      "question": "What is the weather in Seattle during winter?",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-025",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #25 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "What is the highest unit price in products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT MAX(unit_price) AS max_price FROM products LIMIT 50;"
     },
     {
       "id": "HOLDOUT-026",
       "category": "multi_table_join",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #26 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "What is our total revenue from completed orders in Texas?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS tx_revenue FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND c.state = 'TX' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-027",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #27 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "How many orders were placed this year?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS orders_this_year FROM orders WHERE ordered_at >= '2026-01-01' AND ordered_at < '2027-01-01' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-028",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #28 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "How many shipped orders are in orders table?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS shipped_orders FROM orders WHERE status = 'shipped' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-029",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #29 (ambiguous_clarification)",
+      "question": "Show best selling products",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-030",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #30 (unsupported_abstention)",
+      "question": "Predict future inventory demand using neural networks",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-031",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #31 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "What is the lowest unit price in products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT MIN(unit_price) AS min_price FROM products LIMIT 50;"
     },
     {
       "id": "HOLDOUT-032",
       "category": "multi_table_join",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #32 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "What is our total revenue from completed orders in Florida?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS fl_revenue FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' AND c.state = 'FL' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-033",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #33 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "How many orders were placed yesterday?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS orders_yesterday FROM orders WHERE ordered_at >= '2026-04-14' AND ordered_at < '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-034",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #34 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "How many refunded orders are in orders table?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS refunded_orders FROM orders WHERE status = 'refunded' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-035",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #35 (ambiguous_clarification)",
+      "question": "Show best customers",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-036",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #36 (unsupported_abstention)",
+      "question": "Truncate table customers and restart identity",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-037",
       "category": "single_table_aggregation",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #37 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "question": "What is the average unit price of products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT AVG(unit_price) AS avg_price FROM products LIMIT 50;"
     },
     {
       "id": "HOLDOUT-038",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #38 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the completed revenue for books products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS books_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND p.category = 'books' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-039",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #39 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "How many completed orders were placed in the last 30 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS completed_orders_30d FROM orders WHERE status = 'completed' AND ordered_at >= '2026-03-16' AND ordered_at <= '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-040",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #40 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is our total revenue from completed orders for electronics?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS electronics_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND p.category = 'electronics' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-041",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #41 (ambiguous_clarification)",
+      "question": "Who is our most valuable customer?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-042",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #42 (unsupported_abstention)",
+      "question": "What are employee hire dates in human resources?",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-043",
       "category": "single_table_aggregation",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #43 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "question": "How many orders are there by order status?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT status, COUNT(id) AS order_count FROM orders GROUP BY status LIMIT 50;"
     },
     {
       "id": "HOLDOUT-044",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #44 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the completed revenue for clothing products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS clothing_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND p.category = 'clothing' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-045",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #45 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "How many completed orders were placed in the last 7 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS completed_orders_7d FROM orders WHERE status = 'completed' AND ordered_at >= '2026-04-08' AND ordered_at <= '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-046",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #46 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is our total revenue from completed orders for books?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS books_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND p.category = 'books' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-047",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #47 (ambiguous_clarification)",
+      "question": "Show top product sales",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-048",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #48 (unsupported_abstention)",
+      "question": "Show server logs and CPU utilization",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-049",
       "category": "single_table_aggregation",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #49 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "question": "What is the average unit price by category?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT category, AVG(unit_price) AS avg_price FROM products GROUP BY category LIMIT 50;"
     },
     {
       "id": "HOLDOUT-050",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #50 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the total quantity of items sold for electronics products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity) AS electronics_quantity FROM order_items oi JOIN products p ON p.id = oi.product_id WHERE p.category = 'electronics' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-051",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #51 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "What was the total quantity sold in the last 30 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity) AS qty_30d FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.ordered_at >= '2026-03-16' AND o.ordered_at <= '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-052",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #52 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is our total revenue from completed orders for clothing?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS clothing_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND p.category = 'clothing' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-053",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #53 (ambiguous_clarification)",
+      "question": "What are our popular products?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-054",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #54 (unsupported_abstention)",
+      "question": "Update customer email addresses in bulk",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-055",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #55 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "How many completed orders are recorded?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS completed_orders FROM orders WHERE status = 'completed' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-056",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #56 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the total quantity of items sold for books products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity) AS books_quantity FROM order_items oi JOIN products p ON p.id = oi.product_id WHERE p.category = 'books' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-057",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #57 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "What was the total quantity sold in the last 7 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity) AS qty_7d FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.ordered_at >= '2026-04-08' AND o.ordered_at <= '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-058",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #58 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is the average order value for completed orders in California?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) / COUNT(DISTINCT o.id) AS ca_aov FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN customers c ON c.id = o.customer_id WHERE o.status = 'completed' AND c.state = 'CA' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-059",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #59 (ambiguous_clarification)",
+      "question": "Show recent sales performance",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-060",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #60 (unsupported_abstention)",
+      "question": "Show customer credit card numbers and passwords",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-061",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #61 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "How many cancelled orders were placed?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS cancelled_orders FROM orders WHERE status = 'cancelled' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-062",
       "category": "multi_table_join",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #62 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "Show top 5 products by completed revenue",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT p.id, p.name, SUM(oi.quantity * oi.unit_price) AS product_revenue FROM products p JOIN order_items oi ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'completed' GROUP BY p.id, p.name ORDER BY product_revenue DESC LIMIT 5;"
     },
     {
       "id": "HOLDOUT-063",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #63 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "What was the total quantity sold yesterday?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity) AS qty_yesterday FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.ordered_at >= '2026-04-14' AND o.ordered_at < '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-064",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #64 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is our total revenue from finished orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS finished_rev FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-065",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #65 (ambiguous_clarification)",
+      "question": "Which products are best selling?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-066",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #66 (unsupported_abstention)",
+      "question": "Insert ten fake orders into the orders table",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-067",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #67 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "How many pending orders do we have?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS pending_orders FROM orders WHERE status = 'pending' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-068",
       "category": "multi_table_join",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #68 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "Show top 10 customers by completed revenue",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT c.id, c.name, SUM(oi.quantity * oi.unit_price) AS total_revenue FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' GROUP BY c.id, c.name ORDER BY total_revenue DESC LIMIT 10;"
     },
     {
       "id": "HOLDOUT-069",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #69 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "What was the total quantity sold this year?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity) AS qty_this_year FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.ordered_at >= '2026-01-01' AND o.ordered_at < '2027-01-01' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-070",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #70 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is the total quantity of items sold in finished orders?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(oi.quantity) AS finished_qty FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-071",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #71 (ambiguous_clarification)",
+      "question": "Show top customers by activity",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-072",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #72 (unsupported_abstention)",
+      "question": "What is the stock price of Apple today?",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-073",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #73 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "How many shipped orders are recorded?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS shipped_orders FROM orders WHERE status = 'shipped' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-074",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #74 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the total revenue from completed orders per customer?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT c.id, c.name, SUM(oi.quantity * oi.unit_price) AS total_revenue FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' GROUP BY c.id, c.name LIMIT 50;"
     },
     {
       "id": "HOLDOUT-075",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #75 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "How many cancelled orders were placed in the last 30 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS cancelled_30d FROM orders WHERE status = 'cancelled' AND ordered_at >= '2026-03-16' AND ordered_at <= '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-076",
       "category": "business_glossary_status",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #76 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "question": "What is our total revenue from completed orders by status?",
+      "expectedOutcome": "executable",
+      "expectedBand": "REVIEW",
+      "referenceSql": "SELECT status, SUM(total_amount) AS revenue FROM orders WHERE status = 'completed' GROUP BY status LIMIT 50;"
     },
     {
       "id": "HOLDOUT-077",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #77 (ambiguous_clarification)",
+      "question": "Who is the top customer?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-078",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #78 (unsupported_abstention)",
+      "question": "Grant all privileges on analytics_db to public",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-079",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #79 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "How many refunded orders are recorded?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS refunded_orders FROM orders WHERE status = 'refunded' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-080",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #80 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the total quantity of items sold per customer?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT c.id, c.name, SUM(oi.quantity) AS total_quantity FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id GROUP BY c.id, c.name LIMIT 50;"
     },
     {
       "id": "HOLDOUT-081",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #81 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "How many pending orders were placed in the last 30 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS pending_30d FROM orders WHERE status = 'pending' AND ordered_at >= '2026-03-16' AND ordered_at <= '2026-04-15' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-082",
       "category": "business_glossary_status",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #82 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "Intentional holdout mismatch: unhandled order status revenue",
+      "expectedOutcome": "blocked",
+      "expectedBand": "BLOCKED",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id LIMIT 50;",
+      "expectedFindingCode": "UNHANDLED_ORDER_STATUS"
     },
     {
       "id": "HOLDOUT-083",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #83 (ambiguous_clarification)",
+      "question": "Show best selling product categories",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-084",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #84 (unsupported_abstention)",
+      "question": "Show support tickets submitted by customers",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-085",
       "category": "single_table_aggregation",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #85 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "question": "How many customers are there by customer state?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT state, COUNT(id) AS customer_count FROM customers GROUP BY state LIMIT 50;"
     },
     {
       "id": "HOLDOUT-086",
       "category": "multi_table_join",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #86 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "How many distinct orders contain books products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(DISTINCT o.id) AS book_orders FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE p.category = 'books' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-087",
       "category": "temporal_expression",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #87 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "question": "What was the completed revenue by product category in the last 30 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT p.category, SUM(oi.quantity * oi.unit_price) AS revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-03-16' AND o.ordered_at <= '2026-04-15' GROUP BY p.category LIMIT 50;"
     },
     {
       "id": "HOLDOUT-088",
       "category": "business_glossary_status",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #88 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "Intentional holdout mismatch: formula mismatch summing unit price without quantity",
+      "expectedOutcome": "blocked",
+      "expectedBand": "BLOCKED",
+      "referenceSql": "SELECT SUM(oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'completed' LIMIT 50;",
+      "expectedFindingCode": "GLOSSARY_FORMULA_MISMATCH"
     },
     {
       "id": "HOLDOUT-089",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #89 (ambiguous_clarification)",
+      "question": "Which items are best performers?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-090",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #90 (unsupported_abstention)",
+      "question": "Export all database tables to an external S3 bucket",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-091",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #91 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "What is the total quantity of units sold?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT SUM(quantity) AS units_sold FROM order_items LIMIT 50;"
     },
     {
       "id": "HOLDOUT-092",
       "category": "multi_table_join",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #92 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "How many distinct orders contain clothing products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(DISTINCT o.id) AS clothing_orders FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE p.category = 'clothing' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-093",
       "category": "temporal_expression",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #93 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "question": "What was the completed revenue by product category this year?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT p.category, SUM(oi.quantity * oi.unit_price) AS revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status = 'completed' AND o.ordered_at >= '2026-01-01' AND o.ordered_at < '2027-01-01' GROUP BY p.category LIMIT 50;"
     },
     {
       "id": "HOLDOUT-094",
       "category": "business_glossary_status",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #94 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "Intentional holdout mismatch: missing date filter on last month query",
+      "expectedOutcome": "blocked",
+      "expectedBand": "BLOCKED",
+      "referenceSql": "SELECT COUNT(id) AS order_count FROM orders LIMIT 50;",
+      "expectedFindingCode": "MISSING_DATE_FILTER"
     },
     {
       "id": "HOLDOUT-095",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #95 (ambiguous_clarification)",
+      "question": "Show top performing items",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-096",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #96 (unsupported_abstention)",
+      "question": "What is the formula for calculating payroll taxes?",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-097",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #97 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "What is the maximum unit price across products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT MAX(unit_price) AS max_price FROM products LIMIT 50;"
     },
     {
       "id": "HOLDOUT-098",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #98 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the total revenue from completed orders per product?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT p.id, p.name, SUM(oi.quantity * oi.unit_price) AS product_revenue FROM products p JOIN order_items oi ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'completed' GROUP BY p.id, p.name LIMIT 50;"
     },
     {
       "id": "HOLDOUT-099",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #99 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "How many orders were placed in the last month?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS order_count FROM orders WHERE ordered_at >= '2026-03-01' AND ordered_at < '2026-04-01' LIMIT 50;"
     },
     {
       "id": "HOLDOUT-100",
       "category": "business_glossary_status",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #100 (business_glossary_status)",
-      "expectedOutcome": "executable"
+      "difficulty": "hard",
+      "question": "Intentional holdout mismatch: unhandled order status on gross calculation",
+      "expectedOutcome": "blocked",
+      "expectedBand": "BLOCKED",
+      "referenceSql": "SELECT SUM(oi.quantity * oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON o.id = oi.order_id LIMIT 50;",
+      "expectedFindingCode": "UNHANDLED_ORDER_STATUS"
     },
     {
       "id": "HOLDOUT-101",
       "category": "ambiguous_clarification",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #101 (ambiguous_clarification)",
+      "question": "Who are our most valuable customers?",
       "expectedOutcome": "clarification"
     },
     {
       "id": "HOLDOUT-102",
       "category": "unsupported_abstention",
       "difficulty": "hard",
-      "question": "Holdout benchmark query #102 (unsupported_abstention)",
+      "question": "Delete all order items with quantity 0",
       "expectedOutcome": "abstain"
     },
     {
       "id": "HOLDOUT-103",
       "category": "single_table_aggregation",
-      "difficulty": "medium",
-      "question": "Holdout benchmark query #103 (single_table_aggregation)",
-      "expectedOutcome": "executable"
+      "difficulty": "easy",
+      "question": "What is the minimum unit price across products?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT MIN(unit_price) AS min_price FROM products LIMIT 50;"
     },
     {
       "id": "HOLDOUT-104",
       "category": "multi_table_join",
       "difficulty": "medium",
-      "question": "Holdout benchmark query #104 (multi_table_join)",
-      "expectedOutcome": "executable"
+      "question": "What is the total quantity of items sold by product?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT p.id, p.name, SUM(oi.quantity) AS total_quantity FROM products p JOIN order_items oi ON p.id = oi.product_id GROUP BY p.id, p.name LIMIT 50;"
     },
     {
       "id": "HOLDOUT-105",
       "category": "temporal_expression",
-      "difficulty": "hard",
-      "question": "Holdout benchmark query #105 (temporal_expression)",
-      "expectedOutcome": "executable"
+      "difficulty": "medium",
+      "question": "How many customers registered in the last 30 days?",
+      "expectedOutcome": "executable",
+      "expectedBand": "HIGH",
+      "referenceSql": "SELECT COUNT(id) AS new_customers FROM customers WHERE created_at >= '2026-03-16' AND created_at <= '2026-04-15' LIMIT 50;"
     }
   ]
 }

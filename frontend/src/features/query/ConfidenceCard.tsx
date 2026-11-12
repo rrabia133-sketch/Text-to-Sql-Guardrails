@@ -28,7 +28,7 @@ export function ConfidenceCard({
     breakdown,
     findings = [],
 }: ConfidenceCardProps) {
-    const [expanded, setExpanded] = useState(true);
+    const [expanded, setExpanded] = useState(false);
 
     const normalizedBand = band.toUpperCase() as ConfidenceBand;
     const bandClass = normalizedBand.toLowerCase();

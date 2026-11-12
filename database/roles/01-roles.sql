@@ -55,10 +55,11 @@ GRANT CONNECT ON DATABASE app_db TO db_migrator;
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM analytics_user;
 
--- Grant read-only access to existing & future tables
+-- Grant read-only access to existing & future tables (created by postgres or db_migrator)
 GRANT USAGE ON SCHEMA public TO analytics_user;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO analytics_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO analytics_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE db_migrator IN SCHEMA public GRANT SELECT ON TABLES TO analytics_user;
 
 -- Allow db_migrator to manage DDL in analytics_db
 GRANT ALL ON SCHEMA public TO db_migrator;
@@ -80,12 +81,14 @@ ALTER ROLE analytics_user SET statement_timeout = '5s';
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 REVOKE CREATE ON SCHEMA public FROM app_user;
 
--- Grant CRUD on application metadata tables to app_user
+-- Grant CRUD on application metadata tables to app_user (including tables created by db_migrator)
 GRANT USAGE ON SCHEMA public TO app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO app_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO app_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE db_migrator IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE db_migrator IN SCHEMA public GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO app_user;
 
 -- Allow db_migrator full DDL privileges to manage migrations
 GRANT ALL ON SCHEMA public TO db_migrator;

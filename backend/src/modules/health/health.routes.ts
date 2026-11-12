@@ -13,7 +13,7 @@ export const healthRoutes: FastifyPluginAsync<HealthRoutesOptions> = async (
     const { dbChecker } = opts;
 
     // Liveness probe: verifies the Fastify Node process is running
-    fastify.get("/health", async (): Promise<HealthResponse> => {
+    const livenessHandler = async (): Promise<HealthResponse> => {
         const uptime = Math.floor(process.uptime());
         return {
             status: "ok",
@@ -22,10 +22,12 @@ export const healthRoutes: FastifyPluginAsync<HealthRoutesOptions> = async (
             uptimeSeconds: uptime,
             timestamp: new Date().toISOString(),
         };
-    });
+    };
+    fastify.get("/health", livenessHandler);
+    fastify.get("/health/liveness", livenessHandler);
 
     // Readiness probe: verifies end-to-end connectivity to analytics_db and app_db
-    fastify.get("/ready", async (_req, reply): Promise<ReadinessResponse> => {
+    const readinessHandler = async (_req: any, reply: any): Promise<ReadinessResponse> => {
         const checkResults = await dbChecker.checkHealth();
 
         const isReady =
@@ -43,5 +45,7 @@ export const healthRoutes: FastifyPluginAsync<HealthRoutesOptions> = async (
         }
 
         return response;
-    });
+    };
+    fastify.get("/ready", readinessHandler);
+    fastify.get("/health/readiness", readinessHandler);
 };

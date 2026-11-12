@@ -1,0 +1,108 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  secret-scan:
+    name: Secret Scan & Git Hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Ensure .env is not tracked in git
+        run: |
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo "ERROR: .env file must never be tracked in git!"
+            exit 1
+          fi
+
+      - name: Run repository secret & placeholder check
+        run: node scripts/secret-scan.mjs
+
+      - name: Run Gitleaks secret scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-test:
+    name: Lint, Typecheck, Test & Build
+    runs-on: ubuntu-latest
+    needs: secret-scan
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_dev_password_2026
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      PORT: 3001
+      HOST: 127.0.0.1
+      CORS_ORIGIN: http://localhost:5173
+      SESSION_SECRET: ci-test-session-secret-minimum-32-characters-long
+      ANALYTICS_DB_URL: postgresql://analytics_user:analytics_password@127.0.0.1:5434/analytics_db
+      APP_DB_URL: postgresql://app_user:app_password@127.0.0.1:5434/app_db
+      MIGRATION_DB_URL: postgresql://db_migrator:migrator_password@127.0.0.1:5434/app_db
+      PROVIDER_MODE: local
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 with npm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies cleanly
+        run: npm ci
+
+      - name: Build shared contracts package
+        run: npm run build -w packages/contracts
+
+      - name: Initialize dual PostgreSQL databases, roles & fixtures
+        run: |
+          command -v psql >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y postgresql-client)
+          export PGPASSWORD=postgres_dev_password_2026
+          psql -h 127.0.0.1 -p 5434 -U postgres -d postgres -v ON_ERROR_STOP=1 -f infra/compose/init-scripts/01-init-databases.sql
+          psql -h 127.0.0.1 -p 5434 -U postgres -d postgres -v ON_ERROR_STOP=1 -f infra/compose/init-scripts/02-init-roles.sql
+          psql -h 127.0.0.1 -p 5434 -U postgres -d analytics_db -v ON_ERROR_STOP=1 -f database/analytics/schema/01-schema.sql
+          psql -h 127.0.0.1 -p 5434 -U postgres -d analytics_db -v ON_ERROR_STOP=1 -f database/analytics/seeds/02-seed-small.sql
+
+      - name: Apply app_db migrations
+        run: npm run migrate
+
+      - name: Run workspace lint checks
+        run: npm run lint
+
+      - name: Run workspace TypeScript checks
+        run: npm run typecheck
+
+      - name: Run automated test suites
+        run: npm run test
+
+      - name: Run full production build
+        run: npm run build
+

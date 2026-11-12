@@ -177,19 +177,21 @@ function MainWorkspace() {
             {user ? (
                 /* Authenticated Analyst Workspace */
                 <main className="workspace-main">
-                    <ProviderSelector
-                        selectedProvider={selectedProvider}
-                        onSelectProvider={(p) => setSelectedProvider(p)}
-                        disabled={generating}
-                    />
+                    <div className="workspace-sidebar">
+                        <ProviderSelector
+                            selectedProvider={selectedProvider}
+                            onSelectProvider={(p) => setSelectedProvider(p)}
+                            disabled={generating}
+                        />
 
-                    <QueryInputBar
-                        prompt={prompt}
-                        onPromptChange={setPrompt}
-                        onSubmit={() => handleGenerateQuery()}
-                        loading={generating}
-                        error={generationError}
-                    />
+                        <QueryInputBar
+                            prompt={prompt}
+                            onPromptChange={setPrompt}
+                            onSubmit={() => handleGenerateQuery()}
+                            loading={generating}
+                            error={generationError}
+                        />
+                    </div>
 
                     <SqlPreviewPanel
                         generationResponse={generationResponse}

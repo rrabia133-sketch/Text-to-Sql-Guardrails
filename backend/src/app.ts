@@ -35,6 +35,9 @@ import { HistoryRepository } from "./modules/history/history.repository.js";
 import { exportRoutes } from "./modules/export/export.routes.js";
 import { CsvExporterService } from "./modules/export/csv-exporter.service.js";
 import { ResultCacheService } from "./modules/execution/result-cache.service.js";
+import { tracingAndRedactionPlugin, PINO_REDACT_PATHS } from "./plugins/redaction.js";
+import { MetricsService } from "./modules/metrics/metrics.service.js";
+import { metricsRoutes } from "./modules/metrics/metrics.routes.js";
 
 export interface BuildAppOptions extends FastifyServerOptions {
     appConfig?: AppConfig;
@@ -58,6 +61,7 @@ export interface BuildAppOptions extends FastifyServerOptions {
     csvExporterService?: CsvExporterService;
     historyRepo?: HistoryRepository;
     retentionService?: RetentionService;
+    metricsService?: MetricsService;
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -90,7 +94,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     const app = Fastify({
         logger: {
             level: currentConfig.NODE_ENV === "test" ? "silent" : "info",
-            redact: ["req.headers.authorization", "req.headers.cookie"],
+            redact: PINO_REDACT_PATHS,
         },
         ...opts,
     });
@@ -109,6 +113,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     });
 
     // Core security & utility plugins
+    await app.register(tracingAndRedactionPlugin);
     await app.register(sensible);
 
     await app.register(cors, {
@@ -127,6 +132,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
 
     // Health and readiness routes
     await app.register(healthRoutes, { dbChecker });
+    await app.register(healthRoutes, { dbChecker, prefix: "/api" });
 
     // Auth endpoints (/api/auth/login, /api/auth/logout, /api/auth/me, /api/auth/users)
     await app.register(authRoutes, { authRepo, prefix: "/api/auth" });
@@ -210,6 +216,10 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         auditLogger,
         prefix: "/api/v1",
     });
+
+    // Observability Prometheus Metrics (Sprint 7 / DO-10)
+    const metricsService = opts.metricsService || new MetricsService(appPool, analyticsPool);
+    await app.register(metricsRoutes, { metricsService });
 
     // Initial root & API health probe
     const rootProbe = async () => {

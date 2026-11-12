@@ -243,48 +243,50 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
                 />
 
                 {/* Referenced Tables & Metadata */}
-                <div className="metadata-grid">
-                    <div className="metadata-item">
-                        <span className="meta-label">Referenced Tables:</span>
-                        <div className="tags-list">
-                            {generationResponse.referencedTables.map((tbl, i) => (
-                                <span key={i} className="table-badge">
-                                    📁 {tbl}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    {generationResponse.referencedColumns.length > 0 && (
+                <div className="preview-details-grid">
+                    <div className="metadata-grid">
                         <div className="metadata-item">
-                            <span className="meta-label">Columns:</span>
+                            <span className="meta-label">Referenced Tables:</span>
                             <div className="tags-list">
-                                {generationResponse.referencedColumns.map((col, i) => (
-                                    <span key={i} className="column-badge">
-                                        {col}
+                                {generationResponse.referencedTables.map((tbl, i) => (
+                                    <span key={i} className="table-badge">
+                                        📁 {tbl}
                                     </span>
                                 ))}
                             </div>
                         </div>
-                    )}
-                </div>
 
-                {/* Model Assumptions */}
-                {generationResponse.assumptions.length > 0 && (
-                    <div className="assumptions-box">
-                        <h4 className="box-title">Model Assumptions & Applied Filters</h4>
-                        <ul className="assumptions-list">
-                            {generationResponse.assumptions.map((item, idx) => (
-                                <li key={idx}>{item}</li>
-                            ))}
-                        </ul>
+                        {generationResponse.referencedColumns.length > 0 && (
+                            <div className="metadata-item">
+                                <span className="meta-label">Columns:</span>
+                                <div className="tags-list">
+                                    {generationResponse.referencedColumns.map((col, i) => (
+                                        <span key={i} className="column-badge">
+                                            {col}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                )}
 
-                {/* Plain-English Explanation */}
-                <div className="explanation-box">
-                    <h4 className="box-title">Query Explanation</h4>
-                    <p className="explanation-text">{generationResponse.explanation}</p>
+                    {/* Plain-English Explanation */}
+                    <div className="explanation-box">
+                        <h4 className="box-title">Query Explanation</h4>
+                        <p className="explanation-text">{generationResponse.explanation}</p>
+                    </div>
+
+                    {/* Model Assumptions */}
+                    {generationResponse.assumptions.length > 0 && (
+                        <div className="assumptions-box">
+                            <h4 className="box-title">Model Assumptions & Applied Filters</h4>
+                            <ul className="assumptions-list">
+                                {generationResponse.assumptions.map((item, idx) => (
+                                    <li key={idx}>{item}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
 
                 {/* Version Registry Footer */}
