@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
 import type { FeedbackVerdict, FeedbackReasonCode, FeedbackRecord } from "@text2sql/contracts";
+import {
+    AlertTriangleIcon,
+    CheckIcon,
+    ThumbDownIcon,
+    ThumbUpIcon,
+} from "../../components/Icons";
 
 export interface FeedbackWidgetProps {
     artifactId: string;
@@ -130,7 +136,8 @@ export function FeedbackWidget({
                         title="Mark query as correct"
                         aria-pressed={verdict === "correct"}
                     >
-                        👍 Correct
+                        <ThumbUpIcon size={14} />
+                        <span>Correct</span>
                     </button>
 
                     <button
@@ -141,7 +148,8 @@ export function FeedbackWidget({
                         title="Mark query as incorrect or flawed"
                         aria-pressed={verdict === "incorrect"}
                     >
-                        👎 Incorrect
+                        <ThumbDownIcon size={14} />
+                        <span>Incorrect</span>
                     </button>
                 </div>
             </div>
@@ -149,8 +157,11 @@ export function FeedbackWidget({
             {/* Success Toast */}
             {submitted && !showIncorrectForm && (
                 <div className="feedback-success-banner" role="status">
-                    <span>
-                        ✓ Feedback recorded ({verdict === "correct" ? "Accurate" : "Needs Review"}). Thank you!
+                    <span className="feedback-banner-copy">
+                        <CheckIcon size={13} />
+                        <span>
+                            Feedback recorded ({verdict === "correct" ? "Accurate" : "Needs Review"}). Thank you!
+                        </span>
                     </span>
                     <button
                         type="button"
@@ -165,7 +176,10 @@ export function FeedbackWidget({
             {/* Error Banner */}
             {error && (
                 <div className="feedback-error-banner" role="alert">
-                    <span>⚠️ {error}</span>
+                    <span className="feedback-banner-copy">
+                        <AlertTriangleIcon size={14} />
+                        <span>{error}</span>
+                    </span>
                 </div>
             )}
 

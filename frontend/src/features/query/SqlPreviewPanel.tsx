@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type {
     ConfidenceBand,
     QueryGenerationResponse,
@@ -9,25 +9,71 @@ import { ConfidenceCard } from "./ConfidenceCard";
 import { ReviewAcknowledgementModal } from "./ReviewAcknowledgementModal";
 import { ResultsTablePanel } from "../results/ResultsTablePanel";
 import { FeedbackWidget } from "../feedback/FeedbackWidget";
+import {
+    AlertTriangleIcon,
+    BanIcon,
+    CheckIcon,
+    CopyIcon,
+    DatabaseIcon,
+    PlayIcon,
+    ShieldCheckIcon,
+    TableIcon,
+    TerminalIcon,
+} from "../../components/Icons";
 
 export interface SqlPreviewPanelProps {
     generationResponse: QueryGenerationResponse | null;
+    autoExecuteSeq?: number;
     loading: boolean;
 }
 
-export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanelProps) {
+function resolveExecutionPolicy(res: QueryGenerationResponse | null) {
+    if (!res) {
+        return {
+            normalizedBand: "HIGH" as ConfidenceBand,
+            isBlocked: false,
+            isReviewRequired: false,
+            isCompletedArtifact: false,
+        };
+    }
+
+    const normalizedBand: ConfidenceBand = (
+        res.confidenceBand?.toUpperCase() ||
+        (res.status === "preview_blocked"
+            ? "BLOCKED"
+            : res.status === "preview_review"
+            ? "REVIEW"
+            : "HIGH")
+    ) as ConfidenceBand;
+
+    const isBlocked =
+        normalizedBand === "BLOCKED" ||
+        res.status === "preview_blocked" ||
+        res.status === "failed";
+
+    const isReviewRequired =
+        !isBlocked &&
+        (normalizedBand === "REVIEW" || res.status === "preview_review");
+
+    return {
+        normalizedBand,
+        isBlocked,
+        isReviewRequired,
+        isCompletedArtifact: res.status === "executed",
+    };
+}
+
+export function SqlPreviewPanel({
+    generationResponse,
+    autoExecuteSeq = 0,
+    loading,
+}: SqlPreviewPanelProps) {
     const [copied, setCopied] = useState(false);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [executing, setExecuting] = useState(false);
     const [executionError, setExecutionError] = useState<string | null>(null);
     const [executionResult, setExecutionResult] = useState<ExecutionResultResponse | null>(null);
-
-    useEffect(() => {
-        setIsReviewModalOpen(false);
-        setExecuting(false);
-        setExecutionError(null);
-        setExecutionResult(null);
-    }, [generationResponse?.artifactId]);
+    const lastAutoExecutedSeqRef = useRef(0);
 
     const handleCopy = () => {
         if (!generationResponse?.sql) return;
@@ -36,16 +82,21 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const executeArtifact = async (acknowledgement?: ReviewAcknowledgement) => {
-        if (!generationResponse) return;
+    const executeArtifact = async (
+        acknowledgement?: ReviewAcknowledgement,
+        targetArtifactId?: string
+    ) => {
+        const artifactId = targetArtifactId || generationResponse?.artifactId;
+        if (!artifactId) return;
         setExecuting(true);
         setExecutionError(null);
 
         try {
             const res = await fetch(
-                `/api/v1/queries/${encodeURIComponent(generationResponse.artifactId)}/execute`,
+                `/api/v1/queries/${encodeURIComponent(artifactId)}/execute`,
                 {
                     method: "POST",
+                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(
                         acknowledgement ? { acknowledgement } : {}
@@ -67,6 +118,37 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
         }
     };
 
+    useEffect(() => {
+        setIsReviewModalOpen(false);
+        setExecuting(false);
+        setExecutionError(null);
+        setExecutionResult(null);
+
+        if (
+            !generationResponse ||
+            autoExecuteSeq <= 0 ||
+            autoExecuteSeq === lastAutoExecutedSeqRef.current
+        ) {
+            return;
+        }
+
+        lastAutoExecutedSeqRef.current = autoExecuteSeq;
+
+        const { isBlocked, isReviewRequired, isCompletedArtifact } =
+            resolveExecutionPolicy(generationResponse);
+
+        if (isBlocked || isCompletedArtifact) {
+            return;
+        }
+
+        if (isReviewRequired) {
+            setIsReviewModalOpen(true);
+            return;
+        }
+
+        void executeArtifact(undefined, generationResponse.artifactId);
+    }, [generationResponse?.artifactId, autoExecuteSeq]);
+
     if (loading) {
         return (
             <section className="panel-card" id="sql-preview-section">
@@ -87,40 +169,43 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
         return (
             <section className="panel-card empty-preview-card" id="sql-preview-section">
                 <div className="panel-header">
-                    <h2 className="panel-title">Validated SQL & Generation Preview</h2>
+                    <h2 className="panel-title">SQL Query & Database Answer</h2>
                     <span className="brand-badge idle-badge">Idle</span>
                 </div>
                 <div className="panel-body empty-preview-content">
-                    <div className="empty-preview-icon">🔍</div>
-                    <h3 className="empty-preview-heading">No SQL Generated Yet</h3>
+                    <div className="empty-preview-icon-ring" aria-hidden="true">
+                        <DatabaseIcon size={28} />
+                    </div>
+                    <h3 className="empty-preview-heading">Ready for Analytical Query</h3>
                     <p className="empty-preview-text">
-                        Type an analytical question above and click <strong>Generate SQL Preview</strong> to compile schema-grounded PostgreSQL code.
+                        Ask a question on the left to compile AST-validated PostgreSQL SQL, verify semantic confidence, and view live database results side by side.
                     </p>
+                    <div className="empty-workflow-strip" aria-hidden="true">
+                        <span className="empty-workflow-pill">
+                            <ShieldCheckIcon size={13} />
+                            <span>AST Verified</span>
+                        </span>
+                        <span className="empty-workflow-pill">
+                            <TerminalIcon size={13} />
+                            <span>Read-Only Sandbox</span>
+                        </span>
+                        <span className="empty-workflow-pill">
+                            <TableIcon size={13} />
+                            <span>Live Answer</span>
+                        </span>
+                    </div>
                 </div>
             </section>
         );
     }
 
-    const normalizedBand: ConfidenceBand = (
-        generationResponse.confidenceBand?.toUpperCase() ||
-        (generationResponse.status === "preview_blocked"
-            ? "BLOCKED"
-            : generationResponse.status === "preview_review"
-            ? "REVIEW"
-            : "HIGH")
-    ) as ConfidenceBand;
-
-    const isBlocked =
-        normalizedBand === "BLOCKED" ||
-        generationResponse.status === "preview_blocked" ||
-        generationResponse.status === "failed";
-
-    const isReviewRequired =
-        !isBlocked &&
-        (normalizedBand === "REVIEW" || generationResponse.status === "preview_review");
+    const { normalizedBand, isBlocked, isReviewRequired, isCompletedArtifact } =
+        resolveExecutionPolicy(generationResponse);
+    const hasExecuted =
+        executionResult?.status === "completed" || isCompletedArtifact;
 
     const handleRunClick = () => {
-        if (isBlocked || executing) return;
+        if (isBlocked || executing || hasExecuted) return;
         if (isReviewRequired) {
             setIsReviewModalOpen(true);
             return;
@@ -129,14 +214,21 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
     };
 
     const findings = generationResponse.semanticFindings || [];
+    const displayStatus = executing
+        ? "EXECUTING"
+        : executionResult
+        ? executionResult.status.toUpperCase()
+        : executionError
+        ? "EXECUTION_ERROR"
+        : generationResponse.status.toUpperCase();
 
     return (
         <section className="panel-card" id="sql-preview-section">
             <div className="panel-header">
                 <div className="panel-title-group">
-                    <h2 className="panel-title">Grounded SQL Preview</h2>
+                    <h2 className="panel-title">SQL Query & Database Answer</h2>
                     <span className="brand-badge preview-badge">
-                        Status: {generationResponse.status.toUpperCase()}
+                        Status: {displayStatus}
                     </span>
                 </div>
                 <div className="header-meta-tags">
@@ -145,11 +237,21 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
                     </span>
                     <button
                         type="button"
-                        className="copy-btn"
+                        className={`copy-btn ${copied ? "copied" : ""}`}
                         onClick={handleCopy}
                         title="Copy SQL to clipboard"
                     >
-                        {copied ? "✓ Copied" : "📋 Copy SQL"}
+                        {copied ? (
+                            <>
+                                <CheckIcon size={13} />
+                                <span>Copied</span>
+                            </>
+                        ) : (
+                            <>
+                                <CopyIcon size={13} />
+                                <span>Copy SQL</span>
+                            </>
+                        )}
                     </button>
 
                     <button
@@ -162,40 +264,54 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
                                 : "run-btn-ready"
                         }`}
                         onClick={handleRunClick}
-                        disabled={isBlocked || executing}
+                        disabled={isBlocked || executing || hasExecuted}
                         title={
                             isBlocked
                                 ? "Execution blocked due to critical semantic or safety findings"
+                                : hasExecuted
+                                ? "Query already executed against analytics_db"
                                 : isReviewRequired
                                 ? "Review and acknowledge warnings before running query"
                                 : "Execute read-only SQL query against analytics_db"
                         }
                     >
-                        {executing
-                            ? "Running..."
-                            : isBlocked
-                            ? "🚫 Execution Blocked"
-                            : isReviewRequired
-                            ? "⚠️ Review & Run Query"
-                            : "▶ Run Query"}
+                        {executing ? (
+                            <>
+                                <span className="btn-spinner btn-spinner-sm" aria-hidden="true"></span>
+                                <span>Running...</span>
+                            </>
+                        ) : isBlocked ? (
+                            <>
+                                <BanIcon size={13} />
+                                <span>Execution Blocked</span>
+                            </>
+                        ) : hasExecuted ? (
+                            <>
+                                <CheckIcon size={13} />
+                                <span>Executed</span>
+                            </>
+                        ) : isReviewRequired ? (
+                            <>
+                                <AlertTriangleIcon size={13} />
+                                <span>Review & Run Query</span>
+                            </>
+                        ) : (
+                            <>
+                                <PlayIcon size={12} />
+                                <span>Run Query</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
 
             <div className="panel-body">
-                {typeof generationResponse.confidenceScore === "number" && (
-                    <ConfidenceCard
-                        score={generationResponse.confidenceScore}
-                        band={normalizedBand}
-                        breakdown={generationResponse.confidenceBreakdown}
-                        findings={findings}
-                    />
-                )}
-
                 {/* Corrective Guidance Banner when Blocked */}
                 {isBlocked && (
                     <div className="blocked-guidance-banner" role="alert">
-                        <div className="banner-icon">🛑</div>
+                        <div className="banner-icon" aria-hidden="true">
+                            <BanIcon size={20} />
+                        </div>
                         <div className="banner-text">
                             <strong>Execution Blocked — Critical Semantic or Guardrail Refusal</strong>
                             <p>
@@ -205,20 +321,13 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
                     </div>
                 )}
 
-                {executionError && (
-                    <div className="blocked-guidance-banner" role="alert">
-                        <div className="banner-icon">⚠️</div>
-                        <div className="banner-text">
-                            <strong>Execution Error</strong>
-                            <p>{executionError}</p>
-                        </div>
-                    </div>
-                )}
-
                 {/* SQL Code Block */}
                 <div className="code-block-wrapper">
                     <div className="code-header">
-                        <span className="code-lang">PostgreSQL (SELECT only)</span>
+                        <span className="code-lang">
+                            <TerminalIcon size={13} />
+                            <span>Generated SQL (PostgreSQL SELECT only)</span>
+                        </span>
                         <span className="schema-ver-badge">
                             Schema: {generationResponse.versions.schemaVersion}
                         </span>
@@ -228,12 +337,21 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
                     </pre>
                 </div>
 
-                {/* Execution Results Panel (Task 10 & 11) */}
+                {/* Execution Results Panel (Database Answer) */}
                 {(executing || executionError || executionResult) && (
                     <ResultsTablePanel
                         result={executionResult}
                         error={executionError}
                         loading={executing}
+                    />
+                )}
+
+                {typeof generationResponse.confidenceScore === "number" && (
+                    <ConfidenceCard
+                        score={generationResponse.confidenceScore}
+                        band={normalizedBand}
+                        breakdown={generationResponse.confidenceBreakdown}
+                        findings={findings}
                     />
                 )}
 
@@ -250,7 +368,8 @@ export function SqlPreviewPanel({ generationResponse, loading }: SqlPreviewPanel
                             <div className="tags-list">
                                 {generationResponse.referencedTables.map((tbl, i) => (
                                     <span key={i} className="table-badge">
-                                        📁 {tbl}
+                                        <TableIcon size={12} />
+                                        <span>{tbl}</span>
                                     </span>
                                 ))}
                             </div>

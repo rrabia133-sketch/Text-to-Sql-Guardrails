@@ -34,11 +34,12 @@ function MainWorkspace() {
     const [ariaLiveMessage, setAriaLiveMessage] = useState("");
 
     // Query Generation State
-    const [prompt, setPrompt] = useState("What was our total revenue last month?");
+    const [prompt, setPrompt] = useState("What was our total revenue in September 2026?");
     const [selectedProvider, setSelectedProvider] = useState<ProviderType>("ollama");
     const [generating, setGenerating] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [generationResponse, setGenerationResponse] = useState<QueryGenerationResponse | null>(null);
+    const [autoExecuteSeq, setAutoExecuteSeq] = useState(0);
 
     // Clarification Dialog State
     const [clarification, setClarification] = useState<ClarificationResponse | null>(null);
@@ -116,10 +117,11 @@ function MainWorkspace() {
                 setAriaLiveMessage("Clarification needed. Please select an option.");
             } else if (data.type === "generation") {
                 setGenerationResponse(data);
+                setAutoExecuteSeq((prev) => prev + 1);
                 setIsClarificationOpen(false);
                 setClarification(null);
                 setAriaLiveMessage(
-                    `SQL generated successfully with confidence band ${data.confidenceBand || "HIGH"}.`
+                    `SQL generated with confidence band ${data.confidenceBand || "HIGH"}. Running query against database...`
                 );
             }
         } catch (err: any) {
@@ -168,6 +170,10 @@ function MainWorkspace() {
 
     return (
         <div className="app-container">
+            <a href="#main-workspace" className="skip-link">
+                Skip to workspace
+            </a>
+
             {/* Screen Reader ARIA live region */}
             <div className="sr-only" role="status" aria-live="polite">
                 {ariaLiveMessage}
@@ -177,7 +183,7 @@ function MainWorkspace() {
 
             {user ? (
                 /* Authenticated Analyst Workspace */
-                <main className="workspace-main">
+                <main id="main-workspace" className="workspace-main">
                     <div className="workspace-sidebar">
                         <ProviderSelector
                             selectedProvider={selectedProvider}
@@ -196,6 +202,7 @@ function MainWorkspace() {
 
                     <SqlPreviewPanel
                         generationResponse={generationResponse}
+                        autoExecuteSeq={autoExecuteSeq}
                         loading={generating}
                     />
 
@@ -242,19 +249,19 @@ function MainWorkspace() {
 
                     <div className="status-pill">
                         <span>Schema Grounding:</span>
-                        <span style={{ color: "#0369a1", fontWeight: 600 }}>v1-allowlisted</span>
+                        <span className="status-highlight-schema">v1-allowlisted</span>
                     </div>
 
                     <div className="status-pill">
                         <span>Glossary:</span>
-                        <span style={{ color: "#6d28d9", fontWeight: 600 }}>v1.0.0</span>
+                        <span className="status-highlight-glossary">v1.0.0</span>
                     </div>
                 </div>
 
                 <div className="status-group">
                     <div className="status-pill">
                         <span>Persona:</span>
-                        <span style={{ color: user ? "#047857" : "#475569", fontWeight: 600 }}>
+                        <span className={user ? "status-highlight-persona" : "status-persona-guest"}>
                             {user ? `${user.displayName} [${user.role.toUpperCase()}]` : "GUEST"}
                         </span>
                     </div>

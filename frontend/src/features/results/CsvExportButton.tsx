@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AlertTriangleIcon, DownloadIcon } from "../../components/Icons";
 
 export interface CsvExportButtonProps {
     executionId: string;
@@ -71,12 +72,12 @@ export function CsvExportButton({
             >
                 {exporting ? (
                     <>
-                        <span className="spinner-inline" aria-hidden="true">⏳</span>
+                        <span className="btn-spinner btn-spinner-sm" aria-hidden="true"></span>
                         <span>Exporting...</span>
                     </>
                 ) : (
                     <>
-                        <span aria-hidden="true">📥</span>
+                        <DownloadIcon size={14} />
                         <span>Export CSV</span>
                         {truncated && <span className="truncation-sub-badge">(500 row cap)</span>}
                     </>
@@ -85,14 +86,17 @@ export function CsvExportButton({
 
             {exportError && (
                 <div className="export-error-toast" role="alert">
-                    <span>⚠️ {exportError}</span>
+                    <span className="export-error-copy">
+                        <AlertTriangleIcon size={13} />
+                        <span>{exportError}</span>
+                    </span>
                     <button
                         type="button"
                         className="error-dismiss-btn"
                         onClick={() => setExportError(null)}
                         aria-label="Dismiss error"
                     >
-                        ✕
+                        ×
                     </button>
                 </div>
             )}

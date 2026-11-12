@@ -5,6 +5,7 @@ import type {
     ConfidenceScoreBreakdown,
     SemanticFinding,
 } from "@text2sql/contracts";
+import { ChevronIcon, InfoIcon } from "../../components/Icons";
 import { SemanticFindingsList } from "./SemanticFindingsList";
 import "./ConfidenceCard.css";
 
@@ -82,7 +83,7 @@ export function ConfidenceCard({
             {/* Prominent Heuristic Disclaimer Banner */}
             <div className="heuristic-disclaimer-banner" role="note">
                 <span className="disclaimer-icon" aria-hidden="true">
-                    ℹ️
+                    <InfoIcon size={14} />
                 </span>
                 <span className="disclaimer-text">
                     Heuristic confidence score based on structural and semantic rules. Not a statistical probability.
@@ -138,7 +139,8 @@ export function ConfidenceCard({
                         onClick={() => setExpanded((prev) => !prev)}
                         aria-expanded={expanded}
                     >
-                        {expanded ? "Hide Evidence ▲" : "Show Evidence ▼"}
+                        <span>{expanded ? "Hide Evidence" : "Show Evidence"}</span>
+                        <ChevronIcon size={14} rotated={expanded} />
                     </button>
                 )}
             </div>

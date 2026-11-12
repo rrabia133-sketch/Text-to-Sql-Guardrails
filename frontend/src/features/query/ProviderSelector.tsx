@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ProviderType, ProviderSummaryResponse } from "@text2sql/contracts";
+import { GlobeIcon, LockIcon, ShieldCheckIcon } from "../../components/Icons";
 
 interface ProviderSelectorProps {
     selectedProvider: ProviderType;
@@ -30,22 +31,24 @@ export function ProviderSelector({
             });
     }, []);
 
-    const isLocalAirgap = summary?.activeMode === "local";
+    const isLocalAirgap = summary?.activeMode === "local" || loading;
     const groqAllowed = summary?.allowedProviders.includes("groq") ?? false;
     const dailySpend = summary?.dailyBudget.spentTodayUsd ?? 0;
     const dailyCap = summary?.dailyBudget.budgetLimitUsd ?? 5.0;
 
     return (
-        <div className="provider-selector-card" id="provider-selector">
+        <section className="provider-selector-card" id="provider-selector" aria-label="LLM Provider & Policy">
             <div className="provider-selector-header">
-                <span className="selector-label">LLM Provider & Policy:</span>
+                <span className="selector-label">LLM Provider &amp; Policy</span>
                 {isLocalAirgap ? (
                     <span className="airgap-badge" title="Local-only privacy mode: zero outbound egress">
-                        🛡️ Local Airgap Mode
+                        <ShieldCheckIcon size={12} />
+                        <span>Local Airgap</span>
                     </span>
                 ) : (
                     <span className="hybrid-badge">
-                        🌐 {summary?.activeMode.toUpperCase()} Mode
+                        <GlobeIcon size={12} />
+                        <span>{summary?.activeMode.toUpperCase()} Mode</span>
                     </span>
                 )}
             </div>
@@ -61,9 +64,11 @@ export function ProviderSelector({
                     disabled={disabled}
                     id="provider-ollama-btn"
                 >
-                    <span className="provider-status-dot online"></span>
-                    <span className="provider-name">Ollama Local</span>
-                    <span className="provider-model-tag">qwen2.5-coder:7b</span>
+                    <span className="provider-status-dot online" aria-hidden="true"></span>
+                    <span className="provider-pill-copy">
+                        <span className="provider-name">Ollama Local</span>
+                        <span className="provider-model-tag">qwen2.5-coder:7b</span>
+                    </span>
                 </button>
 
                 {/* Groq Cloud Button */}
@@ -79,10 +84,12 @@ export function ProviderSelector({
                     title={!groqAllowed ? "Groq cloud is disabled in local airgap mode" : "Fast cloud inference"}
                     id="provider-groq-btn"
                 >
-                    <span className={`provider-status-dot ${groqAllowed ? "online" : "offline"}`}></span>
-                    <span className="provider-name">Groq Cloud</span>
-                    <span className="provider-model-tag">llama-3.3-70b</span>
-                    {!groqAllowed && <span className="lock-icon">🔒</span>}
+                    <span className={`provider-status-dot ${groqAllowed ? "online" : "offline"}`} aria-hidden="true"></span>
+                    <span className="provider-pill-copy">
+                        <span className="provider-name">Groq Cloud</span>
+                        <span className="provider-model-tag">llama-3.3-70b</span>
+                    </span>
+                    {!groqAllowed && <LockIcon size={13} className="lock-icon" />}
                 </button>
             </div>
 
@@ -102,6 +109,6 @@ export function ProviderSelector({
                     </div>
                 </div>
             )}
-        </div>
+        </section>
     );
 }

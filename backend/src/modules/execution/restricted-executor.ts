@@ -177,8 +177,8 @@ export class RestrictedExecutor {
             }
 
             // PostgreSQL Kernel-Level Error Code Trapping
-            if (err.code === "25006") {
-                // read_only_sql_transaction
+            if (err.code === "25006" || err.code === "42501") {
+                // 25006: read_only_sql_transaction, 42501: insufficient_privilege
                 return {
                     ok: false,
                     errorCode: "TRANSACTION_VIOLATION",
@@ -207,10 +207,17 @@ export class RestrictedExecutor {
                 };
             }
 
+            const isConnectionRefused =
+                err?.code === "ECONNREFUSED" ||
+                (Array.isArray(err?.errors) && err.errors.some((e: any) => e?.code === "ECONNREFUSED")) ||
+                (typeof err?.message === "string" && err.message.includes("ECONNREFUSED"));
+
             return {
                 ok: false,
                 errorCode: "DATABASE_ERROR",
-                errorMessage: err.message || "An unexpected database error occurred during execution.",
+                errorMessage: isConnectionRefused
+                    ? "PostgreSQL analytics database is offline or unreachable. Start Docker Desktop and run 'npm run db:up' to connect."
+                    : err.message || "An unexpected database error occurred during execution.",
                 executionTimeMs,
             };
         } finally {

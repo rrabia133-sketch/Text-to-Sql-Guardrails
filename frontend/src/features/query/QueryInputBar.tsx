@@ -1,4 +1,5 @@
-import { useState } from "react";
+import type React from "react";
+import { AlertTriangleIcon, SparklesIcon, TableIcon } from "../../components/Icons";
 
 interface QueryInputBarProps {
     prompt: string;
@@ -9,11 +10,13 @@ interface QueryInputBarProps {
 }
 
 const EXAMPLE_QUERIES = [
-    "What was our total revenue last month?",
+    "What is our total revenue this year?",
     "Show top 10 products by unit price in electronics",
     "List all completed orders this year",
-    "Active customers in the last 30 days",
+    "What was our total revenue in September 2026?",
 ];
+
+const APPROVED_TABLES = ["customers", "products", "orders", "order_items"];
 
 export function QueryInputBar({
     prompt,
@@ -43,7 +46,7 @@ export function QueryInputBar({
                 <div className="panel-title-group">
                     <h2 className="panel-title">Natural Language Request</h2>
                     <span className="panel-subtitle">
-                        Ask analytical questions grounded in customers, products, and orders schema.
+                        Ask an analytical question to generate SQL and query PostgreSQL.
                     </span>
                 </div>
                 <div
@@ -55,7 +58,24 @@ export function QueryInputBar({
             </div>
 
             <div className="panel-body">
+                <div className="schema-strip" aria-label="Allowlisted database tables">
+                    <span className="schema-strip-label">
+                        <TableIcon size={12} />
+                        <span>Schema</span>
+                    </span>
+                    <div className="schema-strip-pills">
+                        {APPROVED_TABLES.map((tbl) => (
+                            <span key={tbl} className="schema-table-pill">
+                                {tbl}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="textarea-container">
+                    <label htmlFor="prompt-input" className="sr-only">
+                        Analytical Question Input
+                    </label>
                     <textarea
                         id="prompt-input"
                         className={`prompt-input ${error ? "input-has-error" : ""}`}
@@ -72,14 +92,16 @@ export function QueryInputBar({
 
                 {error && (
                     <div className="error-alert-banner" role="alert">
-                        <span className="error-icon">⚠️</span>
+                        <span className="error-icon" aria-hidden="true">
+                            <AlertTriangleIcon size={15} />
+                        </span>
                         <span className="error-text">{error}</span>
                     </div>
                 )}
 
                 <div className="prompt-actions-bar">
                     <div className="example-chips-group">
-                        <span className="chips-label">Try:</span>
+                        <span className="chips-label">Examples</span>
                         {EXAMPLE_QUERIES.map((q, idx) => (
                             <button
                                 key={idx}
@@ -95,6 +117,7 @@ export function QueryInputBar({
 
                     <button
                         id="generate-sql-btn"
+                        type="button"
                         className="action-btn generate-btn"
                         onClick={onSubmit}
                         disabled={loading || isEmpty || isOverLimit}
@@ -102,11 +125,12 @@ export function QueryInputBar({
                         {loading ? (
                             <>
                                 <span className="btn-spinner" aria-hidden="true"></span>
-                                <span>Generating Grounded SQL...</span>
+                                <span>Generating SQL & Querying DB...</span>
                             </>
                         ) : (
                             <>
-                                <span>⚡ Generate SQL Preview</span>
+                                <SparklesIcon size={16} />
+                                <span>Generate SQL & Get Answer</span>
                             </>
                         )}
                     </button>

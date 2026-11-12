@@ -4,12 +4,13 @@
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 12px;
-    padding: 18px 20px;
-    margin-bottom: 18px;
+    padding: 14px 16px;
+    margin-bottom: 0;
+    flex-shrink: 0;
     box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .confidence-card.band-border-high {
@@ -38,8 +39,11 @@
 }
 
 .disclaimer-icon {
-    font-size: 14px;
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    flex-shrink: 0;
 }
 
 .disclaimer-text {
@@ -172,6 +176,9 @@
 }
 
 .confidence-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background-color: var(--bg-surface-secondary);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -429,20 +436,25 @@
     font-weight: 700;
     cursor: pointer;
     border: 1px solid transparent;
-    transition: all 0.15s ease;
+    transition: all 0.16s var(--ease-out);
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
 .run-query-btn.run-btn-ready {
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    background-color: var(--accent-primary);
     color: #ffffff;
-    box-shadow: 0 2px 8px var(--accent-glow);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 2px 8px var(--accent-glow);
 }
 
 .run-query-btn.run-btn-ready:hover:not(:disabled) {
-    background: var(--accent-primary-hover);
+    background-color: var(--accent-primary-hover);
+    transform: translateY(-1px);
+}
+
+.run-query-btn.run-btn-ready:active:not(:disabled) {
+    transform: scale(0.985);
 }
 
 .run-query-btn.run-btn-review {
@@ -472,7 +484,8 @@
     background-color: #fef2f2;
     border: 1px solid #fecaca;
     border-radius: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 0;
+    flex-shrink: 0;
     color: #991b1b;
     font-size: 13px;
 }

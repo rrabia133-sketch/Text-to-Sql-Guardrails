@@ -1,6 +1,12 @@
 import React from "react";
 import type { ExecutionResultResponse, ColumnTypeMetadata } from "@text2sql/contracts";
 import { CsvExportButton } from "./CsvExportButton";
+import {
+    AlertTriangleIcon,
+    BanIcon,
+    DatabaseIcon,
+    InfoIcon,
+} from "../../components/Icons";
 
 export interface ResultsTablePanelProps {
     result: ExecutionResultResponse | null;
@@ -47,6 +53,44 @@ function formatCellValue(value: unknown, colMeta?: ColumnTypeMetadata): React.Re
     return String(value);
 }
 
+function renderSingleRowSummary(result: ExecutionResultResponse): React.ReactNode {
+    if (result.rowCount !== 1 || result.columns.length === 0 || result.columns.length > 3) {
+        return null;
+    }
+
+    const row = result.rows[0];
+    const allNull = result.columns.every(
+        (col) => row[col.name] === null || row[col.name] === undefined
+    );
+
+    if (allNull) {
+        return (
+            <div className="direct-answer-banner answer-empty-note" role="status">
+                <span className="answer-label">Database Answer:</span>
+                <span className="answer-muted-text">
+                    No matching rows found in the database for these filters (NULL).
+                </span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="direct-answer-banner" role="status">
+            <span className="answer-label">Database Answer:</span>
+            <div className="answer-metrics-row">
+                {result.columns.map((col) => (
+                    <div key={col.name} className="answer-metric-chip">
+                        <span className="answer-col-name">{col.name}:</span>
+                        <span className="answer-col-val">
+                            {formatCellValue(row[col.name], col)}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export function ResultsTablePanel({
     result,
     error,
@@ -57,14 +101,14 @@ export function ResultsTablePanel({
             <section className="results-panel-card" aria-label="Executing Query" aria-busy="true">
                 <div className="results-header">
                     <div className="title-group">
-                        <h3 className="results-title">Query Execution</h3>
+                        <h3 className="results-title">Database Answer</h3>
                         <span className="badge badge-running">Executing...</span>
                     </div>
                 </div>
                 <div className="results-loading-body">
                     <div className="spinner-lg" aria-hidden="true" />
                     <p className="loading-text">
-                        Running read-only query against analytics database inside isolated transaction...
+                        Running read-only query against PostgreSQL analytics database...
                     </p>
                 </div>
             </section>
@@ -81,7 +125,9 @@ export function ResultsTablePanel({
                     </div>
                 </div>
                 <div className="results-error-body">
-                    <div className="error-icon" aria-hidden="true">🚫</div>
+                    <div className="error-icon" aria-hidden="true">
+                        <BanIcon size={20} />
+                    </div>
                     <div className="error-content">
                         <h4>Query Execution Refused</h4>
                         <p className="error-message">{error}</p>
@@ -103,13 +149,14 @@ export function ResultsTablePanel({
             {/* Header with Stats & CSV Action */}
             <div className="results-header">
                 <div className="title-group">
-                    <h3 className="results-title">Execution Results</h3>
+                    <h3 className="results-title">Database Answer</h3>
                     <span className={`badge ${isSuccess ? "badge-completed" : "badge-warn"}`}>
                         {result.status.toUpperCase()}
                     </span>
                     {result.truncated && (
                         <span className="badge badge-truncated" title="Capped at 500 rows / 1 MiB bound">
-                            ⚠️ TRUNCATED (500 MAX)
+                            <AlertTriangleIcon size={12} />
+                            <span>TRUNCATED (500 MAX)</span>
                         </span>
                     )}
                 </div>
@@ -137,10 +184,14 @@ export function ResultsTablePanel({
                 </div>
             </div>
 
+            {renderSingleRowSummary(result)}
+
             {/* Truncation Notice Banner */}
             {result.truncated && (
                 <div className="truncation-alert-banner" role="status">
-                    <span className="alert-icon" aria-hidden="true">ℹ️</span>
+                    <span className="alert-icon" aria-hidden="true">
+                        <InfoIcon size={16} />
+                    </span>
                     <div className="alert-text">
                         <strong>Result Capped:</strong> Query returned more than 500 rows. The result set has been truncated to the first 500 rows (1 MiB memory boundary) for browser responsiveness and safety.
                     </div>
@@ -150,7 +201,9 @@ export function ResultsTablePanel({
             {/* Table or Empty State */}
             {isEmpty ? (
                 <div className="results-empty-state" role="status">
-                    <div className="empty-icon" aria-hidden="true">📊</div>
+                    <div className="empty-icon" aria-hidden="true">
+                        <DatabaseIcon size={24} />
+                    </div>
                     <h4>0 Rows Returned</h4>
                     <p>The query executed cleanly, but no records in the analytics database matched your criteria.</p>
                 </div>

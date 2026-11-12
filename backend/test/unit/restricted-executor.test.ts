@@ -86,41 +86,58 @@ describe("Sprint 4 - Task 13: Restricted Database Executor & Read-Only Containme
             assert.equal(released, true);
         });
 
-        it("traps kernel error 25006 (read_only_sql_transaction) and rolls back", async () => {
-            const executedQueries: string[] = [];
-            let released = false;
+        for (const testCase of [
+            {
+                code: "25006",
+                label: "read_only_sql_transaction",
+                sql: "DELETE FROM customers WHERE id = 1;",
+                trigger: "DELETE",
+                message: "cannot execute DELETE in a read-only transaction",
+            },
+            {
+                code: "42501",
+                label: "insufficient_privilege",
+                sql: "CREATE TABLE test_leak (id INT);",
+                trigger: "CREATE TABLE",
+                message: "permission denied for schema public",
+            },
+        ]) {
+            it(`traps kernel error ${testCase.code} (${testCase.label}) and rolls back`, async () => {
+                const executedQueries: string[] = [];
+                let released = false;
 
-            const mockClient = {
-                query: async (queryText: string) => {
-                    executedQueries.push(queryText);
-                    if (queryText.includes("DELETE")) {
-                        const err: any = new Error("cannot execute DELETE in a read-only transaction");
-                        err.code = "25006";
-                        throw err;
-                    }
-                    return {};
-                },
-                release: () => {
-                    released = true;
-                },
-            };
+                const mockClient = {
+                    query: async (queryText: string) => {
+                        executedQueries.push(queryText);
+                        if (queryText.includes(testCase.trigger)) {
+                            const err: any = new Error(testCase.message);
+                            err.code = testCase.code;
+                            throw err;
+                        }
+                        return {};
+                    },
+                    release: () => {
+                        released = true;
+                    },
+                };
 
-            const mockPool: any = {
-                connect: async () => mockClient,
-            };
+                const mockPool: any = {
+                    connect: async () => mockClient,
+                };
 
-            const executor = new RestrictedExecutor(mockPool);
-            const result = await executor.execute("DELETE FROM customers WHERE id = 1;");
+                const executor = new RestrictedExecutor(mockPool);
+                const result = await executor.execute(testCase.sql);
 
-            assert.equal(result.ok, false);
-            if (!result.ok) {
-                assert.equal(result.errorCode, "TRANSACTION_VIOLATION");
-                assert.match(result.errorMessage, /read-only transaction containment/i);
-            }
+                assert.equal(result.ok, false);
+                if (!result.ok) {
+                    assert.equal(result.errorCode, "TRANSACTION_VIOLATION");
+                    assert.match(result.errorMessage, /read-only transaction containment/i);
+                }
 
-            assert.ok(executedQueries.includes("ROLLBACK;"));
-            assert.equal(released, true);
-        });
+                assert.ok(executedQueries.includes("ROLLBACK;"));
+                assert.equal(released, true);
+            });
+        }
 
         it("traps kernel error 57014 (query_canceled / statement_timeout) and rolls back", async () => {
             const executedQueries: string[] = [];

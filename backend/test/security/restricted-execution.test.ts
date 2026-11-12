@@ -60,7 +60,7 @@ describe("Sprint 4 - Task 17: Restricted Database Execution & Privilege Containm
             }
 
             const mutatingStatements = [
-                "INSERT INTO customers (id, name, region) VALUES (9999, 'Test', 'North');",
+                "INSERT INTO customers (name, region) VALUES ('Test', 'North');",
                 "UPDATE products SET unit_price = 0 WHERE id = 1;",
                 "DELETE FROM orders WHERE id = 1;",
             ];
