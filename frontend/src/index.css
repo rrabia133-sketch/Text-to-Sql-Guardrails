@@ -437,9 +437,9 @@ body {
 }
 
 .role-admin {
-    background-color: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
 }
 
 .role-analyst {
@@ -593,15 +593,35 @@ body {
     border: 1px solid var(--border-accent);
 }
 
-/* Unauthenticated Empty Workspace */
+/* Unauthenticated Empty Workspace with Blurred Database Background */
 .unauth-workspace {
     flex: 1;
     min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px 24px;
+    padding: 30px 24px;
     overflow-y: auto;
+    position: relative;
+    background-color: #060e1a;
+    background-image:
+        radial-gradient(circle at 50% 50%, rgba(6, 14, 26, 0.45) 0%, rgba(6, 14, 26, 0.85) 100%),
+        url('/database-bg.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+.unauth-workspace::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    background: url('/database-bg.svg') center/cover no-repeat;
+    filter: blur(16px);
+    opacity: 0.75;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .empty-state-card {
@@ -2540,26 +2560,31 @@ textarea:focus-visible {
    ========================================================================== */
 
 .auth-hero-shell {
+    position: relative;
+    z-index: 1;
     width: 100%;
-    max-width: 1060px;
+    max-width: 960px;
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
+    background-color: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 22px 48px -12px rgba(15, 23, 42, 0.12), 0 4px 16px rgba(5, 150, 105, 0.06);
+    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .auth-hero-showcase {
     background:
-        radial-gradient(circle at 18% 12%, rgba(16, 185, 129, 0.2), transparent 52%),
-        radial-gradient(circle at 88% 88%, rgba(56, 189, 248, 0.12), transparent 48%),
+        radial-gradient(circle at 18% 12%, rgba(16, 185, 129, 0.22), transparent 52%),
+        radial-gradient(circle at 88% 88%, rgba(56, 189, 248, 0.14), transparent 48%),
         #0b1120;
     color: #f8fafc;
-    padding: 28px 32px;
+    padding: 44px 38px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 16px;
 }
 
@@ -2719,10 +2744,11 @@ textarea:focus-visible {
 
 /* Right Sign-In Panel */
 .auth-signin-panel {
-    padding: 28px 28px 24px;
+    padding: 36px 32px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    justify-content: center;
+    gap: 18px;
     background-color: #ffffff;
 }
 
@@ -2808,9 +2834,9 @@ textarea:focus-visible {
 }
 
 .persona-svg-avatar.avatar-admin {
-    background-color: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
 }
 
 .auth-persona-info {
@@ -2830,8 +2856,9 @@ textarea:focus-visible {
 }
 
 .persona-arrow {
-    font-size: 16px;
-    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--text-dim);
     transition: transform 0.15s ease, color 0.15s ease;
 }

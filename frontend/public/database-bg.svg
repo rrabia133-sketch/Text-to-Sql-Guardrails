@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow1" cx="30%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#0f2b38" stop-opacity="0.8" />
+      <stop offset="60%" stop-color="#081424" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#040914" stop-opacity="1" />
+    </radialGradient>
+    <radialGradient id="emeraldGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="cyanGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="cylinderGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.6" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#0369a1" stop-opacity="0.4" />
+    </linearGradient>
+    <linearGradient id="cylinderGradEmerald" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#047857" stop-opacity="0.6" />
+      <stop offset="50%" stop-color="#34d399" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#065f46" stop-opacity="0.4" />
+    </linearGradient>
+    <linearGradient id="topDiscGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.7" />
+    </linearGradient>
+    <linearGradient id="topDiscEmerald" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a7f3d0" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#059669" stop-opacity="0.7" />
+    </linearGradient>
+
+    <!-- Blur filter for atmospheric depth -->
+    <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" />
+    </filter>
+    <filter id="deepBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24" />
+    </filter>
+  </defs>
+
+  <!-- Deep Base Canvas -->
+  <rect width="1920" height="1080" fill="url(#bgGlow1)" />
+
+  <!-- Ambient Light Wells -->
+  <circle cx="350" cy="350" r="450" fill="url(#cyanGlow)" filter="url(#deepBlur)" />
+  <circle cx="1550" cy="650" r="550" fill="url(#emeraldGlow)" filter="url(#deepBlur)" />
+  <circle cx="960" cy="540" r="380" fill="url(#emeraldGlow)" filter="url(#deepBlur)" opacity="0.6" />
+
+  <!-- Isometric / Perspective Grid lines (database data warehouse mesh) -->
+  <g stroke="#1e293b" stroke-width="1" opacity="0.25">
+    <path d="M0,200 L1920,200 M0,400 L1920,400 M0,600 L1920,600 M0,800 L1920,800 M0,1000 L1920,1000" />
+    <path d="M200,0 L200,1080 M400,0 L400,1080 M600,0 L600,1080 M800,0 L800,1080 M1000,0 L1000,1080 M1200,0 L1200,1080 M1400,0 L1400,1080 M1600,0 L1600,1080 M1800,0 L1800,1080" />
+  </g>
+
+  <!-- Left Background: Clustered Database Cylinders (Discs) -->
+  <g transform="translate(180, 220)" filter="url(#softBlur)" opacity="0.75">
+    <!-- Cylinder 1 (Back Left) -->
+    <g transform="translate(0, 0)">
+      <!-- Tier 3 -->
+      <path d="M 0,120 A 110,35 0 0,0 220,120 V 160 A 110,35 0 0,1 0,160 Z" fill="url(#cylinderGrad1)" />
+      <ellipse cx="110" cy="120" rx="110" ry="35" fill="url(#topDiscGrad)" opacity="0.5" />
+      <!-- Tier 2 -->
+      <path d="M 0,60 A 110,35 0 0,0 220,60 V 100 A 110,35 0 0,1 0,100 Z" fill="url(#cylinderGrad1)" />
+      <ellipse cx="110" cy="60" rx="110" ry="35" fill="url(#topDiscGrad)" opacity="0.6" />
+      <!-- Tier 1 -->
+      <path d="M 0,0 A 110,35 0 0,0 220,0 V 40 A 110,35 0 0,1 0,40 Z" fill="url(#cylinderGrad1)" />
+      <ellipse cx="110" cy="0" rx="110" ry="35" fill="url(#topDiscGrad)" />
+    </g>
+
+    <!-- Cylinder 2 (Front Left - Emerald) -->
+    <g transform="translate(140, 160)">
+      <!-- Tier 3 -->
+      <path d="M 0,130 A 130,40 0 0,0 260,130 V 180 A 130,40 0 0,1 0,180 Z" fill="url(#cylinderGradEmerald)" />
+      <ellipse cx="130" cy="130" rx="130" ry="40" fill="url(#topDiscEmerald)" opacity="0.5" />
+      <!-- Tier 2 -->
+      <path d="M 0,65 A 130,40 0 0,0 260,65 V 115 A 130,40 0 0,1 0,115 Z" fill="url(#cylinderGradEmerald)" />
+      <ellipse cx="130" cy="65" rx="130" ry="40" fill="url(#topDiscEmerald)" opacity="0.65" />
+      <!-- Tier 1 -->
+      <path d="M 0,0 A 130,40 0 0,0 260,0 V 50 A 130,40 0 0,1 0,50 Z" fill="url(#cylinderGradEmerald)" />
+      <ellipse cx="130" cy="0" rx="130" ry="40" fill="url(#topDiscEmerald)" />
+    </g>
+  </g>
+
+  <!-- Right Background: Distributed Storage Shards / Database Rack Nodes -->
+  <g transform="translate(1420, 180)" filter="url(#softBlur)" opacity="0.8">
+    <!-- Server Stack / Database Node 1 -->
+    <g transform="translate(0, 40)">
+      <!-- Disc 4 -->
+      <path d="M 0,180 A 120,38 0 0,0 240,180 V 225 A 120,38 0 0,1 0,225 Z" fill="url(#cylinderGradEmerald)" />
+      <ellipse cx="120" cy="180" rx="120" ry="38" fill="url(#topDiscEmerald)" opacity="0.4" />
+      <!-- Disc 3 -->
+      <path d="M 0,120 A 120,38 0 0,0 240,120 V 165 A 120,38 0 0,1 0,165 Z" fill="url(#cylinderGradEmerald)" />
+      <ellipse cx="120" cy="120" rx="120" ry="38" fill="url(#topDiscEmerald)" opacity="0.5" />
+      <!-- Disc 2 -->
+      <path d="M 0,60 A 120,38 0 0,0 240,60 V 105 A 120,38 0 0,1 0,105 Z" fill="url(#cylinderGradEmerald)" />
+      <ellipse cx="120" cy="60" rx="120" ry="38" fill="url(#topDiscEmerald)" opacity="0.6" />
+      <!-- Disc 1 -->
+      <path d="M 0,0 A 120,38 0 0,0 240,0 V 45 A 120,38 0 0,1 0,45 Z" fill="url(#cylinderGradEmerald)" />
+      <ellipse cx="120" cy="0" rx="120" ry="38" fill="url(#topDiscEmerald)" />
+    </g>
+
+    <!-- Additional Cyan Database Shard -->
+    <g transform="translate(-120, 320)">
+      <path d="M 0,100 A 90,28 0 0,0 180,100 V 135 A 90,28 0 0,1 0,135 Z" fill="url(#cylinderGrad1)" />
+      <ellipse cx="90" cy="100" rx="90" ry="28" fill="url(#topDiscGrad)" opacity="0.4" />
+      <path d="M 0,50 A 90,28 0 0,0 180,50 V 85 A 90,28 0 0,1 0,85 Z" fill="url(#cylinderGrad1)" />
+      <ellipse cx="90" cy="50" rx="90" ry="28" fill="url(#topDiscGrad)" opacity="0.6" />
+      <path d="M 0,0 A 90,28 0 0,0 180,0 V 35 A 90,28 0 0,1 0,35 Z" fill="url(#cylinderGrad1)" />
+      <ellipse cx="90" cy="0" rx="90" ry="28" fill="url(#topDiscGrad)" />
+    </g>
+  </g>
+
+  <!-- Network Interconnect Lines (Relational Schema & Foreign Keys) -->
+  <g stroke="#38bdf8" stroke-width="2" stroke-dasharray="6,6" opacity="0.4" fill="none" filter="url(#softBlur)">
+    <path d="M 440,380 Q 720,240 1000,420 T 1440,320" />
+    <path d="M 320,520 Q 640,680 980,560 T 1520,580" />
+    <path d="M 520,440 L 980,560" />
+    <path d="M 980,560 L 1320,520" />
+  </g>
+
+  <!-- Glowing Relational Data Nodes -->
+  <g fill="#10b981" filter="url(#softBlur)">
+    <circle cx="440" cy="380" r="9" />
+    <circle cx="1000" cy="420" r="12" fill="#38bdf8" />
+    <circle cx="1440" cy="320" r="10" />
+    <circle cx="320" cy="520" r="11" fill="#38bdf8" />
+    <circle cx="980" cy="560" r="14" />
+    <circle cx="1520" cy="580" r="12" />
+  </g>
+</svg>
+

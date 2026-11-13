@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ShieldCheck, User, X } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
 interface UserSwitcherModalProps {
@@ -33,7 +34,7 @@ export function UserSwitcherModal({ isOpen, onClose }: UserSwitcherModalProps) {
                         <p className="modal-subtitle">Select a seed demo user to test role-based access</p>
                     </div>
                     <button className="modal-close-btn" onClick={onClose} aria-label="Close">
-                        ✕
+                        <X size={16} />
                     </button>
                 </div>
 
@@ -50,7 +51,7 @@ export function UserSwitcherModal({ isOpen, onClose }: UserSwitcherModalProps) {
                                 disabled={submittingUser !== null}
                             >
                                 <div className="persona-avatar">
-                                    {u.role === "admin" ? "🛡️" : "📊"}
+                                    {u.role === "admin" ? <ShieldCheck size={18} /> : <User size={18} />}
                                 </div>
                                 <div className="persona-details">
                                     <div className="persona-name-row">

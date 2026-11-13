@@ -1,11 +1,13 @@
 import { useState } from "react";
+import {
+    ArrowLeftRight,
+    History,
+    LogIn,
+    LogOut,
+    ShieldCheck,
+} from "lucide-react";
 import { useAuth } from "../features/auth/AuthContext";
 import { UserSwitcherModal } from "../features/auth/UserSwitcherModal";
-import {
-    ArrowRightLeftIcon,
-    HistoryIcon,
-    ShieldCheckIcon,
-} from "./Icons";
 
 export interface HeaderProps {
     onOpenHistory?: () => void;
@@ -20,10 +22,9 @@ export function Header({ onOpenHistory }: HeaderProps = {}) {
             <header className="app-header">
                 <div className="brand">
                     <div className="brand-icon" aria-hidden="true">
-                        <ShieldCheckIcon size={18} />
+                        <ShieldCheck size={18} />
                     </div>
                     <h1 className="brand-title">Text-to-SQL Guardrails</h1>
-                    <span className="brand-badge">AST &amp; Airgap Guarded</span>
                 </div>
 
                 <div className="header-meta">
@@ -38,7 +39,7 @@ export function Header({ onOpenHistory }: HeaderProps = {}) {
                                     title="Open Query History (Ctrl+H)"
                                     aria-label="Open Query History"
                                 >
-                                    <HistoryIcon size={14} />
+                                    <History size={14} />
                                     <span>History</span>
                                     <kbd className="shortcut-kbd">Ctrl+H</kbd>
                                 </button>
@@ -55,7 +56,7 @@ export function Header({ onOpenHistory }: HeaderProps = {}) {
                                 <span className="user-name">{user.displayName}</span>
                                 <span className={`role-pill role-${user.role}`}>{user.role}</span>
                                 <span className="switch-hint">
-                                    <ArrowRightLeftIcon size={12} />
+                                    <ArrowLeftRight size={12} />
                                     <span>Switch</span>
                                 </span>
                             </button>
@@ -66,7 +67,8 @@ export function Header({ onOpenHistory }: HeaderProps = {}) {
                                 id="logout-btn"
                                 onClick={() => logout()}
                             >
-                                Sign Out
+                                <LogOut size={13} style={{ marginRight: 4, verticalAlign: "-2px" }} />
+                                <span>Sign Out</span>
                             </button>
                         </>
                     ) : (
@@ -75,8 +77,10 @@ export function Header({ onOpenHistory }: HeaderProps = {}) {
                             className="action-btn"
                             id="login-btn"
                             onClick={() => setIsSwitcherOpen(true)}
+                            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
                         >
-                            Sign In / Select User
+                            <LogIn size={15} />
+                            <span>Sign In / Select User</span>
                         </button>
                     )}
                 </div>

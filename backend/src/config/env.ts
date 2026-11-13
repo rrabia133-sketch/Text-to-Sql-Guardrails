@@ -1,9 +1,20 @@
 import dotenv from "dotenv";
+import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-// Load .env from project root or backend folder
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-dotenv.config();
+// Load .env from backend folder or workspace root (covers npm `-w backend` cwd)
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const envCandidates = [
+    path.resolve(process.cwd(), ".env"),
+    path.resolve(process.cwd(), "../.env"),
+    path.resolve(currentDir, "../../../.env"),
+];
+for (const envPath of envCandidates) {
+    if (fs.existsSync(envPath)) {
+        dotenv.config({ path: envPath });
+    }
+}
 
 export interface AppConfig {
     PORT: number;

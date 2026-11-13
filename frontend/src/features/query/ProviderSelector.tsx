@@ -33,6 +33,12 @@ export function ProviderSelector({
 
     const isLocalAirgap = summary?.activeMode === "local" || loading;
     const groqAllowed = summary?.allowedProviders.includes("groq") ?? false;
+    const ollamaModel =
+        summary?.providers.find((p) => p.provider === "ollama")?.model ||
+        "qwen2.5-coder:7b";
+    const groqModel =
+        summary?.providers.find((p) => p.provider === "groq")?.model ||
+        "groq-cloud";
     const dailySpend = summary?.dailyBudget.spentTodayUsd ?? 0;
     const dailyCap = summary?.dailyBudget.budgetLimitUsd ?? 5.0;
 
@@ -67,7 +73,7 @@ export function ProviderSelector({
                     <span className="provider-status-dot online" aria-hidden="true"></span>
                     <span className="provider-pill-copy">
                         <span className="provider-name">Ollama Local</span>
-                        <span className="provider-model-tag">qwen2.5-coder:7b</span>
+                        <span className="provider-model-tag">{ollamaModel}</span>
                     </span>
                 </button>
 
@@ -87,7 +93,7 @@ export function ProviderSelector({
                     <span className={`provider-status-dot ${groqAllowed ? "online" : "offline"}`} aria-hidden="true"></span>
                     <span className="provider-pill-copy">
                         <span className="provider-name">Groq Cloud</span>
-                        <span className="provider-model-tag">llama-3.3-70b</span>
+                        <span className="provider-model-tag">{groqModel}</span>
                     </span>
                     {!groqAllowed && <LockIcon size={13} className="lock-icon" />}
                 </button>

@@ -1,5 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { config } from "../../src/config/env.js";
 import { GroqProvider } from "../../src/modules/providers/groq.provider.js";
 import { ProviderQuotaError, ProviderTimeoutError } from "../../src/modules/providers/base.provider.js";
 
@@ -51,7 +52,7 @@ describe("Task 8: Groq Cloud Provider Adapter (US-08)", () => {
 
         assert.equal(sentHeaders?.Authorization, `Bearer ${testSecret}`);
         assert.deepEqual(sentBody.response_format, { type: "json_object" });
-        assert.equal(sentBody.model, "llama-3.3-70b-versatile");
+        assert.equal(sentBody.model, config.GROQ_MODEL);
         assert.equal(res.provider, "groq");
         assert.equal(res.promptTokens, 110);
         assert.equal(res.completionTokens, 55);
