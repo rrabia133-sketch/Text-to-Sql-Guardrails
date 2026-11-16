@@ -1,13 +1,31 @@
+import { timingSafeEqual } from "node:crypto";
 import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from "fastify";
 import fp from "fastify-plugin";
 import { MetricsService } from "./metrics.service.js";
 
 export interface MetricsRoutesOptions {
     metricsService: MetricsService;
+    metricsBearerToken?: string;
+}
+
+function isValidBearerToken(authHeader: string | undefined, expectedToken: string): boolean {
+    if (!authHeader || !expectedToken) {
+        return false;
+    }
+    const match = /^Bearer\s+(.+)$/i.exec(authHeader.trim());
+    if (!match || !match[1]) {
+        return false;
+    }
+    const providedBuf = Buffer.from(match[1], "utf8");
+    const expectedBuf = Buffer.from(expectedToken, "utf8");
+    if (providedBuf.length !== expectedBuf.length) {
+        return false;
+    }
+    return timingSafeEqual(providedBuf, expectedBuf);
 }
 
 const metricsRoutesPlugin: FastifyPluginAsync<MetricsRoutesOptions> = async (app, opts) => {
-    const { metricsService } = opts;
+    const { metricsService, metricsBearerToken } = opts;
 
     // Attach request timing hook
     app.addHook("onRequest", async (request: FastifyRequest) => {
@@ -44,10 +62,33 @@ const metricsRoutesPlugin: FastifyPluginAsync<MetricsRoutesOptions> = async (app
                         type: "string",
                         description: "Prometheus text exposition format",
                     },
+                    401: {
+                        type: "object",
+                        properties: {
+                            statusCode: { type: "number" },
+                            error: { type: "string" },
+                            message: { type: "string" },
+                        },
+                    },
                 },
             },
         },
-        async (_request: FastifyRequest, reply: FastifyReply) => {
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            if (metricsBearerToken && metricsBearerToken.trim().length > 0) {
+                const isAdminSession = request.user?.role === "admin";
+                const hasValidToken = isValidBearerToken(
+                    request.headers.authorization,
+                    metricsBearerToken.trim()
+                );
+                if (!isAdminSession && !hasValidToken) {
+                    return reply.status(401).send({
+                        statusCode: 401,
+                        error: "Unauthorized",
+                        message: "Valid metrics bearer token or admin session required",
+                    });
+                }
+            }
+
             const prometheusData = await metricsService.exportPrometheus();
             return reply
                 .header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")

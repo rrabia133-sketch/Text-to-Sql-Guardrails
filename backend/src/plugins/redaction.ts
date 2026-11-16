@@ -83,7 +83,16 @@ export function redactSensitiveData<T>(obj: T, depth = 0): T {
     return obj;
 }
 
-const tracingAndRedactionPluginAsync: FastifyPluginAsync = async (app) => {
+export interface TracingAndRedactionOptions {
+    nodeEnv?: string;
+}
+
+const tracingAndRedactionPluginAsync: FastifyPluginAsync<TracingAndRedactionOptions> = async (
+    app,
+    opts
+) => {
+    const isProduction = opts?.nodeEnv === "production" || process.env.NODE_ENV === "production";
+
     // 1. Correlate Request ID across entire lifecycle
     app.addHook("onRequest", async (request: FastifyRequest, reply: FastifyReply) => {
         const incomingId = request.headers["x-request-id"];
@@ -100,6 +109,11 @@ const tracingAndRedactionPluginAsync: FastifyPluginAsync = async (app) => {
         reply.header("x-request-id", request.id);
         reply.header("x-content-type-options", "nosniff");
         reply.header("x-frame-options", "DENY");
+        reply.header("referrer-policy", "strict-origin-when-cross-origin");
+        reply.header("x-permitted-cross-domain-policies", "none");
+        if (isProduction) {
+            reply.header("strict-transport-security", "max-age=31536000; includeSubDomains");
+        }
     });
 };
 

@@ -16,6 +16,11 @@ for (const envPath of envCandidates) {
     }
 }
 
+export const INSECURE_DEV_SECRETS = new Set([
+    "dev-session-secret-change-in-production-min-32-chars",
+    "your_dev_session_secret_min_32_characters_here",
+]);
+
 export interface AppConfig {
     PORT: number;
     HOST: string;
@@ -33,6 +38,12 @@ export interface AppConfig {
     GENERATION_TIMEOUT_LOCAL_MS: number;
     GENERATION_TIMEOUT_CLOUD_MS: number;
     ANALYTICS_TIMEZONE: string;
+    TRUST_PROXY?: boolean;
+    APP_DB_POOL_MAX?: number;
+    ANALYTICS_DB_POOL_MAX?: number;
+    METRICS_BEARER_TOKEN?: string;
+    AUTH_RATE_LIMIT_MAX?: number;
+    AUTH_RATE_LIMIT_WINDOW_MS?: number;
 }
 
 export function validateConfig(raw: Partial<AppConfig>): AppConfig {
@@ -55,24 +66,35 @@ export function validateConfig(raw: Partial<AppConfig>): AppConfig {
         );
     }
 
+    const isProduction = nodeEnv === "production";
+
     const corsOrigin = raw.CORS_ORIGIN || "http://localhost:5173";
 
     const sessionSecret =
-        raw.SESSION_SECRET || "dev-session-secret-change-in-production-min-32-chars";
+        raw.SESSION_SECRET ||
+        (isProduction ? "" : "dev-session-secret-change-in-production-min-32-chars");
     if (!sessionSecret || sessionSecret.length < 32) {
         errors.push("Invalid SESSION_SECRET: must be at least 32 characters long");
+    } else if (isProduction && INSECURE_DEV_SECRETS.has(sessionSecret)) {
+        errors.push(
+            "Invalid SESSION_SECRET: production environment cannot use default or placeholder development secret"
+        );
     }
 
     const analyticsDbUrl =
         raw.ANALYTICS_DB_URL ||
-        "postgresql://analytics_user:analytics_password@127.0.0.1:5434/analytics_db";
+        (isProduction
+            ? ""
+            : "postgresql://analytics_user:analytics_password@127.0.0.1:5434/analytics_db");
     if (!analyticsDbUrl.startsWith("postgresql://") && !analyticsDbUrl.startsWith("postgres://")) {
         errors.push("Invalid ANALYTICS_DB_URL: must start with postgresql:// or postgres://");
     }
 
     const appDbUrl =
         raw.APP_DB_URL ||
-        "postgresql://app_user:app_password@127.0.0.1:5434/app_db";
+        (isProduction
+            ? ""
+            : "postgresql://app_user:app_password@127.0.0.1:5434/app_db");
     if (!appDbUrl.startsWith("postgresql://") && !appDbUrl.startsWith("postgres://")) {
         errors.push("Invalid APP_DB_URL: must start with postgresql:// or postgres://");
     }
@@ -88,6 +110,16 @@ export function validateConfig(raw: Partial<AppConfig>): AppConfig {
     const ollamaModel = raw.OLLAMA_MODEL || "qwen2.5-coder:7b";
     const groqApiKey = raw.GROQ_API_KEY || "";
     const groqModel = raw.GROQ_MODEL || "llama-3.3-70b-versatile";
+
+    if (
+        isProduction &&
+        (providerMode === "cloud" || providerMode === "hybrid") &&
+        (!groqApiKey || groqApiKey === "your_groq_api_key_here")
+    ) {
+        errors.push(
+            `Invalid GROQ_API_KEY: a valid GROQ_API_KEY is required in production when PROVIDER_MODE="${providerMode}"`
+        );
+    }
 
     const dailyBudget =
         typeof raw.DAILY_CLOUD_BUDGET_USD === "number"
@@ -115,6 +147,39 @@ export function validateConfig(raw: Partial<AppConfig>): AppConfig {
 
     const analyticsTimezone = raw.ANALYTICS_TIMEZONE || "UTC";
 
+    const trustProxy =
+        typeof raw.TRUST_PROXY === "boolean" ? raw.TRUST_PROXY : isProduction;
+
+    const appDbPoolMax =
+        typeof raw.APP_DB_POOL_MAX === "number"
+            ? raw.APP_DB_POOL_MAX
+            : isProduction
+            ? 20
+            : 5;
+    if (Number.isNaN(appDbPoolMax) || appDbPoolMax <= 0) {
+        errors.push(`Invalid APP_DB_POOL_MAX: must be a positive integer, got "${raw.APP_DB_POOL_MAX}"`);
+    }
+
+    const analyticsDbPoolMax =
+        typeof raw.ANALYTICS_DB_POOL_MAX === "number"
+            ? raw.ANALYTICS_DB_POOL_MAX
+            : isProduction
+            ? 30
+            : 10;
+    if (Number.isNaN(analyticsDbPoolMax) || analyticsDbPoolMax <= 0) {
+        errors.push(
+            `Invalid ANALYTICS_DB_POOL_MAX: must be a positive integer, got "${raw.ANALYTICS_DB_POOL_MAX}"`
+        );
+    }
+
+    const metricsBearerToken = raw.METRICS_BEARER_TOKEN || "";
+    const authRateLimitMax =
+        typeof raw.AUTH_RATE_LIMIT_MAX === "number" ? raw.AUTH_RATE_LIMIT_MAX : 20;
+    const authRateLimitWindowMs =
+        typeof raw.AUTH_RATE_LIMIT_WINDOW_MS === "number"
+            ? raw.AUTH_RATE_LIMIT_WINDOW_MS
+            : 60_000;
+
     if (errors.length > 0) {
         throw new Error(
             `[Configuration Error] Invalid environment configuration:\n - ${errors.join("\n - ")}`
@@ -138,23 +203,37 @@ export function validateConfig(raw: Partial<AppConfig>): AppConfig {
         GENERATION_TIMEOUT_LOCAL_MS: timeoutLocal,
         GENERATION_TIMEOUT_CLOUD_MS: timeoutCloud,
         ANALYTICS_TIMEZONE: analyticsTimezone,
+        TRUST_PROXY: trustProxy,
+        APP_DB_POOL_MAX: appDbPoolMax,
+        ANALYTICS_DB_POOL_MAX: analyticsDbPoolMax,
+        METRICS_BEARER_TOKEN: metricsBearerToken,
+        AUTH_RATE_LIMIT_MAX: authRateLimitMax,
+        AUTH_RATE_LIMIT_WINDOW_MS: authRateLimitWindowMs,
     };
 }
 
 export function loadConfig(): AppConfig {
+    const nodeEnv = ((process.env.NODE_ENV as AppConfig["NODE_ENV"]) || "development");
+    const isProduction = nodeEnv === "production";
+
     return validateConfig({
         PORT: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3001,
         HOST: process.env.HOST || "127.0.0.1",
-        NODE_ENV: (process.env.NODE_ENV as AppConfig["NODE_ENV"]) || "development",
+        NODE_ENV: nodeEnv,
         CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
         SESSION_SECRET:
-            process.env.SESSION_SECRET || "dev-session-secret-change-in-production-min-32-chars",
+            process.env.SESSION_SECRET ||
+            (isProduction ? "" : "dev-session-secret-change-in-production-min-32-chars"),
         ANALYTICS_DB_URL:
             process.env.ANALYTICS_DB_URL ||
-            "postgresql://analytics_user:analytics_password@127.0.0.1:5434/analytics_db",
+            (isProduction
+                ? ""
+                : "postgresql://analytics_user:analytics_password@127.0.0.1:5434/analytics_db"),
         APP_DB_URL:
             process.env.APP_DB_URL ||
-            "postgresql://app_user:app_password@127.0.0.1:5434/app_db",
+            (isProduction
+                ? ""
+                : "postgresql://app_user:app_password@127.0.0.1:5434/app_db"),
         PROVIDER_MODE: (process.env.PROVIDER_MODE as AppConfig["PROVIDER_MODE"]) || "local",
         OLLAMA_HOST: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
         OLLAMA_MODEL: process.env.OLLAMA_MODEL || "qwen2.5-coder:7b",
@@ -170,6 +249,23 @@ export function loadConfig(): AppConfig {
             ? Number.parseInt(process.env.GENERATION_TIMEOUT_CLOUD_MS, 10)
             : 15000,
         ANALYTICS_TIMEZONE: process.env.ANALYTICS_TIMEZONE || "UTC",
+        TRUST_PROXY:
+            process.env.TRUST_PROXY !== undefined
+                ? process.env.TRUST_PROXY === "true"
+                : isProduction,
+        APP_DB_POOL_MAX: process.env.APP_DB_POOL_MAX
+            ? Number.parseInt(process.env.APP_DB_POOL_MAX, 10)
+            : undefined,
+        ANALYTICS_DB_POOL_MAX: process.env.ANALYTICS_DB_POOL_MAX
+            ? Number.parseInt(process.env.ANALYTICS_DB_POOL_MAX, 10)
+            : undefined,
+        METRICS_BEARER_TOKEN: process.env.METRICS_BEARER_TOKEN || "",
+        AUTH_RATE_LIMIT_MAX: process.env.AUTH_RATE_LIMIT_MAX
+            ? Number.parseInt(process.env.AUTH_RATE_LIMIT_MAX, 10)
+            : 20,
+        AUTH_RATE_LIMIT_WINDOW_MS: process.env.AUTH_RATE_LIMIT_WINDOW_MS
+            ? Number.parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS, 10)
+            : 60_000,
     });
 }
 

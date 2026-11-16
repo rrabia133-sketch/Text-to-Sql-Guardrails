@@ -12,20 +12,31 @@ import {
     type SanitizedCatalog,
 } from "./schema.types.js";
 
+export interface SchemaServiceOptions {
+    failClosed?: boolean;
+}
+
 export class SchemaService {
     private analyticsPool?: Pool | null;
     private cachedCatalog: SanitizedCatalog | null = null;
     private cacheExpiresAt: number = 0;
     private cacheTtlMs: number;
+    private failClosed: boolean;
 
-    constructor(analyticsPool?: Pool | null, cacheTtlMs: number = 5 * 60 * 1000) {
+    constructor(
+        analyticsPool?: Pool | null,
+        cacheTtlMs: number = 5 * 60 * 1000,
+        options: SchemaServiceOptions = {}
+    ) {
         this.analyticsPool = analyticsPool;
         this.cacheTtlMs = cacheTtlMs;
+        this.failClosed = Boolean(options.failClosed);
     }
 
     /**
      * Returns the sanitized, allowlisted schema catalog.
      * Uses in-memory cache unless expired or forceRefresh is true.
+     * When failClosed is enabled (production), refuses fallback to canonical fixture if introspection fails.
      */
     async getSanitizedCatalog(forceRefresh = false): Promise<SanitizedCatalog> {
         const now = Date.now();
@@ -33,15 +44,25 @@ export class SchemaService {
             return this.cachedCatalog;
         }
 
-        try {
-            if (this.analyticsPool) {
+        if (this.analyticsPool) {
+            try {
                 const freshCatalog = await this.introspectAndSanitize();
                 this.cachedCatalog = freshCatalog;
                 this.cacheExpiresAt = now + this.cacheTtlMs;
                 return freshCatalog;
+            } catch (error) {
+                if (this.failClosed) {
+                    const msg = error instanceof Error ? error.message : String(error);
+                    throw new Error(
+                        `[SchemaService] Fail-closed: unable to introspect live analytics_db schema: ${msg}`
+                    );
+                }
+                // In non-production mode, fallback to canonical fixture if database is offline
             }
-        } catch (error) {
-            // If database is not reachable, fallback to canonical fixture
+        } else if (this.failClosed) {
+            throw new Error(
+                "[SchemaService] Fail-closed: analyticsPool is required in production mode"
+            );
         }
 
         const canonicalCatalog = this.getCanonicalCatalog();

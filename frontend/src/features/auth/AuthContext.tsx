@@ -5,7 +5,7 @@ export interface AuthContextType {
     user: UserSummary | null;
     loading: boolean;
     availableUsers: UserSummary[];
-    login: (username: string) => Promise<void>;
+    login: (username: string, password?: string) => Promise<void>;
     logout: () => Promise<void>;
     refreshUsers: () => Promise<void>;
 }
@@ -78,12 +78,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         void initAuth();
     }, [refreshUsers]);
 
-    const login = async (username: string) => {
+    const login = async (username: string, password?: string) => {
         const res = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ username }),
+            body: JSON.stringify({ username, ...(password ? { password } : {}) }),
         });
 
         if (!res.ok) {

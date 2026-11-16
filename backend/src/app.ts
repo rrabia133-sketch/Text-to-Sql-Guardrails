@@ -79,19 +79,20 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         opts.appPool ||
         new Pool({
             connectionString: currentConfig.APP_DB_URL,
-            max: 5,
+            max: currentConfig.APP_DB_POOL_MAX ?? 5,
         });
 
     const analyticsPool =
         opts.analyticsPool ||
         new Pool({
             connectionString: currentConfig.ANALYTICS_DB_URL,
-            max: 10,
+            max: currentConfig.ANALYTICS_DB_POOL_MAX ?? 10,
         });
 
     const authRepo = opts.authRepo || new AuthRepository(appPool);
 
     const app = Fastify({
+        trustProxy: currentConfig.TRUST_PROXY ?? currentConfig.NODE_ENV === "production",
         logger: {
             level: currentConfig.NODE_ENV === "test" ? "silent" : "info",
             redact: PINO_REDACT_PATHS,
@@ -113,7 +114,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     });
 
     // Core security & utility plugins
-    await app.register(tracingAndRedactionPlugin);
+    await app.register(tracingAndRedactionPlugin, { nodeEnv: currentConfig.NODE_ENV });
     await app.register(sensible);
 
     await app.register(cors, {
@@ -135,10 +136,21 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     await app.register(healthRoutes, { dbChecker, prefix: "/api" });
 
     // Auth endpoints (/api/auth/login, /api/auth/logout, /api/auth/me, /api/auth/users)
-    await app.register(authRoutes, { authRepo, prefix: "/api/auth" });
+    await app.register(authRoutes, {
+        authRepo,
+        nodeEnv: currentConfig.NODE_ENV,
+        rateLimitMax: currentConfig.AUTH_RATE_LIMIT_MAX,
+        rateLimitWindowMs: currentConfig.AUTH_RATE_LIMIT_WINDOW_MS,
+        prefix: "/api/auth",
+    });
 
     // Sprint 3 Grounded Generation, Provider, and Schema routes
-    const schemaService = opts.schemaService || new SchemaService();
+    const isProduction = currentConfig.NODE_ENV === "production";
+    const schemaService =
+        opts.schemaService ||
+        new SchemaService(opts.analyticsPool || (isProduction ? analyticsPool : undefined), 5 * 60 * 1000, {
+            failClosed: isProduction,
+        });
     const providerRouter = opts.providerRouter || new ProviderRouter({ mode: currentConfig.PROVIDER_MODE });
     const queryArtifactRepo = opts.queryArtifactRepo || new QueryArtifactRepository(appPool);
     const semanticRepo = opts.semanticRepo || new SemanticRepository(appPool);
@@ -219,7 +231,10 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
 
     // Observability Prometheus Metrics (Sprint 7 / DO-10)
     const metricsService = opts.metricsService || new MetricsService(appPool, analyticsPool);
-    await app.register(metricsRoutes, { metricsService });
+    await app.register(metricsRoutes, {
+        metricsService,
+        metricsBearerToken: currentConfig.METRICS_BEARER_TOKEN,
+    });
 
     // Initial root & API health probe
     const rootProbe = async () => {

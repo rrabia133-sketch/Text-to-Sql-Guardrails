@@ -6,6 +6,7 @@ export interface UserRecord {
     username: string;
     displayName: string;
     role: "analyst" | "admin";
+    passwordHash?: string;
     createdAt: Date;
 }
 
@@ -27,6 +28,7 @@ interface UserRow {
     username: string;
     display_name: string;
     role: "analyst" | "admin";
+    password_hash?: string | null;
     created_at: Date;
 }
 
@@ -71,6 +73,7 @@ function mapUserRow(row: UserRow): UserRecord {
         username: row.username,
         displayName: row.display_name,
         role: row.role,
+        ...(row.password_hash ? { passwordHash: row.password_hash } : {}),
         createdAt: new Date(row.created_at),
     };
 }
@@ -99,7 +102,7 @@ export class AuthRepository {
     async findUserById(id: string): Promise<UserRecord | null> {
         try {
             const query = `
-                SELECT id, email, username, display_name, role, created_at
+                SELECT *
                 FROM users
                 WHERE id = $1
                 LIMIT 1;
@@ -115,7 +118,7 @@ export class AuthRepository {
     async findUserByUsername(username: string): Promise<UserRecord | null> {
         try {
             const query = `
-                SELECT id, email, username, display_name, role, created_at
+                SELECT *
                 FROM users
                 WHERE username = $1
                 LIMIT 1;
@@ -134,7 +137,7 @@ export class AuthRepository {
     async findUserByEmail(email: string): Promise<UserRecord | null> {
         try {
             const query = `
-                SELECT id, email, username, display_name, role, created_at
+                SELECT *
                 FROM users
                 WHERE email = $1
                 LIMIT 1;
@@ -153,7 +156,7 @@ export class AuthRepository {
     async listUsers(): Promise<UserRecord[]> {
         try {
             const query = `
-                SELECT id, email, username, display_name, role, created_at
+                SELECT *
                 FROM users
                 ORDER BY created_at ASC;
             `;
