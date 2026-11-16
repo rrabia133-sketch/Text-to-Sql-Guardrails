@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { Header } from "./components/Header";
 import { UserSwitcherModal } from "./features/auth/UserSwitcherModal";
@@ -7,28 +7,15 @@ import { ProviderSelector } from "./features/query/ProviderSelector";
 import { QueryInputBar } from "./features/query/QueryInputBar";
 import { SqlPreviewPanel } from "./features/query/SqlPreviewPanel";
 import { ClarificationModal } from "./features/clarification/ClarificationModal";
-import { QueryHistoryPanel } from "./features/history/QueryHistoryPanel";
 import type {
     ProviderType,
     QueryGenerationResponse,
     ClarificationResponse,
-    HistoryItemSummary,
 } from "@text2sql/contracts";
-
-interface ApiHealthResponse {
-    name: string;
-    status: string;
-    version: string;
-}
 
 function MainWorkspace() {
     const { user, loading: authLoading } = useAuth();
-    const [apiStatus, setApiStatus] = useState<ApiHealthResponse | null>(null);
-    const [connecting, setConnecting] = useState(true);
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-
-    // Query History Drawer State (US-15)
-    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
     // WCAG 2.2 AA ARIA Live Region State
     const [ariaLiveMessage, setAriaLiveMessage] = useState("");
@@ -44,35 +31,6 @@ function MainWorkspace() {
     // Clarification Dialog State
     const [clarification, setClarification] = useState<ClarificationResponse | null>(null);
     const [isClarificationOpen, setIsClarificationOpen] = useState(false);
-
-    useEffect(() => {
-        fetch("/api/")
-            .then((res) => {
-                if (!res.ok) throw new Error("API response error");
-                return res.json();
-            })
-            .then((data: ApiHealthResponse) => {
-                setApiStatus(data);
-                setConnecting(false);
-            })
-            .catch(() => {
-                setConnecting(false);
-            });
-    }, []);
-
-    // Global keyboard shortcuts (Ctrl+H / Cmd+H for query history)
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "h") {
-                e.preventDefault();
-                if (user) {
-                    setIsHistoryOpen((prev) => !prev);
-                }
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [user]);
 
     const handleGenerateQuery = async (
         overridePrompt?: string,
@@ -142,24 +100,6 @@ function MainWorkspace() {
         );
     };
 
-    const handleSelectHistoryItem = (item: HistoryItemSummary) => {
-        setPrompt(item.question);
-        setIsHistoryOpen(false);
-        setAriaLiveMessage(`Loaded query: ${item.question}`);
-
-        // Fetch full artifact preview
-        fetch(`/api/v1/queries/${encodeURIComponent(item.artifactId)}`, {
-            credentials: "include",
-        })
-            .then((res) => (res.ok ? res.json() : null))
-            .then((data: QueryGenerationResponse | null) => {
-                if (data) {
-                    setGenerationResponse(data);
-                }
-            })
-            .catch(() => {});
-    };
-
     if (authLoading) {
         return (
             <div className="loading-screen">
@@ -179,7 +119,7 @@ function MainWorkspace() {
                 {ariaLiveMessage}
             </div>
 
-            <Header onOpenHistory={() => setIsHistoryOpen(true)} />
+            <Header />
 
             {user ? (
                 /* Authenticated Analyst Workspace */
@@ -213,12 +153,6 @@ function MainWorkspace() {
                         onClose={() => setIsClarificationOpen(false)}
                         submitting={generating}
                     />
-
-                    <QueryHistoryPanel
-                        isOpen={isHistoryOpen}
-                        onClose={() => setIsHistoryOpen(false)}
-                        onSelectHistoryItem={handleSelectHistoryItem}
-                    />
                 </main>
             ) : (
                 /* Unauthenticated Welcome & Sign-In Stage */
@@ -230,43 +164,6 @@ function MainWorkspace() {
                     />
                 </>
             )}
-
-            <footer className="app-statusbar">
-                <div className="status-group">
-                    <div
-                        id="backend-status-pill"
-                        className={`status-pill ${apiStatus ? "online" : connecting ? "" : "offline"}`}
-                    >
-                        <span>●</span>
-                        <span>
-                            {connecting
-                                ? "Connecting to API..."
-                                : apiStatus
-                                    ? `Fastify API: Connected (v${apiStatus.version})`
-                                    : "Fastify API: Offline"}
-                        </span>
-                    </div>
-
-                    <div className="status-pill">
-                        <span>Schema Grounding:</span>
-                        <span className="status-highlight-schema">v1-allowlisted</span>
-                    </div>
-
-                    <div className="status-pill">
-                        <span>Glossary:</span>
-                        <span className="status-highlight-glossary">v1.0.0</span>
-                    </div>
-                </div>
-
-                <div className="status-group">
-                    <div className="status-pill">
-                        <span>Persona:</span>
-                        <span className={user ? "status-highlight-persona" : "status-persona-guest"}>
-                            {user ? `${user.displayName} [${user.role.toUpperCase()}]` : "GUEST"}
-                        </span>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 }

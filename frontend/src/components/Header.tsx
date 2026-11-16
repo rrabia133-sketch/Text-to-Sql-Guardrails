@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
     ArrowLeftRight,
-    History,
     LogIn,
     LogOut,
     ShieldCheck,
@@ -9,11 +8,7 @@ import {
 import { useAuth } from "../features/auth/AuthContext";
 import { UserSwitcherModal } from "../features/auth/UserSwitcherModal";
 
-export interface HeaderProps {
-    onOpenHistory?: () => void;
-}
-
-export function Header({ onOpenHistory }: HeaderProps = {}) {
+export function Header() {
     const { user, logout } = useAuth();
     const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
@@ -30,21 +25,6 @@ export function Header({ onOpenHistory }: HeaderProps = {}) {
                 <div className="header-meta">
                     {user ? (
                         <>
-                            {onOpenHistory && (
-                                <button
-                                    type="button"
-                                    className="btn-history-toggle"
-                                    id="history-toggle-btn"
-                                    onClick={onOpenHistory}
-                                    title="Open Query History (Ctrl+H)"
-                                    aria-label="Open Query History"
-                                >
-                                    <History size={14} />
-                                    <span>History</span>
-                                    <kbd className="shortcut-kbd">Ctrl+H</kbd>
-                                </button>
-                            )}
-
                             <button
                                 type="button"
                                 className="user-badge-btn"

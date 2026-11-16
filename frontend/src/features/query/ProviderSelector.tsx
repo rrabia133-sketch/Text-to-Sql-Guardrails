@@ -39,8 +39,6 @@ export function ProviderSelector({
     const groqModel =
         summary?.providers.find((p) => p.provider === "groq")?.model ||
         "groq-cloud";
-    const dailySpend = summary?.dailyBudget.spentTodayUsd ?? 0;
-    const dailyCap = summary?.dailyBudget.budgetLimitUsd ?? 5.0;
 
     return (
         <section className="provider-selector-card" id="provider-selector" aria-label="LLM Provider & Policy">
@@ -98,23 +96,6 @@ export function ProviderSelector({
                     {!groqAllowed && <LockIcon size={13} className="lock-icon" />}
                 </button>
             </div>
-
-            {/* Cloud Budget Meter */}
-            {groqAllowed && (
-                <div className="budget-meter">
-                    <span className="budget-text">
-                        Daily Budget: ${dailySpend.toFixed(3)} / ${dailyCap.toFixed(2)} USD
-                    </span>
-                    <div className="budget-bar-bg">
-                        <div
-                            className="budget-bar-fill"
-                            style={{
-                                width: `${Math.min(100, (dailySpend / dailyCap) * 100)}%`,
-                            }}
-                        ></div>
-                    </div>
-                </div>
-            )}
         </section>
     );
 }

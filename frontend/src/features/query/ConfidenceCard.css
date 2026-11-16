@@ -14,15 +14,15 @@
 }
 
 .confidence-card.band-border-high {
-    border-left: 4px solid var(--status-success);
+    border: 1px solid var(--status-success);
 }
 
 .confidence-card.band-border-review {
-    border-left: 4px solid var(--status-warning);
+    border: 1px solid var(--status-warning);
 }
 
 .confidence-card.band-border-blocked {
-    border-left: 4px solid var(--status-danger);
+    border: 1px solid var(--status-danger);
 }
 
 /* Heuristic Disclaimer Banner */

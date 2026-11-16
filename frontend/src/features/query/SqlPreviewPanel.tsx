@@ -9,11 +9,11 @@ import { ConfidenceCard } from "./ConfidenceCard";
 import { ReviewAcknowledgementModal } from "./ReviewAcknowledgementModal";
 import { ResultsTablePanel } from "../results/ResultsTablePanel";
 import { FeedbackWidget } from "../feedback/FeedbackWidget";
+import { VsCodeSqlEditor } from "./VsCodeSqlEditor";
 import {
     AlertTriangleIcon,
     BanIcon,
     CheckIcon,
-    CopyIcon,
     DatabaseIcon,
     PlayIcon,
     ShieldCheckIcon,
@@ -68,19 +68,11 @@ export function SqlPreviewPanel({
     autoExecuteSeq = 0,
     loading,
 }: SqlPreviewPanelProps) {
-    const [copied, setCopied] = useState(false);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [executing, setExecuting] = useState(false);
     const [executionError, setExecutionError] = useState<string | null>(null);
     const [executionResult, setExecutionResult] = useState<ExecutionResultResponse | null>(null);
     const lastAutoExecutedSeqRef = useRef(0);
-
-    const handleCopy = () => {
-        if (!generationResponse?.sql) return;
-        navigator.clipboard.writeText(generationResponse.sql);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
 
     const executeArtifact = async (
         acknowledgement?: ReviewAcknowledgement,
@@ -235,24 +227,6 @@ export function SqlPreviewPanel({
                     <span className="provider-tag">
                         {generationResponse.provider.toUpperCase()} ({generationResponse.model})
                     </span>
-                    <button
-                        type="button"
-                        className={`copy-btn ${copied ? "copied" : ""}`}
-                        onClick={handleCopy}
-                        title="Copy SQL to clipboard"
-                    >
-                        {copied ? (
-                            <>
-                                <CheckIcon size={13} />
-                                <span>Copied</span>
-                            </>
-                        ) : (
-                            <>
-                                <CopyIcon size={13} />
-                                <span>Copy SQL</span>
-                            </>
-                        )}
-                    </button>
 
                     <button
                         type="button"
@@ -321,21 +295,11 @@ export function SqlPreviewPanel({
                     </div>
                 )}
 
-                {/* SQL Code Block */}
-                <div className="code-block-wrapper">
-                    <div className="code-header">
-                        <span className="code-lang">
-                            <TerminalIcon size={13} />
-                            <span>Generated SQL (PostgreSQL SELECT only)</span>
-                        </span>
-                        <span className="schema-ver-badge">
-                            Schema: {generationResponse.versions.schemaVersion}
-                        </span>
-                    </div>
-                    <pre className="code-viewer">
-                        <code>{generationResponse.sql}</code>
-                    </pre>
-                </div>
+                {/* VS Code Style SQL Editor */}
+                <VsCodeSqlEditor
+                    sql={generationResponse.sql}
+                    schemaVersion={generationResponse.versions.schemaVersion}
+                />
 
                 {/* Execution Results Panel (Database Answer) */}
                 {(executing || executionError || executionResult) && (
