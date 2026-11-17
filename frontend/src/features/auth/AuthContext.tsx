@@ -1,63 +1,61 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
-import type { UserSummary } from "@text2sql/contracts";
+import type { AuthConfigResponse, RegisterRequest, UserSummary } from "@text2sql/contracts";
 
 export interface AuthContextType {
     user: UserSummary | null;
     loading: boolean;
+    authConfig: AuthConfigResponse;
     availableUsers: UserSummary[];
     login: (username: string, password?: string) => Promise<void>;
+    register: (input: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
     refreshUsers: () => Promise<void>;
 }
 
-const DEFAULT_DEMO_USERS: UserSummary[] = [
-    {
-        id: "usr_analyst_a",
-        username: "analyst_a",
-        displayName: "Analyst Alice",
-        role: "analyst",
-    },
-    {
-        id: "usr_analyst_b",
-        username: "analyst_b",
-        displayName: "Analyst Bob",
-        role: "analyst",
-    },
-    {
-        id: "usr_admin_01",
-        username: "admin_user",
-        displayName: "Admin",
-        role: "admin",
-    },
-];
+const DEFAULT_AUTH_CONFIG: AuthConfigResponse = {
+    mode: "development",
+    passwordRequired: false,
+    registrationEnabled: true,
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserSummary | null>(null);
     const [loading, setLoading] = useState(true);
-    const [availableUsers, setAvailableUsers] = useState<UserSummary[]>(DEFAULT_DEMO_USERS);
+    const [authConfig, setAuthConfig] = useState<AuthConfigResponse>(DEFAULT_AUTH_CONFIG);
+    const [availableUsers, setAvailableUsers] = useState<UserSummary[]>([]);
 
     const refreshUsers = useCallback(async () => {
         try {
-            const usersRes = await fetch("/api/auth/users");
+            const usersRes = await fetch("/api/auth/users", { credentials: "include" });
             if (usersRes.ok) {
                 const data = await usersRes.json();
-                if (Array.isArray(data) && data.length > 0) {
+                if (Array.isArray(data)) {
                     setAvailableUsers(data);
                 }
+            } else if (usersRes.status === 401 || usersRes.status === 403) {
+                setAvailableUsers([]);
             }
         } catch {
-            // Keep default demo users if API is still warming up
+            // Ignore transient network errors during warmup
         }
     }, []);
 
     useEffect(() => {
         async function initAuth() {
             try {
-                // 1. Restore session on page reload if session_id cookie exists
-                const meRes = await fetch("/api/auth/me", { credentials: "include" });
-                if (meRes.ok) {
+                const [configRes, meRes] = await Promise.all([
+                    fetch("/api/auth/config", { credentials: "include" }).catch(() => null),
+                    fetch("/api/auth/me", { credentials: "include" }).catch(() => null),
+                ]);
+
+                if (configRes && configRes.ok) {
+                    const cfg = (await configRes.json()) as AuthConfigResponse;
+                    setAuthConfig(cfg);
+                }
+
+                if (meRes && meRes.ok) {
                     const data = await meRes.json();
                     setUser(data.user);
                 } else {
@@ -68,7 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             try {
-                // 2. Fetch seed users for switcher
                 await refreshUsers();
             } finally {
                 setLoading(false);
@@ -83,7 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ username, ...(password ? { password } : {}) }),
+            body: JSON.stringify({
+                username: username.trim(),
+                ...(password !== undefined && password.length > 0 ? { password } : {}),
+            }),
         });
 
         if (!res.ok) {
@@ -93,6 +93,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const data = await res.json();
         setUser(data.user);
+        await refreshUsers();
+    };
+
+    const register = async (input: RegisterRequest) => {
+        const res = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(input),
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.message || "Registration failed");
+        }
+
+        const data = await res.json();
+        setUser(data.user);
+        await refreshUsers();
     };
 
     const logout = async () => {
@@ -103,11 +122,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
         } finally {
             setUser(null);
+            await refreshUsers();
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, availableUsers, login, logout, refreshUsers }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                loading,
+                authConfig,
+                availableUsers,
+                login,
+                register,
+                logout,
+                refreshUsers,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

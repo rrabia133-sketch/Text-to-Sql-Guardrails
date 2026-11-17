@@ -44,6 +44,9 @@ export interface AppConfig {
     METRICS_BEARER_TOKEN?: string;
     AUTH_RATE_LIMIT_MAX?: number;
     AUTH_RATE_LIMIT_WINDOW_MS?: number;
+    COOKIE_SECURE?: boolean;
+    ALLOW_SELF_REGISTRATION?: boolean;
+    BOOTSTRAP_ADMIN_PASSWORD?: string;
 }
 
 export function validateConfig(raw: Partial<AppConfig>): AppConfig {
@@ -179,6 +182,13 @@ export function validateConfig(raw: Partial<AppConfig>): AppConfig {
         typeof raw.AUTH_RATE_LIMIT_WINDOW_MS === "number"
             ? raw.AUTH_RATE_LIMIT_WINDOW_MS
             : 60_000;
+    const cookieSecure =
+        typeof raw.COOKIE_SECURE === "boolean" ? raw.COOKIE_SECURE : undefined;
+    const allowSelfRegistration =
+        typeof raw.ALLOW_SELF_REGISTRATION === "boolean"
+            ? raw.ALLOW_SELF_REGISTRATION
+            : true;
+    const bootstrapAdminPassword = raw.BOOTSTRAP_ADMIN_PASSWORD || "";
 
     if (errors.length > 0) {
         throw new Error(
@@ -209,6 +219,9 @@ export function validateConfig(raw: Partial<AppConfig>): AppConfig {
         METRICS_BEARER_TOKEN: metricsBearerToken,
         AUTH_RATE_LIMIT_MAX: authRateLimitMax,
         AUTH_RATE_LIMIT_WINDOW_MS: authRateLimitWindowMs,
+        COOKIE_SECURE: cookieSecure,
+        ALLOW_SELF_REGISTRATION: allowSelfRegistration,
+        BOOTSTRAP_ADMIN_PASSWORD: bootstrapAdminPassword,
     };
 }
 
@@ -266,6 +279,15 @@ export function loadConfig(): AppConfig {
         AUTH_RATE_LIMIT_WINDOW_MS: process.env.AUTH_RATE_LIMIT_WINDOW_MS
             ? Number.parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS, 10)
             : 60_000,
+        COOKIE_SECURE:
+            process.env.COOKIE_SECURE !== undefined
+                ? process.env.COOKIE_SECURE === "true"
+                : undefined,
+        ALLOW_SELF_REGISTRATION:
+            process.env.ALLOW_SELF_REGISTRATION !== undefined
+                ? process.env.ALLOW_SELF_REGISTRATION !== "false"
+                : true,
+        BOOTSTRAP_ADMIN_PASSWORD: process.env.BOOTSTRAP_ADMIN_PASSWORD || "",
     });
 }
 

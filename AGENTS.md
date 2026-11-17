@@ -133,3 +133,4 @@ Pause and ask the user for clarification if:
 1. Requirements conflict with security guardrails or database privilege containment rules.
 2. An unexpected architectural blocker arises requiring modification of database schemas or migration strategy.
 3. An irreversible data deletion or external network egress requirement is requested.
+4. dont ove engeenring the code just to the point code which is needed.

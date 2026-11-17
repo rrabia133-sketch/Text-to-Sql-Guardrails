@@ -10,6 +10,7 @@ import {
 } from "./modules/health/health.service.js";
 import { healthRoutes } from "./modules/health/health.routes.js";
 import { AuthRepository } from "./modules/auth/auth.repository.js";
+import { hashPassword } from "./modules/auth/password.util.js";
 import { authPlugin } from "./plugins/auth.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { schemaRoutes } from "./modules/schema/schema.routes.js";
@@ -80,6 +81,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         new Pool({
             connectionString: currentConfig.APP_DB_URL,
             max: currentConfig.APP_DB_POOL_MAX ?? 5,
+            connectionTimeoutMillis: 2000,
         });
 
     const analyticsPool =
@@ -87,9 +89,17 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
         new Pool({
             connectionString: currentConfig.ANALYTICS_DB_URL,
             max: currentConfig.ANALYTICS_DB_POOL_MAX ?? 10,
+            connectionTimeoutMillis: 2000,
         });
 
     const authRepo = opts.authRepo || new AuthRepository(appPool);
+
+    if (currentConfig.BOOTSTRAP_ADMIN_PASSWORD && currentConfig.BOOTSTRAP_ADMIN_PASSWORD.length >= 8) {
+        await authRepo.updateUserPasswordHash(
+            "usr_admin_01",
+            hashPassword(currentConfig.BOOTSTRAP_ADMIN_PASSWORD)
+        );
+    }
 
     const app = Fastify({
         trustProxy: currentConfig.TRUST_PROXY ?? currentConfig.NODE_ENV === "production",
@@ -135,12 +145,14 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     await app.register(healthRoutes, { dbChecker });
     await app.register(healthRoutes, { dbChecker, prefix: "/api" });
 
-    // Auth endpoints (/api/auth/login, /api/auth/logout, /api/auth/me, /api/auth/users)
+    // Auth endpoints (/api/auth/config, /api/auth/register, /api/auth/login, /api/auth/logout, /api/auth/me, /api/auth/users)
     await app.register(authRoutes, {
         authRepo,
         nodeEnv: currentConfig.NODE_ENV,
         rateLimitMax: currentConfig.AUTH_RATE_LIMIT_MAX,
         rateLimitWindowMs: currentConfig.AUTH_RATE_LIMIT_WINDOW_MS,
+        cookieSecure: currentConfig.COOKIE_SECURE,
+        allowRegistration: currentConfig.ALLOW_SELF_REGISTRATION,
         prefix: "/api/auth",
     });
 

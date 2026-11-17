@@ -17,7 +17,7 @@ export function ProviderSelector({
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("/api/v1/providers")
+        fetch("/api/v1/providers", { credentials: "include" })
             .then((res) => {
                 if (!res.ok) throw new Error("Failed to load providers");
                 return res.json();

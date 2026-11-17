@@ -57,6 +57,7 @@ function MainWorkspace() {
         try {
             const res = await fetch("/api/v1/queries", {
                 method: "POST",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },

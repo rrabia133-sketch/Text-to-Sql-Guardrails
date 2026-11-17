@@ -77,6 +77,34 @@ export class InMemoryAuthRepository extends AuthRepository {
         );
     }
 
+    override async createUser(input: {
+        id: string;
+        email: string;
+        username: string;
+        displayName: string;
+        role: "analyst" | "admin";
+        passwordHash: string;
+    }): Promise<UserRecord> {
+        const record: UserRecord = {
+            id: input.id,
+            email: input.email,
+            username: input.username,
+            displayName: input.displayName,
+            role: input.role,
+            passwordHash: input.passwordHash,
+            createdAt: new Date(),
+        };
+        this.users.set(record.id, record);
+        return record;
+    }
+
+    override async updateUserPasswordHash(userId: string, passwordHash: string): Promise<void> {
+        const existing = this.users.get(userId);
+        if (existing) {
+            existing.passwordHash = passwordHash;
+        }
+    }
+
     override async createSession(session: {
         id: string;
         userId: string;

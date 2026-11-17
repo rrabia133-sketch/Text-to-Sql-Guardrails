@@ -150,7 +150,7 @@ describe("Production-Grade Hardening & Fail-Closed Verification Suite", () => {
                 ANALYTICS_DB_URL: "postgresql://analytics_user:pass@127.0.0.1:5434/analytics_db",
                 APP_DB_URL: "postgresql://app_user:pass@127.0.0.1:5434/app_db",
                 PROVIDER_MODE: "local",
-                AUTH_RATE_LIMIT_MAX: 5,
+                AUTH_RATE_LIMIT_MAX: 6,
                 AUTH_RATE_LIMIT_WINDOW_MS: 60_000,
             });
 
@@ -171,6 +171,45 @@ describe("Production-Grade Hardening & Fail-Closed Verification Suite", () => {
             await app.ready();
 
             try {
+                // 0. Public auth config reports passwordRequired=true in production
+                const cfgRes = await app.inject({
+                    method: "GET",
+                    url: "/api/auth/config",
+                });
+                assert.equal(cfgRes.statusCode, 200);
+                assert.deepEqual(JSON.parse(cfgRes.body), {
+                    mode: "production",
+                    passwordRequired: true,
+                    registrationEnabled: true,
+                });
+
+                // 0b. Self-registration creates an analyst account with hashed password and rejects duplicates
+                const regRes = await app.inject({
+                    method: "POST",
+                    url: "/api/auth/register",
+                    payload: {
+                        username: "new_analyst",
+                        email: "new_analyst@corp.internal",
+                        password: "StrongPassword#2026",
+                        displayName: "New Analyst",
+                    },
+                });
+                assert.equal(regRes.statusCode, 201);
+                const regBody = JSON.parse(regRes.body);
+                assert.equal(regBody.user.username, "new_analyst");
+                assert.equal(regBody.user.role, "analyst");
+
+                const dupRegRes = await app.inject({
+                    method: "POST",
+                    url: "/api/auth/register",
+                    payload: {
+                        username: "new_analyst",
+                        email: "other@corp.internal",
+                        password: "StrongPassword#2026",
+                    },
+                });
+                assert.equal(dupRegRes.statusCode, 409);
+
                 // 1. Anonymous user enumeration via GET /api/auth/users is blocked with 401
                 const anonUsersRes = await app.inject({
                     method: "GET",
@@ -194,10 +233,11 @@ describe("Production-Grade Hardening & Fail-Closed Verification Suite", () => {
                 });
                 assert.equal(wrongPassRes.statusCode, 401);
 
-                // 4. Valid analyst login succeeds and sets HttpOnly + Secure + SameSite=Strict + HSTS
+                // 4. Valid analyst login over HTTPS proxy succeeds and sets HttpOnly + Secure + SameSite=Strict + HSTS
                 const analystLoginRes = await app.inject({
                     method: "POST",
                     url: "/api/auth/login",
+                    headers: { "x-forwarded-proto": "https" },
                     payload: { username: "analyst_prod", password: "AnalystProdSecret#2026" },
                 });
                 assert.equal(analystLoginRes.statusCode, 200);
@@ -242,11 +282,6 @@ describe("Production-Grade Hardening & Fail-Closed Verification Suite", () => {
                 assert.equal(adminUsersRes.statusCode, 200);
 
                 // 7. Exceeding AUTH_RATE_LIMIT_MAX (5 attempts) triggers 429 Too Many Requests with Retry-After
-                await app.inject({
-                    method: "POST",
-                    url: "/api/auth/login",
-                    payload: { username: "analyst_prod", password: "WrongPassword" },
-                });
                 const rateLimitedRes = await app.inject({
                     method: "POST",
                     url: "/api/auth/login",

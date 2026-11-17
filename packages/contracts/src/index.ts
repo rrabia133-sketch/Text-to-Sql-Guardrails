@@ -56,6 +56,19 @@ export interface LoginRequest {
     password?: string;
 }
 
+export interface RegisterRequest {
+    username: string;
+    email: string;
+    password: string;
+    displayName?: string;
+}
+
+export interface AuthConfigResponse {
+    mode: "development" | "production" | "test";
+    passwordRequired: boolean;
+    registrationEnabled: boolean;
+}
+
 export interface LoginResponse {
     user: UserSummary;
     sessionId: string;

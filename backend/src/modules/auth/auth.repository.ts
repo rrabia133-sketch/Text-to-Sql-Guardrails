@@ -120,7 +120,7 @@ export class AuthRepository {
             const query = `
                 SELECT *
                 FROM users
-                WHERE username = $1
+                WHERE LOWER(username) = LOWER($1)
                 LIMIT 1;
             `;
             const res = await this.pool.query<UserRow>(query, [username]);
@@ -139,7 +139,7 @@ export class AuthRepository {
             const query = `
                 SELECT *
                 FROM users
-                WHERE email = $1
+                WHERE LOWER(email) = LOWER($1)
                 LIMIT 1;
             `;
             const res = await this.pool.query<UserRow>(query, [email]);
@@ -166,6 +166,67 @@ export class AuthRepository {
             // Fallback to in-memory seed store when app_db is offline
         }
         return Array.from(this.fallbackUsers.values());
+    }
+
+    async createUser(input: {
+        id: string;
+        email: string;
+        username: string;
+        displayName: string;
+        role: "analyst" | "admin";
+        passwordHash: string;
+    }): Promise<UserRecord> {
+        try {
+            const query = `
+                INSERT INTO users (id, email, username, display_name, role, password_hash)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING *;
+            `;
+            const res = await this.pool.query<UserRow>(query, [
+                input.id,
+                input.email,
+                input.username,
+                input.displayName,
+                input.role,
+                input.passwordHash,
+            ]);
+            if (res.rows.length > 0) {
+                return mapUserRow(res.rows[0]);
+            }
+        } catch (err: any) {
+            // Propagate unique constraint violation even when app_db is online
+            if (err?.code === "23505") {
+                throw err;
+            }
+            // Fallback to in-memory store when app_db is offline
+        }
+
+        const record: UserRecord = {
+            id: input.id,
+            email: input.email,
+            username: input.username,
+            displayName: input.displayName,
+            role: input.role,
+            passwordHash: input.passwordHash,
+            createdAt: new Date(),
+        };
+        this.fallbackUsers.set(record.id, record);
+        return record;
+    }
+
+    async updateUserPasswordHash(userId: string, passwordHash: string): Promise<void> {
+        try {
+            await this.pool.query(
+                `UPDATE users SET password_hash = $1 WHERE id = $2;`,
+                [passwordHash, userId]
+            );
+        } catch {
+            // Fallback to in-memory store when app_db is offline
+        }
+        const existing = this.fallbackUsers.get(userId);
+        if (existing) {
+            existing.passwordHash = passwordHash;
+        }
     }
 
     // ==========================================
