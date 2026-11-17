@@ -152,7 +152,11 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
                         errorMessage: execResult.errorMessage,
                     });
 
-                    await queryArtifactRepo.updateStatus(artifactId, "failed");
+                    // Only permanently fail the artifact on security/transaction violations;
+                    // transient DB connectivity or timeout errors leave the preview artifact retryable.
+                    if (execResult.errorCode === "TRANSACTION_VIOLATION") {
+                        await queryArtifactRepo.updateStatus(artifactId, "failed");
+                    }
 
                     await auditLogger.log({
                         userId,
@@ -167,7 +171,15 @@ export const executionRoutes: FastifyPluginAsync<ExecutionRoutesOptions> = async
                         ipAddress: request.ip,
                     });
 
-                    const statusCode = execResult.errorCode === "EXECUTION_TIMEOUT" ? 504 : 400;
+                    const isDbOffline =
+                        execResult.errorCode === "DATABASE_ERROR" &&
+                        /offline|unreachable|ECONNREFUSED/i.test(execResult.errorMessage);
+                    const statusCode =
+                        execResult.errorCode === "EXECUTION_TIMEOUT"
+                            ? 504
+                            : isDbOffline
+                            ? 503
+                            : 400;
                     return reply.status(statusCode).send({
                         executionId,
                         artifactId,

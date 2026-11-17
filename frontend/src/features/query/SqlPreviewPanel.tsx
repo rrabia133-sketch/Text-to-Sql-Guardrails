@@ -73,13 +73,15 @@ export function SqlPreviewPanel({
     const [executionError, setExecutionError] = useState<string | null>(null);
     const [executionResult, setExecutionResult] = useState<ExecutionResultResponse | null>(null);
     const lastAutoExecutedSeqRef = useRef(0);
+    const inFlightArtifactRef = useRef<string | null>(null);
 
     const executeArtifact = async (
         acknowledgement?: ReviewAcknowledgement,
         targetArtifactId?: string
     ) => {
         const artifactId = targetArtifactId || generationResponse?.artifactId;
-        if (!artifactId) return;
+        if (!artifactId || inFlightArtifactRef.current === artifactId) return;
+        inFlightArtifactRef.current = artifactId;
         setExecuting(true);
         setExecutionError(null);
 
@@ -106,16 +108,14 @@ export function SqlPreviewPanel({
         } catch (err: any) {
             setExecutionError(err?.message || "Query execution failed.");
         } finally {
+            if (inFlightArtifactRef.current === artifactId) {
+                inFlightArtifactRef.current = null;
+            }
             setExecuting(false);
         }
     };
 
     useEffect(() => {
-        setIsReviewModalOpen(false);
-        setExecuting(false);
-        setExecutionError(null);
-        setExecutionResult(null);
-
         if (
             !generationResponse ||
             autoExecuteSeq <= 0 ||
@@ -125,6 +125,9 @@ export function SqlPreviewPanel({
         }
 
         lastAutoExecutedSeqRef.current = autoExecuteSeq;
+        setIsReviewModalOpen(false);
+        setExecutionError(null);
+        setExecutionResult(null);
 
         const { isBlocked, isReviewRequired, isCompletedArtifact } =
             resolveExecutionPolicy(generationResponse);

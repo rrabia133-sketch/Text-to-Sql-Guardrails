@@ -215,6 +215,57 @@ describe("Sprint 4 - Task 16: Fastify Execution API Routes & Audit Logging (US-1
             concurrencyManager.release(userAId, "exec_slot1");
             concurrencyManager.release(userAId, "exec_slot2");
         });
+
+        it("keeps artifact in retryable preview state on transient DATABASE_ERROR (offline DB) instead of locking as failed", async () => {
+            const artifact = await queryArtifactRepo.create({
+                userId: userAId,
+                prompt: "Top 10 products",
+                generatedSql: "SELECT id, name FROM products LIMIT 10;",
+                referencedTables: ["products"],
+                referencedColumns: ["products.id", "products.name"],
+                assumptions: [],
+                explanation: "Top 10 products",
+                provider: "ollama",
+                model: "qwen2.5-coder:7b",
+                promptVersion: "1.0.0",
+                schemaVersion: "1.0.0",
+            });
+
+            // Simulate temporary analytics_db outage on first execution attempt
+            const originalExecute = restrictedExecutor.execute.bind(restrictedExecutor);
+            restrictedExecutor.execute = async () => ({
+                ok: false,
+                errorCode: "DATABASE_ERROR",
+                errorMessage:
+                    "PostgreSQL analytics database is offline or unreachable. Start Docker Desktop and run 'npm run db:up' to connect.",
+                executionTimeMs: 12,
+            });
+
+            try {
+                const failRes = await app.inject({
+                    method: "POST",
+                    url: `/api/v1/queries/${artifact.id}/execute`,
+                    headers: { cookie: userACookie },
+                });
+                assert.equal(failRes.statusCode, 503);
+                const failBody = JSON.parse(failRes.payload);
+                assert.equal(failBody.code, "DATABASE_ERROR");
+
+                // Artifact remains in 'preview' state so retrying works
+                const stillPreview = await queryArtifactRepo.findById(artifact.id);
+                assert.equal(stillPreview?.status, "preview");
+            } finally {
+                restrictedExecutor.execute = originalExecute;
+            }
+
+            // Retry after DB recovers succeeds with 200 OK
+            const retryRes = await app.inject({
+                method: "POST",
+                url: `/api/v1/queries/${artifact.id}/execute`,
+                headers: { cookie: userACookie },
+            });
+            assert.equal(retryRes.statusCode, 200);
+        });
     });
 
     describe("GET /api/v1/executions/:id", () => {
