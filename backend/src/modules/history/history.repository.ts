@@ -66,12 +66,11 @@ export class HistoryRepository {
                         a.provider,
                         a.model,
                         a.created_at,
-                        sf.confidence_score,
-                        sf.confidence_band,
+                        a.confidence_score,
+                        a.confidence_band,
                         e.created_at as executed_at,
                         e.status as last_execution_status
                     FROM query_artifacts a
-                    LEFT JOIN semantic_findings sf ON a.id = sf.artifact_id
                     LEFT JOIN LATERAL (
                         SELECT created_at, status FROM query_executions
                         WHERE artifact_id = a.id
